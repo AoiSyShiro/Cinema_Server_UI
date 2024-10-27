@@ -1,165 +1,145 @@
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
+const User = require("../models/User");
+const bcrypt = require("bcrypt");
 
-// Hàm xử lý đăng ký người dùng
-exports.register = async (req, res) => {
-    const { username, password, email, role } = req.body;
+// Hàm đăng ký người dùng
+const register = async (req, res) => {
+  const { full_name, phone_number, email, password } = req.body;
 
-    try {
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: 'Email đã tồn tại' });
-        }
+  // Kiểm tra dữ liệu đầu vào
+  if (!full_name || !phone_number || !email || !password) {
+    console.log(
+      "Lỗi: Dữ liệu đầu vào không hợp lệ. Tất cả các trường là bắt buộc."
+    );
+    return res.status(400).json({
+      error: "Dữ liệu đầu vào không hợp lệ",
+      message: "Tất cả các trường là bắt buộc",
+    });
+  }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({
-            username,
-            password: hashedPassword,
-            email,
-            role,
-            address: null,
-            phone_number: null,
-            favorite_movies: [],
-            gender: 'Other'
-        });
-
-        await newUser.save();
-        res.status(201).json({ message: 'Đăng ký thành công' });
-    } catch (err) {
-        console.error('Lỗi đăng ký:', err);
-        res.status(500).json({ message: 'Lỗi đăng ký', error: err.message });
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      console.log(`Lỗi: Email "${email}" đã tồn tại.`);
+      return res.status(400).json({
+        error: "Dữ liệu đầu vào không hợp lệ",
+        message: "Email đã tồn tại",
+      });
     }
+
+    // Mã hóa mật khẩu
+    const hashedPassword = await bcrypt.hash(password, 10);
+    console.log(`Mã hóa mật khẩu cho người dùng "${full_name}".`);
+
+    const newUser = new User({
+      email,
+      password: hashedPassword,
+      phone: phone_number,
+      username: full_name,
+    });
+
+    await newUser.save();
+    console.log(`Tạo tài khoản thành công cho người dùng "${full_name}".`);
+
+    // Trả về phản hồi
+    return res.status(201).json({
+      id: newUser.user_id,
+      full_name: newUser.username,
+      phone_number: newUser.phone,
+      email: newUser.email,
+      active: true,
+      deflag: false,
+      created_at: newUser.created_at.toISOString(),
+      updated_at: newUser.created_at.toISOString(),
+    });
+  } catch (error) {
+    console.error("Lỗi hệ thống:", error);
+    return res.status(500).json({
+      error: "Lỗi máy chủ nội bộ",
+      message: "Đã xảy ra lỗi không mong muốn",
+    });
+  }
 };
 
-// Hàm xử lý đăng nhập
-exports.login = async (req, res) => {
-    const { email, password } = req.body;
+// Hàm đăng nhập người dùng
+const login = async (req, res) => {
+  const { email, password } = req.body;
 
-    try {
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
-        }
+  // Kiểm tra dữ liệu đầu vào
+  if (!email || !password) {
+    console.log(
+      "Lỗi: Dữ liệu đầu vào không hợp lệ. Email và mật khẩu là bắt buộc."
+    );
+    return res.status(400).json({
+      error: "Dữ liệu đầu vào không hợp lệ",
+      message: "Email và mật khẩu là bắt buộc",
+    });
+  }
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
-        }
-
-        res.status(200).json({
-            user: {
-                user_id: user._id,
-                username: user.username,
-                email: user.email,
-                role: user.role,
-                address: user.address,
-                phone_number: user.phone_number,
-                gender: user.gender
-            }
-        });
-    } catch (err) {
-        console.error('Lỗi đăng nhập:', err);
-        res.status(500).json({ message: 'Lỗi đăng nhập', error: err.message });
+  try {
+    // Tìm người dùng theo email
+    const user = await User.findOne({ email });
+    if (!user) {
+      console.log(`Lỗi: Người dùng với email "${email}" không tồn tại.`);
+      return res.status(400).json({
+        error: "Dữ liệu đầu vào không hợp lệ",
+        message: "Người dùng không tồn tại",
+      });
     }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      console.log("Lỗi: Mật khẩu không đúng.");
+      return res.status(400).json({
+        error: "Dữ liệu đầu vào không hợp lệ",
+        message: "Mật khẩu không đúng",
+      });
+    }
+
+    console.log(`Đăng nhập thành công cho người dùng "${user.username}".`);
+
+    return res.status(200).json({
+      id: user.user_id,
+      full_name: user.username,
+      phone_number: user.phone,
+      email: user.email,
+      active: true,
+      created_at: user.created_at.toISOString(),
+      updated_at: user.updated_at.toISOString(),
+    });
+  } catch (error) {
+    console.error("Lỗi hệ thống:", error);
+    return res.status(500).json({
+      error: "Lỗi máy chủ nội bộ",
+      message: "Đã xảy ra lỗi không mong muốn",
+    });
+  }
 };
 
-// Lấy thông tin người dùng bằng email
-exports.getProfile = async (req, res) => {
-    const { email } = req.body;
+// Hàm thoát tài khoản
+const logout = async (req, res) => {
+  const token = req.headers["authorization"]?.split(" ")[1];
 
-    try {
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: 'Người dùng không tồn tại' });
-        }
+  if (!token) {
+    return res.status(401).json({
+      error: "Không có quyền truy cập",
+      message: "Cần có token để xác thực",
+    });
+  }
 
-        res.status(200).json({
-            id: user._id,
-            username: user.username,
-            email: user.email,
-            address: user.address,
-            phone_number: user.phone_number,
-            gender: user.gender
-        });
-    } catch (err) {
-        console.error('Lỗi lấy thông tin profile:', err);
-        res.status(500).json({ message: 'Lỗi lấy thông tin profile', error: err.message });
-    }
+  try {
+    console.log(`Người dùng đã thoát tài khoản với token: ${token}`);
+
+    // logic để xử lý thoát tài khoản
+    return res.status(200).json({
+      message: "Đã thoát tài khoản thành công",
+    });
+  } catch (error) {
+    console.error("Lỗi hệ thống:", error);
+    return res.status(500).json({
+      error: "Lỗi máy chủ nội bộ",
+      message: "Đã xảy ra lỗi không mong muốn",
+    });
+  }
 };
 
-// Cập nhật thông tin người dùng
-exports.updateProfile = async (req, res) => {
-    const email = String(req.body.email).trim();
-    const username = String(req.body.username).trim();
-    const phone_number = req.body.phone_number ? String(req.body.phone_number).trim() : null;
-    const gender = req.body.gender ? String(req.body.gender).trim() : 'Other';
-    const address = req.body.address ? String(req.body.address).trim() : null;
-
-    try {
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: 'Người dùng không tồn tại' });
-        }
-
-        // Cập nhật tên người dùng
-        user.username = username || user.username;
-
-        // Cập nhật phone_number
-        if (phone_number !== null) {
-            user.phone_number = phone_number;
-        }
-
-        // Cập nhật gender nếu hợp lệ
-        if (['Male', 'Female', 'Other'].includes(gender)) {
-            user.gender = gender;
-        }
-
-        // Cập nhật address
-        if (address !== null) {
-            user.address = address;
-        }
-
-        // Lưu thay đổi vào cơ sở dữ liệu
-        await user.save();
-
-        res.status(200).json({
-            message: 'Cập nhật thông tin thành công',
-            user: {
-                id: user._id,
-                username: user.username,
-                email: user.email,
-                address: user.address,
-                phone_number: user.phone_number,
-                gender: user.gender
-            }
-        });
-    } catch (err) {
-        console.error('Lỗi cập nhật thông tin profile:', err);
-        res.status(500).json({ message: 'Lỗi cập nhật thông tin profile', error: err.message });
-    }
-};
-
-// Cập nhật mật khẩu
-exports.updatePassword = async (req, res) => {
-    const { email, oldPassword, newPassword } = req.body;
-
-    try {
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: 'Người dùng không tồn tại' });
-        }
-
-        const isMatch = await bcrypt.compare(oldPassword, user.password);
-        if (!isMatch) {
-            return res.status(401).json({ message: 'Mật khẩu cũ không đúng' });
-        }
-
-        user.password = await bcrypt.hash(newPassword, 10);
-        await user.save();
-
-        res.status(200).json({ message: 'Cập nhật mật khẩu thành công' });
-    } catch (err) {
-        console.error('Lỗi cập nhật mật khẩu:', err);
-        res.status(500).json({ message: 'Lỗi cập nhật mật khẩu', error: err.message });
-    }
-};
+module.exports = { register, login, logout };

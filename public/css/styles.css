@@ -1,0 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+.nav-item {
+    font-family: 'Times New Roman', Times, serif
+}
+.navbar-brand, .nav-link {
+    font-weight: 500; /* Hoặc 700 để chữ đậm hơn */
+}
