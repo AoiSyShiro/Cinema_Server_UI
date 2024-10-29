@@ -4,7 +4,11 @@ const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const dotenv = require("dotenv");
-const userRoutes = require("./routes/userRoutes"); //
+const userRoutes = require("./routes/userRoutes");
+const foodDrinkRoutes = require('./routes/foodDrinkRoutes');
+const movieRoutes = require('./routes/movieRoutes');
+const categoryRoutes = require('./routes/categoryRoutes'); // Đường dẫn đến categoryRoutes
+
 
 // Configure Cloudinary
 cloudinary.config({
@@ -68,6 +72,9 @@ app.post("/upload", upload.single("movieImage"), async (req, res) => {
 });
 
 app.use("/auth", userRoutes);
+app.use('/food-drinks', foodDrinkRoutes);
+app.use('/movies', movieRoutes);
+app.use('/categories', categoryRoutes); // Sử dụng router cho categories
 
 const PORT = process.env.PORT || 5000;
 const connectToDatabase = require("./config/db.js");

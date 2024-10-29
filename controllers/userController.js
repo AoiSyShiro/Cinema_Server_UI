@@ -66,9 +66,7 @@ const login = async (req, res) => {
 
   // Kiểm tra dữ liệu đầu vào
   if (!email || !password) {
-    console.log(
-      "Lỗi: Dữ liệu đầu vào không hợp lệ. Email và mật khẩu là bắt buộc."
-    );
+    console.log("Lỗi: Dữ liệu đầu vào không hợp lệ. Email và mật khẩu là bắt buộc.");
     return res.status(400).json({
       error: "Dữ liệu đầu vào không hợp lệ",
       message: "Email và mật khẩu là bắt buộc",
@@ -85,6 +83,8 @@ const login = async (req, res) => {
         message: "Người dùng không tồn tại",
       });
     }
+
+    console.log(`Người dùng tìm thấy: ${user.username}, email: ${user.email}`);
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
@@ -103,17 +103,17 @@ const login = async (req, res) => {
       phone_number: user.phone,
       email: user.email,
       active: true,
-      created_at: user.created_at.toISOString(),
-      updated_at: user.updated_at.toISOString(),
     });
   } catch (error) {
-    console.error("Lỗi hệ thống:", error);
+    console.error("Lỗi hệ thống:", error); // Đã có
+    console.error("Chi tiết lỗi:", error.message); // Thêm log chi tiết lỗi
     return res.status(500).json({
       error: "Lỗi máy chủ nội bộ",
       message: "Đã xảy ra lỗi không mong muốn",
     });
-  }
+  }  
 };
+
 
 // Hàm thoát tài khoản
 const logout = async (req, res) => {
@@ -142,4 +142,143 @@ const logout = async (req, res) => {
   }
 };
 
-module.exports = { register, login, logout };
+// Hàm thay đổi mật khẩu
+const changePassword = async (req, res) => {
+  const { email, oldPassword, newPassword } = req.body;
+
+  if (!email || !oldPassword || !newPassword) {
+    return res.status(400).json({
+      error: "Dữ liệu đầu vào không hợp lệ",
+      message: "Email, mật khẩu cũ và mật khẩu mới là bắt buộc",
+    });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({
+        error: "Dữ liệu đầu vào không hợp lệ",
+        message: "Người dùng không tồn tại",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({
+        error: "Dữ liệu đầu vào không hợp lệ",
+        message: "Mật khẩu cũ không đúng",
+      });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    return res.status(200).json({
+      message: "Mật khẩu đã được thay đổi thành công",
+    });
+  } catch (error) {
+    console.error("Lỗi hệ thống:", error);
+    return res.status(500).json({
+      error: "Lỗi máy chủ nội bộ",
+      message: "Đã xảy ra lỗi không mong muốn",
+    });
+  }
+};
+
+// Hàm cập nhật thông tin người dùng
+const updateUserInfo = async (req, res) => {
+  const { user_id, phone, username, age, gender, address } = req.body;
+
+  if (!user_id) {
+    return res.status(400).json({
+      error: "Dữ liệu đầu vào không hợp lệ",
+      message: "ID người dùng là bắt buộc",
+    });
+  }
+
+  try {
+    const user = await User.findOne({ user_id });
+    if (!user) {
+      return res.status(400).json({
+        error: "Dữ liệu đầu vào không hợp lệ",
+        message: "Người dùng không tồn tại",
+      });
+    }
+
+    if (phone) user.phone = phone;
+    if (username) user.username = username;
+    if (age !== undefined) user.age = age;
+    if (gender) user.gender = gender;
+    if (address) user.address = address;
+
+    user.updated_at = new Date(); // Cập nhật thời gian hiện tại
+    await user.save();
+
+    console.log("Thông tin người dùng sau khi cập nhật:", user); // Log thông tin người dùng
+
+    return res.status(200).json({
+      message: "Thông tin người dùng đã được cập nhật",
+      user: {
+        id: user.user_id,
+        full_name: user.username,
+        phone_number: user.phone,
+        email: user.email,
+        age: user.age,
+        gender: user.gender,
+        address: user.address,
+        created_at: user.created_at ? user.created_at.toISOString() : null,
+        updated_at: user.updated_at ? user.updated_at.toISOString() : null,
+      },
+    });
+  } catch (error) {
+    console.error("Lỗi hệ thống:", error);
+    return res.status(500).json({
+      error: "Lỗi máy chủ nội bộ",
+      message: "Đã xảy ra lỗi không mong muốn",
+    });
+  }
+};
+
+
+// Hàm xóa người dùng
+const deleteUser = async (req, res) => {
+  const { user_id } = req.body;
+
+  if (!user_id) {
+    return res.status(400).json({
+      error: "Dữ liệu đầu vào không hợp lệ",
+      message: "ID người dùng là bắt buộc",
+    });
+  }
+
+  try {
+    const user = await User.findOne({ user_id });
+    if (!user) {
+      return res.status(400).json({
+        error: "Dữ liệu đầu vào không hợp lệ",
+        message: "Người dùng không tồn tại",
+      });
+    }
+
+    await User.deleteOne({ user_id });
+
+    return res.status(200).json({
+      message: "Người dùng đã được xóa thành công",
+    });
+  } catch (error) {
+    console.error("Lỗi hệ thống:", error);
+    return res.status(500).json({
+      error: "Lỗi máy chủ nội bộ",
+      message: "Đã xảy ra lỗi không mong muốn",
+    });
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  logout,
+  changePassword,
+  updateUserInfo,
+  deleteUser,
+};

@@ -11,6 +11,11 @@ const FoodDrinkSchema = new mongoose.Schema({
   image: { type: String },
 });
 
+// Middleware để cập nhật `updated_at`
+FoodDrinkSchema.pre('save', function (next) {
+  this.updated_at = Date.now();
+  next();
+});
 
 FoodDrinkSchema.plugin(AutoIncrement, { inc_field: "food_drink_id" });
 
