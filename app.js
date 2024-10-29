@@ -84,8 +84,8 @@ const startServer = async () => {
 
   app.listen(PORT, async () => {
     console.log(`Server đang chạy ở cổng ${PORT}`);
-    const open = await import("open");
-    await open.default(`http://localhost:${PORT}`);
+    // const open = await import("open");
+    // await open.default(`http://localhost:${PORT}`);
   });
 };
 
