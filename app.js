@@ -14,7 +14,7 @@ const ticketBookingRouter = require("./routes/ticketBookingRouter");
 const promotionRoutes = require("./routes/promotionRouter");
 const reviewRoutes = require("./routes/reviewRouter");
 const bookingRoutes = require("./routes/bookingRouter");
-const paymentRouter = require('./routes/paymentRouter');
+const paymentRouter = require("./routes/paymentRouter");
 
 // Configure Cloudinary
 cloudinary.config({
@@ -90,7 +90,6 @@ app.use("/tickets", ticketBookingRouter);
 app.use("/promotions", promotionRoutes);
 app.use("/reviews", reviewRoutes);
 app.use("/bookings", bookingRoutes);
-
 
 //Thanh toán
 app.use("/payments", paymentRouter);
