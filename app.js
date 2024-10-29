@@ -5,10 +5,16 @@ const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoutes");
-const foodDrinkRoutes = require('./routes/foodDrinkRoutes');
-const movieRoutes = require('./routes/movieRoutes');
-const categoryRoutes = require('./routes/categoryRoutes'); // Đường dẫn đến categoryRoutes
-
+const foodDrinkRoutes = require("./routes/foodDrinkRoutes");
+const movieRoutes = require("./routes/movieRoutes");
+const categoryRoutes = require("./routes/categoryRoutes"); // Đường dẫn đến categoryRoutes
+const trailerRouter = require("./routes/trailerRouter");
+const showtimeRouter = require("./routes/showtimeRouter");
+const ticketBookingRouter = require("./routes/ticketBookingRouter");
+const promotionRoutes = require("./routes/promotionRouter");
+const reviewRoutes = require("./routes/reviewRouter");
+const bookingRoutes = require("./routes/bookingRouter");
+const paymentRouter = require('./routes/paymentRouter');
 
 // Configure Cloudinary
 cloudinary.config({
@@ -72,9 +78,22 @@ app.post("/upload", upload.single("movieImage"), async (req, res) => {
 });
 
 app.use("/auth", userRoutes);
-app.use('/food-drinks', foodDrinkRoutes);
-app.use('/movies', movieRoutes);
-app.use('/categories', categoryRoutes); // Sử dụng router cho categories
+app.use("/food-drinks", foodDrinkRoutes);
+app.use("/movies", movieRoutes);
+app.use("/categories", categoryRoutes);
+// Lấy trailer các phim đang chiếu tại rạp khi mở app (APP Tự code Cơ chế)
+app.use("/current", trailerRouter);
+// Route quản lý suất chiếu
+app.use("/showtimes", showtimeRouter);
+// Route quản lý đặt vé
+app.use("/tickets", ticketBookingRouter);
+app.use("/promotions", promotionRoutes);
+app.use("/reviews", reviewRoutes);
+app.use("/bookings", bookingRoutes);
+
+
+//Thanh toán
+app.use("/payments", paymentRouter);
 
 const PORT = process.env.PORT || 5000;
 const connectToDatabase = require("./config/db.js");
