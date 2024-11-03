@@ -1,7 +1,7 @@
 # API Routes
 
 ## Routers
-- **authRouter.js**: Quản lý xác thực (đăng nhập, đăng ký, đổi mật khẩu)
+- **authRouter.js**: Quản lý xác thực (đăng nhập, đăng ký, đổi mật khẩu) (Chưa tách)
 - **userRouter.js**: Quản lý người dùng (profile, lịch sử đặt vé)
 - **categoryRouter.js**: Quản lý thể loại phim
 - **foodDrinkRouter.js**: Quản lý đồ ăn/uống
