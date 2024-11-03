@@ -6,9 +6,11 @@ const movieSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String },
   trailer_url: { type: String },
-  category_id: { type: Number, required: true, ref: "Category" }, // Khóa phụ tham chiếu đến Category
+  category_id: { type: Number, required: true, ref: "Category" }, 
   duration: { type: Number },
   release_date: { type: Date },
+  image_url: { type: String },
+  coming_soon: { type: Boolean, default: false } // Thêm trường coming_soon
 });
 
 movieSchema.plugin(AutoIncrement, { inc_field: "movie_id" });

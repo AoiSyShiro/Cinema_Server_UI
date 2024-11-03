@@ -6,6 +6,7 @@ const {
   changePassword,
   updateUserInfo,
   deleteUser,
+  getUserInfo,
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -27,5 +28,8 @@ router.put("/update-info", updateUserInfo);
 
 // Xóa người dùng
 router.delete("/delete", deleteUser);
+
+// Lấy thông tin người dùng
+router.get("/user/:user_id", getUserInfo);
 
 module.exports = router;

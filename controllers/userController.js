@@ -66,7 +66,9 @@ const login = async (req, res) => {
 
   // Kiểm tra dữ liệu đầu vào
   if (!email || !password) {
-    console.log("Lỗi: Dữ liệu đầu vào không hợp lệ. Email và mật khẩu là bắt buộc.");
+    console.log(
+      "Lỗi: Dữ liệu đầu vào không hợp lệ. Email và mật khẩu là bắt buộc."
+    );
     return res.status(400).json({
       error: "Dữ liệu đầu vào không hợp lệ",
       message: "Email và mật khẩu là bắt buộc",
@@ -105,15 +107,14 @@ const login = async (req, res) => {
       active: true,
     });
   } catch (error) {
-    console.error("Lỗi hệ thống:", error); // Đã có
-    console.error("Chi tiết lỗi:", error.message); // Thêm log chi tiết lỗi
+    console.error("Lỗi hệ thống:", error);
+    console.error("Chi tiết lỗi:", error.message);
     return res.status(500).json({
       error: "Lỗi máy chủ nội bộ",
       message: "Đã xảy ra lỗi không mong muốn",
     });
-  }  
+  }
 };
-
 
 // Hàm thoát tài khoản
 const logout = async (req, res) => {
@@ -142,35 +143,40 @@ const logout = async (req, res) => {
   }
 };
 
-// Hàm thay đổi mật khẩu
 const changePassword = async (req, res) => {
-  const { email, oldPassword, newPassword } = req.body;
+  const { user_id, current_password, new_password } = req.body;
 
-  if (!email || !oldPassword || !newPassword) {
+  // Kiểm tra dữ liệu đầu vào
+  if (!user_id || !current_password || !new_password) {
     return res.status(400).json({
       error: "Dữ liệu đầu vào không hợp lệ",
-      message: "Email, mật khẩu cũ và mật khẩu mới là bắt buộc",
+      message: "user_id, mật khẩu cũ và mật khẩu mới là bắt buộc",
     });
   }
 
   try {
-    const user = await User.findOne({ email });
+    // Tìm người dùng theo user_id
+    const user = await User.findOne({ user_id });
     if (!user) {
-      return res.status(400).json({
-        error: "Dữ liệu đầu vào không hợp lệ",
+      console.error(`Người dùng không tồn tại với user_id: ${user_id}`);
+      return res.status(404).json({
+        error: "Người dùng không tồn tại",
         message: "Người dùng không tồn tại",
       });
     }
 
-    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    // Kiểm tra mật khẩu cũ
+    const isMatch = await bcrypt.compare(current_password, user.password);
     if (!isMatch) {
+      console.error(`Mật khẩu cũ không đúng cho user_id: ${user_id}`);
       return res.status(400).json({
-        error: "Dữ liệu đầu vào không hợp lệ",
+        error: "Mật khẩu cũ không đúng",
         message: "Mật khẩu cũ không đúng",
       });
     }
 
-    user.password = await bcrypt.hash(newPassword, 10);
+    // Mã hóa mật khẩu mới
+    user.password = await bcrypt.hash(new_password, 10);
     await user.save();
 
     return res.status(200).json({
@@ -239,7 +245,6 @@ const updateUserInfo = async (req, res) => {
   }
 };
 
-
 // Hàm xóa người dùng
 const deleteUser = async (req, res) => {
   const { user_id } = req.body;
@@ -274,6 +279,48 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// Hàm lấy thông tin người dùng dựa vào user_id
+const getUserInfo = async (req, res) => {
+  const { user_id } = req.params;
+
+  if (!user_id) {
+    return res.status(400).json({
+      error: "Dữ liệu đầu vào không hợp lệ",
+      message: "ID người dùng là bắt buộc",
+    });
+  }
+
+  try {
+    const user = await User.findOne({ user_id });
+    if (!user) {
+      return res.status(404).json({
+        error: "Người dùng không tồn tại",
+        message: `Không tìm thấy người dùng với ID: ${user_id}`,
+      });
+    }
+
+    return res.status(200).json({
+      id: user.user_id,
+      full_name: user.username,
+      phone_number: user.phone,
+      email: user.email,
+      age: user.age,
+      gender: user.gender,
+      address: user.address,
+      created_at: user.created_at ? user.created_at.toISOString() : null,
+      updated_at: user.updated_at ? user.updated_at.toISOString() : null,
+    });
+  } catch (error) {
+    console.error("Lỗi hệ thống:", error);
+    return res.status(500).json({
+      error: "Lỗi máy chủ nội bộ",
+      message: "Đã xảy ra lỗi không mong muốn",
+    });
+  }
+};
+
+
+
 module.exports = {
   register,
   login,
@@ -281,4 +328,5 @@ module.exports = {
   changePassword,
   updateUserInfo,
   deleteUser,
+  getUserInfo,
 };
