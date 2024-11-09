@@ -10,7 +10,8 @@ const movieSchema = new mongoose.Schema({
   duration: { type: Number },
   release_date: { type: Date },
   image_url: { type: String },
-  coming_soon: { type: Boolean, default: false } // Thêm trường coming_soon
+  coming_soon: { type: Boolean, default: false }
+   // Thêm trường coming_soon
 });
 
 movieSchema.plugin(AutoIncrement, { inc_field: "movie_id" });
