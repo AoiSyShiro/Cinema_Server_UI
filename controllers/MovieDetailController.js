@@ -112,10 +112,32 @@ const getMoviesComingSoon = async (req, res) => {
   }
 };
 
+const searchMoviesByTitle = async (req, res) => {
+  try {
+    const { title } = req.query;
+    if (!title) {
+      return res.status(400).json({ message: "Vui lòng cung cấp tên phim" });
+    }
+
+    const regex = new RegExp(title, "i"); // i để tìm kiếm không phân biệt chữ hoa chữ thường
+    const movies = await Movie.find({ title: { $regex: regex } });
+
+    if (movies.length === 0) {
+      return res.status(404).json({ message: "Không tìm thấy phim" });
+    }
+
+    res.status(200).json(movies);
+  } catch (error) {
+    console.error("Lỗi khi tìm kiếm phim:", error);
+    res.status(500).json({ message: "Lỗi khi tìm kiếm phim", error });
+  }
+};
+
 module.exports = {
   getMovieDetails,
   getMoviesByGenre,
   getRandomMovies,
   getUpcomingMovies,
   getMoviesComingSoon,
+  searchMoviesByTitle,
 };

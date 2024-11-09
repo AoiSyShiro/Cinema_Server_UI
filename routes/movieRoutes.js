@@ -28,7 +28,13 @@ router.get("/genre/:genre", movieDetailController.getMoviesByGenre);
 // Lấy danh sách ramdom movie để chiếu lên slide
 router.get("/random", movieDetailController.getRandomMovies); // Random movies route
 
+// Lấy danh sách phim sắp chiếu
 router.get("/upcoming", movieDetailController.getUpcomingMovies);
+
+// Lấy danh sách phim sắp ra mắt
 router.get("/coming-soon", movieDetailController.getMoviesComingSoon);
+
+// Tìm kiếm phim theo tên
+router.get("/search", movieDetailController.searchMoviesByTitle);
 
 module.exports = router;
