@@ -13,7 +13,8 @@ const UserSchema = new mongoose.Schema({
   gender: { type: String, enum: ["Male", "Female", "Other"], default: "Other" },
   address: { type: String, default: null },
   role: { type: String, required: true, default: "user" },
-  avatar_url: { type: String, default: null }, 
+  avatar_url: { type: String, default: null },
+  favorites: { type: [Number], default: [] },  // Thêm trường favorites lưu trữ danh sách phim yêu thích
 });
 
 UserSchema.plugin(AutoIncrement, { inc_field: "user_id" });
