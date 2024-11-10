@@ -39,10 +39,12 @@ router.get("/search", movieDetailController.searchMoviesByTitle);
 
 
 // Thêm phim vào danh sách yêu thích của người dùng
-router.post("/users/:user_id/favorites", movieDetailController.addFavoriteMovie);
+router.post("/users/:user_id/favorites/:movie_id", movieDetailController.addFavoriteMovie);
 
 // Xóa phim khỏi danh sách yêu thích của người dùng
-router.delete("/users/:user_id/favorites", movieDetailController.removeFavoriteMovie);
+router.delete("/users/:user_id/favorites/:movie_id", movieDetailController.removeFavoriteMovie);
+
+router.get("/users/:user_id/favorites/:movie_id", movieDetailController.checkIfFavorite);
 
 
 module.exports = router;

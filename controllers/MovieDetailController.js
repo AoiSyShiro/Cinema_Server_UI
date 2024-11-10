@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Movie = require("../models/Movie");
-const User = require('../models/User');
+const User = require("../models/User");
 const getMovieDetails = async (req, res) => {
   console.log("Received request for movie_id:", req.params.movie_id);
   try {
@@ -135,10 +135,12 @@ const searchMoviesByTitle = async (req, res) => {
 };
 
 const addFavoriteMovie = async (req, res) => {
-  const { movie_id } = req.body;  // Lấy movie_id từ body request
-  const { user_id } = req.params;  // Lấy user_id từ params request
+  const { movie_id } = req.params; // Lấy movie_id từ params request
+  const { user_id } = req.params; // Lấy user_id từ params request
 
-  console.log(`Nhận request để thêm phim yêu thích: user_id = ${user_id}, movie_id = ${movie_id}`);
+  console.log(
+    `Nhận request để thêm phim yêu thích: user_id = ${user_id}, movie_id = ${movie_id}`
+  );
 
   try {
     // Kiểm tra nếu phim tồn tại trong cơ sở dữ liệu
@@ -159,15 +161,21 @@ const addFavoriteMovie = async (req, res) => {
 
     // Kiểm tra nếu phim đã có trong danh sách yêu thích
     if (user.favorites.includes(movie_id)) {
-      console.log(`Phim ${movie.title} đã có trong danh sách yêu thích của người dùng ${user.username}.`);
-      return res.status(400).json({ message: "Phim đã có trong danh sách yêu thích" });
+      console.log(
+        `Phim ${movie.title} đã có trong danh sách yêu thích của người dùng ${user.username}.`
+      );
+      return res
+        .status(400)
+        .json({ message: "Phim đã có trong danh sách yêu thích" });
     }
 
     // Thêm phim vào danh sách yêu thích
     user.favorites.push(movie_id);
-    await user.save();  // Lưu người dùng lại sau khi cập nhật danh sách favorites
+    await user.save(); // Lưu người dùng lại sau khi cập nhật danh sách favorites
 
-    console.log(`Phim ${movie.title} đã được thêm vào danh sách yêu thích của người dùng ${user.username}.`);
+    console.log(
+      `Phim ${movie.title} đã được thêm vào danh sách yêu thích của người dùng ${user.username}.`
+    );
 
     // Trả về phản hồi thành công
     res.status(200).json({
@@ -175,54 +183,73 @@ const addFavoriteMovie = async (req, res) => {
       favorites: user.favorites,
     });
   } catch (error) {
-    console.error("Lỗi khi thêm phim yêu thích:", error);  // Log lỗi chi tiết
-    res.status(500).json({ message: "Lỗi khi thêm phim yêu thích", error: error.message });  // Trả về thông báo lỗi chi tiết
+    console.error("Lỗi khi thêm phim yêu thích:", error); // Log lỗi chi tiết
+    res
+      .status(500)
+      .json({ message: "Lỗi khi thêm phim yêu thích", error: error.message }); // Trả về thông báo lỗi chi tiết
   }
 };
 
-
 const removeFavoriteMovie = async (req, res) => {
-  const { movie_id } = req.body;  // Lấy movie_id từ body request
-  const { user_id } = req.params;  // Lấy user_id từ params request
+  const { user_id, movie_id } = req.params;  // Lấy user_id và movie_id từ params request
+
+  console.log(`Nhận request để xóa phim yêu thích: user_id = ${user_id}, movie_id = ${movie_id}`);
 
   try {
-    // Kiểm tra nếu phim tồn tại trong cơ sở dữ liệu
-    const movie = await Movie.findOne({ movie_id });
-    if (!movie) {
-      console.log(`Phim với ID ${movie_id} không tồn tại.`);
-      return res.status(404).json({ message: "Phim không tồn tại" });
-    }
-    console.log(`Phim ${movie.title} đã được tìm thấy.`);
-
     // Tìm người dùng theo user_id
     const user = await User.findOne({ user_id });
     if (!user) {
       console.log(`Người dùng với ID ${user_id} không tồn tại.`);
       return res.status(404).json({ message: "Người dùng không tồn tại" });
     }
-    console.log(`Người dùng ${user.username} đã được tìm thấy.`);
 
     // Kiểm tra nếu phim có trong danh sách yêu thích của người dùng
-    if (!user.favorites.includes(movie_id)) {
-      console.log(`Phim ${movie.title} không có trong danh sách yêu thích của người dùng ${user.username}.`);
+    if (!user.favorites.includes(Number(movie_id))) {
+      console.log(`Phim ${movie_id} không có trong danh sách yêu thích của người dùng ${user.username}.`);
       return res.status(400).json({ message: "Phim không có trong danh sách yêu thích" });
     }
 
     // Xóa phim khỏi danh sách yêu thích
-    user.favorites = user.favorites.filter(id => id !== movie_id);
-    await user.save();  // Lưu người dùng lại sau khi xóa phim khỏi danh sách yêu thích
+    user.favorites = user.favorites.filter((id) => id !== Number(movie_id)); // Dùng filter để loại bỏ movie_id khỏi mảng
+    await user.save(); // Lưu người dùng lại sau khi xóa phim khỏi danh sách yêu thích
 
-    console.log(`Phim ${movie.title} đã được xóa khỏi danh sách yêu thích của người dùng ${user.username}.`);
+    console.log(`Phim ${movie_id} đã được xóa khỏi danh sách yêu thích của người dùng ${user.username}.`);
 
     // Trả về phản hồi thành công
-    res.status(200).json({ message: "Phim đã được xóa khỏi danh sách yêu thích", favorites: user.favorites });
+    res.status(200).json({
+      message: "Phim đã được xóa khỏi danh sách yêu thích",
+      favorites: user.favorites,  // Trả về danh sách favorites mới
+    });
   } catch (error) {
     console.error("Lỗi khi xóa phim yêu thích:", error);
-    res.status(500).json({ message: "Lỗi khi xóa phim yêu thích", error });
+    res.status(500).json({ message: "Lỗi khi xóa phim yêu thích", error: error.message });
   }
 };
 
 
+
+
+// Kiểm tra phim có trong danh sách yêu thích của người dùng không
+const checkIfFavorite = async (req, res) => {
+  const { user_id, movie_id } = req.params;
+
+  try {
+    // Tìm người dùng theo user_id
+    const user = await User.findOne({ user_id });
+    if (!user) {
+      return res.status(404).json({ message: "Người dùng không tồn tại" });
+    }
+
+    // Kiểm tra nếu phim có trong danh sách yêu thích
+    const isFavorite = user.favorites.includes(movie_id);
+
+    // Trả về kết quả
+    res.status(200).json({ isFavorite });
+  } catch (error) {
+    console.error("Lỗi khi kiểm tra phim yêu thích:", error);
+    res.status(500).json({ message: "Lỗi khi kiểm tra phim yêu thích", error });
+  }
+};
 
 module.exports = {
   getMovieDetails,
@@ -233,4 +260,5 @@ module.exports = {
   searchMoviesByTitle,
   addFavoriteMovie,
   removeFavoriteMovie,
+  checkIfFavorite,
 };

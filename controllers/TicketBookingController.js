@@ -1,62 +1,83 @@
 const BookTickets = require("../models/BookTickets");
 const Showtime = require("../models/Showtime");
 const mongoose = require("mongoose");
+const User = require('../models/User');
+const FoodDrink = require("../models/FoodDrink");
+
 
 // Đặt vé xem phim
 const bookTicket = async (req, res) => {
-    try {
-      const {
-        user_id,
-        showtime_id,
-        seats,
-        ticket_quantity,
-        food_drink,
-        payment_method,
-      } = req.body;
-  
-      // Kiểm tra suất chiếu có tồn tại không (sử dụng Number để tìm kiếm)
-      const showtime = await Showtime.findOne({ showtime_id: showtime_id });
-      if (!showtime) {
-        return res.status(404).json({ message: "Không tìm thấy suất chiếu" });
-      }
-  
-      // Tạo vé mới
-      const newTicket = new BookTickets({
-        user_id,
-        showtime_id: showtime.showtime_id, // Giữ nguyên kiểu Number
-        payment_method,
-        qr_code: generateQRCode(),
-        flag: 1,
-      });
-  
-      const savedTicket = await newTicket.save();
-      res.status(201).json({
-        message: "Đặt vé thành công",
-        ticket: savedTicket,
-        seats,
-        food_drink,
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Lỗi khi đặt vé", error });
+  try {
+    const { user_id, showtime_id, seats, food_drinks, payment_method } = req.body;
+
+    // Kiểm tra thông tin người dùng
+    const user = await User.findOne({ user_id });
+    if (!user) {
+      return res.status(404).json({ message: "Người dùng không tồn tại" });
     }
-  };
-  
+
+    // Kiểm tra suất chiếu có tồn tại không
+    const showtime = await Showtime.findOne({ showtime_id });
+    if (!showtime) {
+      return res.status(404).json({ message: "Không tìm thấy suất chiếu" });
+    }
+
+    // Lấy movie_id từ showtime
+    const movie_id = showtime.movie_id;
+
+    // Kiểm tra xem ghế đã được đặt chưa
+    const alreadyReserved = seats.some(seat => showtime.reserved_seats.includes(seat));
+    if (alreadyReserved) {
+      return res.status(400).json({ message: "Một hoặc nhiều ghế đã được đặt, vui lòng chọn ghế khác." });
+    }
+
+    // Cập nhật danh sách ghế đã đặt trong suất chiếu
+    showtime.reserved_seats.push(...seats);
+    await showtime.save();
+
+    // Kiểm tra và lấy thông tin các món ăn/đồ uống đã chọn
+    let selectedFoodDrinks = [];
+    if (food_drinks && food_drinks.length > 0) {
+      selectedFoodDrinks = await FoodDrink.find({ food_drink_id: { $in: food_drinks.map(item => item.food_drink_id) } });
+      // Kiểm tra nếu có ID nào không hợp lệ
+      if (selectedFoodDrinks.length !== food_drinks.length) {
+        return res.status(400).json({ message: "Một hoặc nhiều món ăn/đồ uống không tồn tại." });
+      }
+    }
+
+    // Tạo vé mới với thông tin các món ăn/đồ uống đã chọn và số lượng
+    const newTicket = new BookTickets({
+      user_id,
+      showtime_id,
+      movie_id,  // Lưu movie_id từ showtime
+      payment_method,
+      qr_code: generateQRCode(),  // Kiểm tra hàm này
+      flag: 1,
+      seats,  // Lưu thông tin ghế đã chọn
+      food_drinks: food_drinks.map(item => ({
+        food_drink_id: item.food_drink_id, 
+        quantity: item.quantity
+      }))  // Lưu food_drink_id và quantity
+    });
+
+    const savedTicket = await newTicket.save();
+    
+    res.status(201).json({
+      message: "Đặt vé thành công",
+      ticket: savedTicket,
+      seats,
+      food_drinks: selectedFoodDrinks,  // Trả về thông tin các món ăn/đồ uống và số lượng
+    });
+  } catch (error) {
+    console.error("Lỗi khi đặt vé:", error); // Log chi tiết lỗi
+    res.status(500).json({ message: "Lỗi khi đặt vé", error: error.message });
+  }
+};
+
 
 // Hàm tạo mã QR ngẫu nhiên (ví dụ)
 const generateQRCode = () => {
   return Math.random().toString(36).substring(2, 15);
-};
-
-// Hiển thị danh sách vé đã đặt
-const getAllTickets = async (req, res) => {
-  try {
-    const tickets = await BookTickets.find()
-      .populate("user_id", "name email")
-      .populate("showtime_id", "start_time room ticket_price");
-    res.status(200).json(tickets);
-  } catch (error) {
-    res.status(500).json({ message: "Lỗi khi lấy danh sách vé", error });
-  }
 };
 
 // Hủy vé theo ID
@@ -73,10 +94,12 @@ const cancelTicket = async (req, res) => {
       return res.status(404).json({ message: "Không tìm thấy vé để hủy" });
     }
 
-    res.status(200).json({ message: "Hủy vé thành công", ticket: canceledTicket });
+    res
+      .status(200)
+      .json({ message: "Hủy vé thành công", ticket: canceledTicket });
   } catch (error) {
     res.status(500).json({ message: "Lỗi khi hủy vé", error });
   }
 };
 
-module.exports = { bookTicket, getAllTickets, cancelTicket };
+module.exports = { bookTicket, cancelTicket };
