@@ -37,14 +37,16 @@ router.get("/coming-soon", movieDetailController.getMoviesComingSoon);
 // Tìm kiếm phim theo tên
 router.get("/search", movieDetailController.searchMoviesByTitle);
 
-
 // Thêm phim vào danh sách yêu thích của người dùng
 router.post("/users/:user_id/favorites/:movie_id", movieDetailController.addFavoriteMovie);
 
 // Xóa phim khỏi danh sách yêu thích của người dùng
 router.delete("/users/:user_id/favorites/:movie_id", movieDetailController.removeFavoriteMovie);
 
+// Kiểm tra phim có trong danh sách yêu thích của người dùng không
 router.get("/users/:user_id/favorites/:movie_id", movieDetailController.checkIfFavorite);
 
+// Lấy danh sách phim yêu thích của người dùng
+router.get("/users/:user_id/favorites", movieDetailController.getFavoriteMovies); 
 
 module.exports = router;

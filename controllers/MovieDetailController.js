@@ -251,6 +251,35 @@ const checkIfFavorite = async (req, res) => {
   }
 };
 
+// Lấy danh sách phim yêu thích của người dùng
+const getFavoriteMovies = async (req, res) => {
+  const { user_id } = req.params;
+
+  try {
+    // Tìm người dùng theo user_id
+    const user = await User.findOne({ user_id });
+    if (!user) {
+      return res.status(404).json({ message: "Người dùng không tồn tại" });
+    }
+
+    // Lấy danh sách phim yêu thích của người dùng
+    const favoriteMovies = await Movie.find({
+      movie_id: { $in: user.favorites },
+    });
+
+    if (favoriteMovies.length === 0) {
+      return res.status(404).json({ message: "Danh sách yêu thích trống" });
+    }
+
+    // Trả về danh sách phim yêu thích
+    res.status(200).json(favoriteMovies);
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách phim yêu thích:", error);
+    res.status(500).json({ message: "Lỗi khi lấy danh sách phim yêu thích", error });
+  }
+};
+
+
 module.exports = {
   getMovieDetails,
   getMoviesByGenre,
@@ -261,4 +290,5 @@ module.exports = {
   addFavoriteMovie,
   removeFavoriteMovie,
   checkIfFavorite,
+  getFavoriteMovies,
 };
