@@ -33,7 +33,7 @@
 
 | STT | Họ và têb | ID | Task|
 |---|---|---| --- |
-| 1 | Nguyễn Ngọc Hoàng Thắng | AoiSyShiro, SoraNega | Server API, Controllers, Movie Trailer, QR, Khuyến Mãi
+| 1 | Nguyễn Ngọc Hoàng Thắng | AoiSyShiro, SoraNega | Server API, Controllers, Movie Trailer, QR, Khuyến Mãi, DEV Server
 | 2 | Trần Văn Cường | | Hiện Thị Phim, Thông Tin Phim, Thêm Sửa Xoá, Tìm Kiếm Phim
 | 3 | Võ Minh Huy | | Hiện Thị Thuật Toán Phim Khác, Thêm Yêu Thích Phim,
 | 4 | Nguyễn Nam Hà Thành | milkypig-code |  Thanh Toán, Lịch Sử, Lịch Sử Đặt Vé
