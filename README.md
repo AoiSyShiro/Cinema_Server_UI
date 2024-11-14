@@ -27,3 +27,16 @@
 - **ShowtimeController.js**: Quản lý suất chiếu phim (Thêm, Sửa, Xóa, Hiển thị danh sách giờ chiếu)
 - **PaymentController.js**: Quản lý thanh toán (Thanh toán qua ví điện tử, ngân hàng)
 - **TrailerController.js**: Xem trailer phim
+
+
+## Thành viên
+
+| STT | Họ và têb | ID | Task|
+|---|---|---| --- |
+| 1 | Nguyễn Ngọc Hoàng Thắng | AoiSyShiro, SoraNega | Server API, Controllers, Movie Trailer, QR, Khuyến Mãi
+| 2 | Trần Văn Cường | Hiện Thị Phim, Thông Tin Phim, Thêm Sửa Xoá, Tìm Kiếm Phim
+| 3 | Võ Minh Huy | Hiện Thị Thuật Toán Phim Khác, Thêm Yêu Thích Phim,
+| 4 | Nguyễn Nam Hà Thành| milkypig-code| | Thanh Toán, Lịch Sử, Lịch Sử Đặt Vé
+| 5 | Tuấn Ngọc| Tạo Xuất Chiếu, Sửa, Xoá Xuất Chiếu, Food, Thêm Sửa Xoá
+| 6 | Khánh| lekhanh1234| UI, User Đăng Ký, Đăng Nhập, Quên Mật Khẩu, Cập Nhật Thông Tin
+
