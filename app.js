@@ -1,5 +1,4 @@
 const express = require("express");
-const punycode = require('punycode/');
 const path = require("path");
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
@@ -8,7 +7,7 @@ const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoutes");
 const foodDrinkRoutes = require("./routes/foodDrinkRoutes");
 const movieRoutes = require("./routes/movieRoutes");
-const categoryRoutes = require("./routes/categoryRoutes"); 
+const categoryRoutes = require("./routes/categoryRoutes");
 const trailerRouter = require("./routes/trailerRouter");
 const showtimeRouter = require("./routes/showtimeRouter");
 const ticketBookingRouter = require("./routes/ticketBookingRouter");
@@ -16,6 +15,10 @@ const promotionRoutes = require("./routes/promotionRouter");
 const reviewRoutes = require("./routes/reviewRouter");
 const bookingRoutes = require("./routes/bookingRouter");
 const paymentRouter = require("./routes/paymentRouter");
+const Movie = require("./models/Movie");
+const Category = require("./models/Category");  // Đảm bảo bạn có mô hình Category
+const FoodDrink = require('./models/FoodDrink');
+
 
 // Configure Cloudinary
 cloudinary.config({
@@ -68,6 +71,52 @@ app.set("view engine", "ejs");
 app.get("/", (req, res) => {
   res.render("index", { title: "Trang chủ" });
 });
+
+app.get("/movies", async (req, res) => {
+  try {
+    const movies = await Movie.find();
+    const categories = await Category.find();
+
+    // In ra dữ liệu movies và categories để kiểm tra
+    console.log("Movies:", movies);
+    console.log("Categories:", categories);
+
+    const moviesWithCategories = movies.map(movie => {
+      const category = categories.find(cat => cat.category_id === movie.category_id);
+      return {
+        ...movie.toObject(),
+        category: category ? category.name : 'Không có danh mục'
+      };
+    });
+
+    // In ra moviesWithCategories sau khi kết hợp
+    console.log("Movies with categories:", moviesWithCategories);
+
+    res.render("movies", { movies: moviesWithCategories });
+  } catch (err) {
+    console.error("Lỗi khi lấy danh sách phim:", err);
+    res.status(500).send("Lỗi khi lấy danh sách phim.");
+  }
+});
+
+
+// Route GET cho trang Food & Drinks
+app.get("/food-drinks", async (req, res) => {
+  try {
+    // Lấy danh sách đồ ăn và đồ uống từ DB
+    const foodDrinks = await FoodDrink.find();
+
+    // In ra danh sách foodDrinks để kiểm tra
+    console.log("Food Drinks:", foodDrinks);
+
+    // Render view và gửi dữ liệu foodDrinks vào view
+    res.render("foodDrink", { foodDrinks: foodDrinks });
+  } catch (err) {
+    console.error("Lỗi khi lấy danh sách đồ ăn/đồ uống:", err);
+    res.status(500).send("Lỗi khi lấy danh sách đồ ăn/đồ uống.");
+  }
+});
+
 
 app.post("/upload", upload.single("movieImage"), async (req, res) => {
   try {

@@ -1,0 +1,54 @@
+<%- include('layout/header.ejs') %>
+
+<!-- Bảng Danh sách Phim -->
+<div class="overflow-x-auto bg-white shadow-lg rounded-lg">
+  <table class="min-w-full table-auto divide-y divide-gray-200">
+    <thead>
+      <tr class="bg-gray-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <th class="px-6 py-3">ID</th>
+        <th class="px-6 py-3">Tên Phim</th>
+        <th class="px-6 py-3">Danh Mục</th>
+        <th class="px-6 py-3">Ngày Phát Hành</th>
+        <th class="px-6 py-3">Thời Lượng</th>
+        <th class="px-6 py-3">Sắp Chiếu?</th>
+        <th class="px-6 py-3">Ảnh</th>
+        <th class="px-6 py-3">Hành Động</th>
+      </tr>
+    </thead>
+    <tbody class="bg-white divide-y divide-gray-200">
+      <% if (movies && movies.length > 0) { %>
+        <% movies.forEach(movie => { %>
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium"><%= movie.movie_id %></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= movie.title %></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= movie.category %></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <%= movie.release_date ? new Date(movie.release_date).toLocaleDateString() : 'Chưa có' %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <%= movie.duration ? movie.duration + " phút" : 'Chưa có' %>
+            </td>
+            <!-- Cột Sắp Chiếu -->
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium 
+              <%= movie.coming_soon ? 'text-green-500' : 'text-red-500' %>">
+              <%= movie.coming_soon ? 'Có' : 'Không' %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <img src="<%= movie.image_url %>" alt="<%= movie.title %>" class="w-16 h-16 object-cover rounded-lg" /> <!-- Hiển thị ảnh -->
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              <a href="/movies/edit/<%= movie._id %>" class="text-indigo-600 hover:text-indigo-900">Chỉnh sửa</a>
+              <a href="/movies/delete/<%= movie._id %>" class="text-red-600 hover:text-red-800 ml-2">Xóa</a>
+            </td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr>
+          <td colspan="8" class="px-6 py-4 text-center text-sm font-medium text-gray-500">Không có phim nào</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('layout/footer.ejs') %>

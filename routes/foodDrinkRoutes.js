@@ -18,4 +18,6 @@ router.put('/:id', upload.single('file'), foodDrinkController.updateFoodDrink);
 // Xóa đồ ăn/đồ uống
 router.delete('/:id', foodDrinkController.deleteFoodDrink);
 
+
+
 module.exports = router;

@@ -1,0 +1,50 @@
+<%- include('layout/header.ejs') %>
+
+<!-- Danh sách Món Ăn và Đồ Uống -->
+<div class="overflow-x-auto bg-white shadow-lg rounded-lg p-6">
+  <h2 class="text-3xl font-semibold text-gray-900 mb-6">Danh Sách Đồ Ăn và Đồ Uống</h2>
+
+  <!-- Nút Thêm Món -->
+  <div class="mb-4 flex justify-end">
+    <a href="/food-drinks/add" class="text-white bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded-md shadow-md transition duration-300">Thêm Món</a>
+  </div>
+
+  <!-- Bảng Danh Sách Món Ăn và Đồ Uống -->
+  <table class="min-w-full table-auto divide-y divide-gray-200">
+    <thead>
+      <tr class="bg-gray-100 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+        <th class="px-6 py-3">ID</th>
+        <th class="px-6 py-3">Tên Món</th>
+        <th class="px-6 py-3">Loại</th>
+        <th class="px-6 py-3">Giá</th>
+        <th class="px-6 py-3">Ảnh</th>
+        <th class="px-6 py-3">Hành Động</th>
+      </tr>
+    </thead>
+    <tbody class="bg-white divide-y divide-gray-200">
+      <% if (foodDrinks && foodDrinks.length > 0) { %>
+        <% foodDrinks.forEach(food => { %>
+          <tr class="hover:bg-gray-50 transition duration-300">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= food.food_drink_id %></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= food.name %></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= food.type %></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= food.price %> VNĐ</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <img src="<%= food.image %>" alt="<%= food.name %>" class="w-16 h-16 object-cover rounded-md shadow-sm" />
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              <a href="/food-drinks/edit/<%= food._id %>" class="text-indigo-600 hover:text-indigo-800">Sửa</a>
+              <a href="/food-drinks/delete/<%= food._id %>" class="text-red-600 hover:text-red-800 ml-4">Xóa</a>
+            </td>
+          </tr>
+        <% }) %>
+      <% } else { %>
+        <tr>
+          <td colspan="6" class="px-6 py-4 text-center text-sm font-medium text-gray-500">Không có món ăn/đồ uống nào</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('layout/footer.ejs') %>

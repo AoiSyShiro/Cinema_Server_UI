@@ -49,4 +49,8 @@ router.get("/users/:user_id/favorites/:movie_id", movieDetailController.checkIfF
 // Lấy danh sách phim yêu thích của người dùng
 router.get("/users/:user_id/favorites", movieDetailController.getFavoriteMovies); 
 
+
+
 module.exports = router;
+
+
