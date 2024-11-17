@@ -31,7 +31,7 @@
 
 ## Thành viên
 
-| STT | Họ và têb | ID | Task|
+| STT | Họ và tên | ID | Task|
 |---|---|---| --- |
 | 1 | Nguyễn Ngọc Hoàng Thắng | AoiSyShiro, SoraNega | Server API, Controllers, Movie Trailer, QR, Khuyến Mãi, DEV Server
 | 2 | Trần Văn Cường | | Hiện Thị Phim, Thông Tin Phim, Thêm Sửa Xoá, Tìm Kiếm Phim
