@@ -24,77 +24,66 @@ const getMovies = async (req, res) => {
 };
 
 // Thêm phim
-const addMovie = async (req, res) => {
-  const {
-    title,
-    description,
-    trailer_url,
-    category_id,
-    duration,
-    release_date,
-    image_url,
-    coming_soon // Thêm trường coming_soon
-  } = req.body;
+const addMovieAdmin = async (req, res) => {  // Đổi tên từ addMovie thành addMovieAdmin
+  upload(req, res, async (err) => {
+    if (err) {
+      return res.status(500).json({ message: "Lỗi khi tải ảnh lên", error: err.message });
+    }
 
-  try {
-    const movie = new Movie({
-      title,
-      description,
-      trailer_url,
-      category_id,
-      duration,
-      release_date,
-      image_url,
-      coming_soon // Thêm trường vào mô hình
-    });
-    await movie.save();
-    res.status(201).json(movie);
-  } catch (error) {
-    console.error("Lỗi khi thêm phim:", error);
-    res.status(500).json({ message: "Lỗi khi thêm phim", error: error.message });
-  }
-};
-
-
-// Cập nhật phim theo movie_id
-const updateMovie = async (req, res) => {
-  const {
-    title,
-    description,
-    trailer_url,
-    category_id,
-    duration,
-    release_date,
-    image_url,
-    coming_soon // Thêm trường coming_soon
-  } = req.body;
-
-  try {
-    const movie = await Movie.findOneAndUpdate(
-      { movie_id: req.params.id },  // Tìm theo movie_id
-      {
+    const { title, description, trailer_url, category_id, duration, release_date, coming_soon } = req.body;
+    try {
+      const image_url = req.file ? req.file.path : null;
+      const movie = new Movie({
         title,
         description,
         trailer_url,
-        category_id,
+        category_id: parseInt(category_id),
         duration,
         release_date,
         image_url,
-        coming_soon // Thêm trường vào mô hình
-      },
-      { new: true }
-    );
+        coming_soon,
+      });
 
-    if (!movie) {
-      return res.status(404).json({ message: "Không tìm thấy phim" });
+      await movie.save();
+      res.redirect("/movies");  // Redirect về trang danh sách phim
+    } catch (error) {
+      console.error("Lỗi khi thêm phim:", error);
+      res.status(500).json({ message: "Lỗi khi thêm phim", error });
     }
-    res.status(200).json(movie);
-  } catch (error) {
-    console.error("Lỗi khi cập nhật phim:", error);
-    res.status(500).json({ message: "Lỗi khi cập nhật phim", error: error.message });
-  }
+  });
 };
 
+// Cập nhật phim
+const updateMovieAdmin = async (req, res) => {  // Đổi tên từ updateMovie thành updateMovieAdmin
+  upload(req, res, async (err) => {
+    if (err) {
+      return res.status(500).json({ message: "Lỗi khi tải ảnh lên", error: err.message });
+    }
+
+    const { movie_id, title, description, trailer_url, category_id, duration, release_date, coming_soon } = req.body;
+    try {
+      const image_url = req.file ? req.file.path : null;
+      const movie = await Movie.findOneAndUpdate(
+        { movie_id },
+        {
+          title,
+          description,
+          trailer_url,
+          category_id: parseInt(category_id),
+          duration,
+          release_date,
+          image_url,
+          coming_soon,
+        },
+        { new: true }
+      );
+      res.json(movie);
+    } catch (error) {
+      console.error("Lỗi khi cập nhật phim:", error);
+      res.status(500).json({ message: "Lỗi khi cập nhật phim", error });
+    }
+  });
+};
 
 // Xóa phim theo movie_id
 const deleteMovie = async (req, res) => {
@@ -114,7 +103,7 @@ const deleteMovie = async (req, res) => {
 
 module.exports = {
   getMovies,
-  addMovie,
-  updateMovie,
+  addMovieAdmin,
+  updateMovieAdmin,
   deleteMovie,
 };

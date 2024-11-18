@@ -11,10 +11,10 @@ const upload = multer({ storage: multer.memoryStorage() });
 router.get("/", movieController.getMovies);
 
 // Thêm phim
-router.post("/", upload.single("image"), movieController.addMovie);
+router.post("/", upload.single("image"), movieController.addMovieAdmin);
 
-// Cập nhật phim
-router.put("/:id", upload.single("image"), movieController.updateMovie);
+// // Cập nhật phim
+// router.put("/:id", upload.single("image"), movieController.updateMovieAdmin);
 
 // Xóa phim
 router.delete("/:id", movieController.deleteMovie);
