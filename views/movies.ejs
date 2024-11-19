@@ -60,62 +60,62 @@
 
 <!-- Modal chỉnh sửa và thêm phim -->
 <div id="movieModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
-  <div class="bg-white p-6 rounded-lg w-1/3 transition-all transform scale-95 opacity-0" id="movieModalContent">
-    <h2 class="text-xl font-semibold mb-4" id="modalTitle">Thêm Phim</h2>
+  <div class="bg-white p-6 w-1/3 transition-all transform scale-95 opacity-0" id="movieModalContent">
+    <h2 class="text-xl font-semibold mb-4 text-gray-800" id="modalTitle">Thêm Phim</h2>
     <form id="movieForm" method="POST" enctype="multipart/form-data" action="">
       <div class="mb-4">
         <label for="title" class="block text-sm font-medium text-gray-700">Tên Phim</label>
-        <input type="text" id="title" name="title" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" required />
+        <input type="text" id="title" name="title" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
       </div>
 
       <div class="mb-4">
         <label for="category_id" class="block text-sm font-medium text-gray-700">Danh Mục</label>
-        <select id="category_id" name="category_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+        <select id="category_id" name="category_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
           <option value="">Chọn thể loại</option>
           <% categories.forEach(category => { %>
             <option value="<%= category.category_id %>"><%= category.name %></option>
           <% }) %>
         </select>
-        
       </div>
 
       <div class="mb-4">
         <label for="release_date" class="block text-sm font-medium text-gray-700">Ngày Phát Hành</label>
-        <input type="date" id="release_date" name="release_date" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" />
+        <input type="date" id="release_date" name="release_date" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
       </div>
 
       <div class="mb-4">
         <label for="duration" class="block text-sm font-medium text-gray-700">Thời Lượng (phút)</label>
-        <input type="number" id="duration" name="duration" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" />
+        <input type="number" id="duration" name="duration" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
       </div>
 
       <div class="mb-4">
         <label for="description" class="block text-sm font-medium text-gray-700">Mô Tả</label>
-        <textarea id="description" name="description" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"></textarea>
+        <textarea id="description" name="description" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
       </div>
 
       <div class="mb-4">
         <label for="trailer_url" class="block text-sm font-medium text-gray-700">Trailer URL</label>
-        <input type="url" id="trailer_url" name="trailer_url" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" />
+        <input type="url" id="trailer_url" name="trailer_url" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
       </div>
 
       <div class="mb-4">
         <label for="image" class="block text-sm font-medium text-gray-700">Ảnh</label>
-        <input type="file" id="image" name="image" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" />
+        <input type="file" id="image" name="image" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
       </div>
 
       <div class="mb-4">
         <label for="coming_soon" class="block text-sm font-medium text-gray-700">Sắp Chiếu</label>
-        <input type="checkbox" id="coming_soon" name="coming_soon" />
+        <input type="checkbox" id="coming_soon" name="coming_soon" class="mt-1" />
       </div>
 
-      <div class="flex justify-end">
-        <button type="button" class="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2" onclick="closeModal()">Hủy</button>
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Lưu</button>
+      <div class="flex justify-end space-x-2">
+        <button type="button" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors duration-200" onclick="closeModal()">Hủy</button>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200">Lưu</button>
       </div>
     </form>
   </div>
 </div>
+
 
 <script>
   // Mở modal để chỉnh sửa thông tin phim

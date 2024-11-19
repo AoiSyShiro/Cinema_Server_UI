@@ -1,50 +1,116 @@
 <%- include('layout/header.ejs') %>
 
-<!-- Danh sách Món Ăn và Đồ Uống -->
-<div class="overflow-x-auto bg-white shadow-lg rounded-lg p-6">
-  <h2 class="text-3xl font-semibold text-gray-900 mb-6">Danh Sách Đồ Ăn và Đồ Uống</h2>
-
-  <!-- Nút Thêm Món -->
-  <div class="mb-4 flex justify-end">
-    <a href="/food-drinks/add" class="text-white bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded-md shadow-md transition duration-300">Thêm Món</a>
-  </div>
-
-  <!-- Bảng Danh Sách Món Ăn và Đồ Uống -->
-  <table class="min-w-full table-auto divide-y divide-gray-200">
-    <thead>
-      <tr class="bg-gray-100 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
-        <th class="px-6 py-3">ID</th>
-        <th class="px-6 py-3">Tên Món</th>
-        <th class="px-6 py-3">Loại</th>
-        <th class="px-6 py-3">Giá</th>
-        <th class="px-6 py-3">Ảnh</th>
-        <th class="px-6 py-3">Hành Động</th>
+<div class="overflow-x-auto bg-white shadow-lg">
+  <table class="min-w-full bg-white border border-gray-200 shadow-md">
+    <thead class="bg-gray-800 text-white">
+      <tr class="text-sm uppercase font-semibold">
+        <th class="px-6 py-3 text-left">ID</th>
+        <th class="px-6 py-3 text-left">Tên Đồ Ăn/Đồ Uống</th>
+        <th class="px-6 py-3 text-left">Loại</th>
+        <th class="px-6 py-3 text-left">Giá</th>
+        <th class="px-6 py-3 text-left">Ảnh</th>
+        <th class="px-6 py-3 text-left">
+          <button class="bg-black text-white py-1.5 px-3 rounded-full shadow-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black transition-all duration-200 ease-in-out text-xs flex items-center" onclick="openAddFoodDrinkModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m7-7H5" />
+            </svg>
+            <span>Thêm Đồ Ăn/Đồ Uống</span>
+          </button>
+        </th>
       </tr>
     </thead>
-    <tbody class="bg-white divide-y divide-gray-200">
-      <% if (foodDrinks && foodDrinks.length > 0) { %>
-        <% foodDrinks.forEach(food => { %>
-          <tr class="hover:bg-gray-50 transition duration-300">
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= food.food_drink_id %></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= food.name %></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= food.type %></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= food.price %> VNĐ</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-              <img src="<%= food.image %>" alt="<%= food.name %>" class="w-16 h-16 object-cover rounded-md shadow-sm" />
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-              <a href="/food-drinks/edit/<%= food._id %>" class="text-indigo-600 hover:text-indigo-800">Sửa</a>
-              <a href="/food-drinks/delete/<%= food._id %>" class="text-red-600 hover:text-red-800 ml-4">Xóa</a>
-            </td>
-          </tr>
-        <% }) %>
-      <% } else { %>
-        <tr>
-          <td colspan="6" class="px-6 py-4 text-center text-sm font-medium text-gray-500">Không có món ăn/đồ uống nào</td>
+    <tbody class="text-gray-700">
+      <% foodDrinks.forEach(foodDrink => { %>
+        <tr class="hover:bg-gray-50 border-b">
+          <td class="px-6 py-4 text-sm text-gray-900 font-medium"><%= foodDrink.food_drink_id %></td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= foodDrink.name %></td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= foodDrink.type %></td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= foodDrink.price %></td>
+          <td class="px-6 py-4 text-sm text-gray-900">
+            <img src="<%= foodDrink.image %>" alt="<%= foodDrink.name %>" class="w-16 h-16 object-cover" />
+          </td>
+          <td class="px-6 py-4 text-sm font-medium text-gray-600">
+            <div class="flex space-x-4">
+              <button class="text-indigo-600 hover:text-indigo-900" onclick="openEditFoodDrinkModal('<%= foodDrink.food_drink_id %>', '<%= foodDrink.name %>', '<%= foodDrink.type %>', <%= foodDrink.price %>, '<%= foodDrink.image %>')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                </svg>
+              </button>
+
+              <a href="/food-drinks-admin/delete/<%= foodDrink.food_drink_id %>" class="text-red-600 hover:text-red-800" onclick="return confirm('Bạn có chắc muốn xóa món này?')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </a>
+            </div>
+          </td>
         </tr>
-      <% } %>
+      <% }) %>
     </tbody>
   </table>
 </div>
 
+<!-- Modal -->
+<div id="foodDrinkModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white p-6 w-1/3 transition-all transform scale-95 opacity-0" id="foodDrinkModalContent">
+    <h2 class="text-xl font-semibold mb-4 text-gray-800" id="modalTitle">Thêm Đồ Ăn/Đồ Uống</h2>
+    <form id="foodDrinkForm" method="POST" enctype="multipart/form-data" action="">
+      <div class="mb-4">
+        <label for="name" class="block text-sm font-medium text-gray-700">Tên</label>
+        <input type="text" id="name" name="name" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
+      </div>
+
+      <div class="mb-4">
+        <label for="type" class="block text-sm font-medium text-gray-700">Loại</label>
+        <input type="text" id="type" name="type" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
+      </div>
+
+      <div class="mb-4">
+        <label for="price" class="block text-sm font-medium text-gray-700">Giá</label>
+        <input type="number" id="price" name="price" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
+      </div>
+
+      <div class="mb-4">
+        <label for="image" class="block text-sm font-medium text-gray-700">Ảnh</label>
+        <input type="file" id="image" name="image" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+      </div>
+
+      <div class="flex justify-end space-x-2">
+        <button type="button" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors duration-200" onclick="closeFoodDrinkModal()">Hủy</button>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200">Lưu</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openAddFoodDrinkModal() {
+    document.getElementById('foodDrinkModal').classList.remove('hidden');
+    document.getElementById('foodDrinkModalContent').classList.remove('scale-95', 'opacity-0');
+    document.getElementById('foodDrinkModalContent').classList.add('scale-100', 'opacity-100');
+    document.getElementById('modalTitle').textContent = 'Thêm Đồ Ăn/Đồ Uống';
+    document.getElementById('foodDrinkForm').reset();
+  }
+
+  function openEditFoodDrinkModal(id, name, type, price, image) {
+    document.getElementById('foodDrinkModal').classList.remove('hidden');
+    document.getElementById('foodDrinkModalContent').classList.remove('scale-95', 'opacity-0');
+    document.getElementById('foodDrinkModalContent').classList.add('scale-100', 'opacity-100');
+    
+    document.getElementById('modalTitle').textContent = 'Chỉnh sửa Đồ Ăn/Đồ Uống';
+    document.getElementById('name').value = name;
+    document.getElementById('type').value = type;
+    document.getElementById('price').value = price;
+    document.getElementById('image').value = '';  // Reset file input
+
+    // Change form action to edit
+    document.getElementById('foodDrinkForm').action = `/food-drinks-admin/${id}`;
+  }
+
+  function closeFoodDrinkModal() {
+    document.getElementById('foodDrinkModal').classList.add('hidden');
+    document.getElementById('foodDrinkModalContent').classList.remove('scale-100', 'opacity-100');
+    document.getElementById('foodDrinkModalContent').classList.add('scale-95', 'opacity-0');
+  }
+</script>
 <%- include('layout/footer.ejs') %>

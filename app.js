@@ -15,9 +15,10 @@ const reviewRoutes = require("./routes/reviewRouter");
 const bookingRoutes = require("./routes/bookingRouter");
 const paymentRouter = require("./routes/paymentRouter");
 const Movie = require("./models/Movie");
-const Category = require("./models/Category");  // Đảm bảo bạn có mô hình Category
-const FoodDrink = require('./models/FoodDrink');
-require('dotenv').config(); // Đảm bảo dotenv.config() được gọi đầu tiên
+const Category = require("./models/Category"); // Đảm bảo bạn có mô hình Category
+const FoodDrink = require("./models/FoodDrink");
+const Showtime = require("./models/Showtime");
+require("dotenv").config(); // Đảm bảo dotenv.config() được gọi đầu tiên
 
 // Kiểm tra xem biến môi trường đã được nạp đúng chưa
 console.log("Cloud Name: ", process.env.CLOUD_NAME);
@@ -26,7 +27,7 @@ console.log("API Secret: ", process.env.API_SECRET);
 
 // Configure Cloudinary
 cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME, 
+  cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.API_KEY,
   api_secret: process.env.API_SECRET,
 });
@@ -74,112 +75,6 @@ app.get("/", (req, res) => {
   res.render("index", { title: "Trang chủ" });
 });
 
-app.get("/movies-admin", async (req, res) => {
-  try {
-    // Lấy tất cả phim
-    const movies = await Movie.find();
-    // Lấy tất cả danh mục thể loại
-    const categories = await Category.find();
-
-    // Kết hợp tên thể loại vào mỗi phim
-    const moviesWithCategories = movies.map(movie => {
-      // Tìm danh mục tương ứng với category_id của phim
-      const category = categories.find(cat => cat.category_id === movie.category_id);  // So sánh category_id
-      return {
-        ...movie.toObject(),
-        category: category ? category.name : 'Không có danh mục'
-      };
-    });
-
-    // Truyền thông tin phim và danh mục vào view
-    res.render("movies", { movies: moviesWithCategories, categories: categories });
-  } catch (err) {
-    console.error("Lỗi khi lấy danh sách phim:", err);
-    res.status(500).send("Lỗi khi lấy danh sách phim.");
-  }
-});
-
-
-// Route để thêm phim
-app.post("/movies-admin", upload.single("image"), async (req, res) => {
-  const { title, description, trailer_url, category_id, duration, release_date, coming_soon } = req.body;
-  const image_url = req.file ? req.file.path : null;
-
-  try {
-    const movie = new Movie({
-      title,
-      description,
-      trailer_url,
-      category_id,
-      duration,
-      release_date,
-      image_url,
-      coming_soon: coming_soon === 'on' // Nếu checkbox "coming_soon" được chọn
-    });
-
-    await movie.save();
-    res.redirect("/movies-admin");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Lỗi khi thêm phim");
-  }
-});
-
-// Route xóa phim theo movie_id
-app.get('/movies-admin/delete/:movie_id', async (req, res) => {
-  const movieId = req.params.movie_id;  // Lấy movie_id từ URL
-
-  try {
-    // Tìm và xóa phim theo movie_id
-    const movie = await Movie.findOneAndDelete({ movie_id: movieId });
-
-    if (!movie) {
-      return res.status(404).send('Phim không tồn tại');
-    }
-
-    // Sau khi xóa thành công, chuyển hướng về trang quản lý phim
-    res.redirect('/movies-admin');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Lỗi khi xóa phim");
-  }
-});
-
-
-
-// Route cập nhật phim
-app.post('/movies-admin/:id', upload.single('image'), async (req, res) => {
-  const movieId = req.params.id;
-  const { title, description, trailer_url, category_id, duration, release_date, coming_soon } = req.body;
-  const image_url = req.file ? req.file.path : null; 
-
-  try {
-    const movie = await Movie.findById(movieId);
-    if (!movie) {
-      return res.status(404).send('Phim không tồn tại');
-    }
-
-    movie.title = title;
-    movie.description = description;
-    movie.trailer_url = trailer_url;
-    movie.category_id = category_id;
-    movie.duration = duration;
-    movie.release_date = release_date;
-    movie.coming_soon = coming_soon === 'on';
-    movie.image_url = image_url || movie.image_url;
-
-    await movie.save();
-    res.redirect('/movies-admin');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Lỗi khi cập nhật phim");
-  }
-});
-
-
-
-
-
 // Các route khác của ứng dụng
 app.use("/auth", userRoutes);
 app.use("/food-drinks", foodDrinkRoutes);
@@ -207,3 +102,313 @@ const startServer = async () => {
 };
 
 startServer();
+
+app.get("/movies-admin", async (req, res) => {
+  try {
+    // Lấy tất cả phim
+    const movies = await Movie.find();
+    // Lấy tất cả danh mục thể loại
+    const categories = await Category.find();
+
+    // Kết hợp tên thể loại vào mỗi phim
+    const moviesWithCategories = movies.map((movie) => {
+      // Tìm danh mục tương ứng với category_id của phim
+      const category = categories.find(
+        (cat) => cat.category_id === movie.category_id
+      ); // So sánh category_id
+      return {
+        ...movie.toObject(),
+        category: category ? category.name : "Không có danh mục",
+      };
+    });
+
+    // Truyền thông tin phim và danh mục vào view
+    res.render("movies", {
+      movies: moviesWithCategories,
+      categories: categories,
+    });
+  } catch (err) {
+    console.error("Lỗi khi lấy danh sách phim:", err);
+    res.status(500).send("Lỗi khi lấy danh sách phim.");
+  }
+});
+
+// Route để thêm phim
+app.post("/movies-admin", upload.single("image"), async (req, res) => {
+  const {
+    title,
+    description,
+    trailer_url,
+    category_id,
+    duration,
+    release_date,
+    coming_soon,
+  } = req.body;
+  const image_url = req.file ? req.file.path : null;
+
+  try {
+    const movie = new Movie({
+      title,
+      description,
+      trailer_url,
+      category_id,
+      duration,
+      release_date,
+      image_url,
+      coming_soon: coming_soon === "on", // Nếu checkbox "coming_soon" được chọn
+    });
+
+    await movie.save();
+    res.redirect("/movies-admin");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Lỗi khi thêm phim");
+  }
+});
+
+// Route xóa phim theo movie_id
+app.get("/movies-admin/delete/:movie_id", async (req, res) => {
+  const movieId = req.params.movie_id; // Lấy movie_id từ URL
+
+  try {
+    // Tìm và xóa phim theo movie_id
+    const movie = await Movie.findOneAndDelete({ movie_id: movieId });
+
+    if (!movie) {
+      return res.status(404).send("Phim không tồn tại");
+    }
+
+    // Sau khi xóa thành công, chuyển hướng về trang quản lý phim
+    res.redirect("/movies-admin");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Lỗi khi xóa phim");
+  }
+});
+
+// Route cập nhật phim
+app.post("/movies-admin/:id", upload.single("image"), async (req, res) => {
+  const movieId = req.params.id;
+  const {
+    title,
+    description,
+    trailer_url,
+    category_id,
+    duration,
+    release_date,
+    coming_soon,
+  } = req.body;
+  const image_url = req.file ? req.file.path : null;
+
+  try {
+    const movie = await Movie.findById(movieId);
+    if (!movie) {
+      return res.status(404).send("Phim không tồn tại");
+    }
+
+    movie.title = title;
+    movie.description = description;
+    movie.trailer_url = trailer_url;
+    movie.category_id = category_id;
+    movie.duration = duration;
+    movie.release_date = release_date;
+    movie.coming_soon = coming_soon === "on";
+    movie.image_url = image_url || movie.image_url;
+
+    await movie.save();
+    res.redirect("/movies-admin");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Lỗi khi cập nhật phim");
+  }
+});
+
+// Route hiển thị danh sách đồ ăn/đồ uống
+app.get("/food-drinks-admin", async (req, res) => {
+  try {
+    const foodDrinks = await FoodDrink.find();
+    res.render("fooddrink", { foodDrinks: foodDrinks });
+  } catch (err) {
+    console.error("Lỗi khi lấy danh sách đồ ăn/đồ uống:", err);
+    res.status(500).send("Lỗi khi lấy danh sách đồ ăn/đồ uống.");
+  }
+});
+
+// Route để thêm đồ ăn/đồ uống
+app.post("/food-drinks-admin", upload.single("image"), async (req, res) => {
+  const { name, type, price } = req.body;
+  const image_url = req.file ? req.file.path : null;
+
+  try {
+    const foodDrink = new FoodDrink({
+      name,
+      type,
+      price,
+      image: image_url,
+    });
+
+    await foodDrink.save();
+    res.redirect("/food-drinks-admin");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Lỗi khi thêm đồ ăn/đồ uống");
+  }
+});
+
+// Route xóa đồ ăn/đồ uống theo food_drink_id
+app.get("/food-drinks-admin/delete/:food_drink_id", async (req, res) => {
+  const foodDrinkId = req.params.food_drink_id; // Lấy food_drink_id từ URL
+
+  try {
+    // Tìm và xóa đồ ăn/đồ uống theo food_drink_id
+    const foodDrink = await FoodDrink.findOneAndDelete({
+      food_drink_id: foodDrinkId,
+    });
+
+    if (!foodDrink) {
+      return res.status(404).send("Đồ ăn/đồ uống không tồn tại");
+    }
+
+    // Sau khi xóa thành công, chuyển hướng về trang quản lý đồ ăn/đồ uống
+    res.redirect("/food-drinks-admin");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Lỗi khi xóa đồ ăn/đồ uống");
+  }
+});
+
+app.post("/food-drinks-admin/:id", upload.single("image"), async (req, res) => {
+  const foodDrinkId = req.params.id; // Đây là `food_drink_id` (dạng số)
+
+  const { name, type, price } = req.body;
+  const priceNumber = price ? parseFloat(price) : null;
+  const image_url = req.file ? req.file.path : null;
+
+  try {
+    // Tìm đồ ăn/đồ uống theo `food_drink_id` thay vì `_id`
+    const foodDrink = await FoodDrink.findOne({ food_drink_id: foodDrinkId });
+
+    if (!foodDrink) {
+      return res.status(404).send("Đồ ăn/đồ uống không tồn tại");
+    }
+
+    // Cập nhật các trường nếu có dữ liệu mới
+    foodDrink.name = name || foodDrink.name;
+    foodDrink.type = type || foodDrink.type;
+    foodDrink.price = priceNumber || foodDrink.price;
+
+    if (image_url) {
+      foodDrink.image = image_url;
+    }
+
+    await foodDrink.save();
+    res.redirect("/food-drinks-admin"); // Chuyển hướng sau khi cập nhật thành công
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Lỗi khi cập nhật đồ ăn/đồ uống");
+  }
+});
+
+app.get("/showtime-admin", async (req, res) => {
+  try {
+    // Lấy tất cả suất chiếu và phim dưới dạng plain object
+    const showtimes = await Showtime.find().lean(); // Sử dụng .lean() để trả về plain object
+    const movies = await Movie.find().lean(); 
+
+    // Duyệt qua showtimes và bổ sung thông tin phim vào từng showtime
+    const showtimesWithMovies = showtimes.map((showtime) => {
+      // Tìm phim tương ứng với movie_id của showtime
+      const movie = movies.find((movie) => movie.movie_id === showtime.movie_id);
+
+      // Trả về showtime đã được bổ sung thông tin movie
+      return {
+        ...showtime,  // showtime đã là plain object, không cần .toObject()
+        movie: movie ? movie : null, // Nếu có phim, trả về thông tin phim, nếu không, trả về null
+        movie_id: showtime.movie_id  // Truyền movie_id vào để sử dụng trong EJS
+      };
+    });
+
+    // Render view và truyền dữ liệu showtimesWithMovies và movies
+    res.render("showtime", { showtimes: showtimesWithMovies, movies });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Server Error");
+  }
+});
+
+
+
+// Route xử lý tạo suất chiếu mới
+app.post("/showtime-admin/create", async (req, res) => {
+  try {
+    const { movie_id, start_time, room, ticket_price } = req.body;
+
+    // Tạo mới đối tượng Showtime mà không cần phải chỉ định showtime_id
+    const newShowtime = new Showtime({
+      movie_id,
+      start_time,
+      room,
+      ticket_price,
+    });
+
+    await newShowtime.save(); // Mongoose sẽ tự động cấp showtime_id
+
+    res.redirect("/showtime-admin"); // Sau khi lưu thành công, chuyển hướng về danh sách suất chiếu
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Lỗi khi tạo suất chiếu");
+  }
+});
+
+// Cập nhật suất chiếu theo showtime_id
+app.post("/showtime-admin/update/:id", async (req, res) => {
+  try {
+    const showtimeId = Number(req.params.id); // Chuyển id từ params sang kiểu số
+
+    // Kiểm tra nếu showtimeId không hợp lệ
+    if (isNaN(showtimeId)) {
+      return res.status(400).send("ID suất chiếu không hợp lệ");
+    }
+
+    const { movie_id, start_time, room, ticket_price } = req.body;
+
+    // Tìm kiếm và cập nhật theo showtime_id (không phải _id)
+    const updatedShowtime = await Showtime.findOneAndUpdate(
+      { showtime_id: showtimeId }, // Dùng showtime_id thay vì _id
+      { movie_id, start_time, room, ticket_price },
+      { new: true } // Trả về đối tượng đã được cập nhật
+    );
+
+    // Kiểm tra nếu không tìm thấy suất chiếu
+    if (!updatedShowtime) {
+      return res.status(404).send("Không tìm thấy suất chiếu");
+    }
+
+    // Redirect về danh sách suất chiếu
+    res.redirect("/showtime-admin");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Lỗi khi cập nhật suất chiếu");
+  }
+});
+
+
+// Xóa suất chiếu
+app.get("/showtime-admin/delete/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id); // Chuyển id sang kiểu number
+
+    const deletedShowtime = await Showtime.findOneAndDelete({
+      showtime_id: id,
+    });
+
+    if (!deletedShowtime) {
+      return res.status(404).send("Không tìm thấy suất chiếu để xóa");
+    }
+
+    res.redirect("/showtime-admin"); // Quay lại danh sách suất chiếu sau khi xóa
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Lỗi khi xóa suất chiếu");
+  }
+});
