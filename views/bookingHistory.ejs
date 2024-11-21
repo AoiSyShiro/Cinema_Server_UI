@@ -1,0 +1,54 @@
+<%- include('layout/header.ejs') %>
+
+<table class="min-w-full bg-white border border-gray-200 shadow-md">
+  <thead class="bg-gray-800 text-white">
+    <tr>
+      <th class="px-6 py-3 text-left">ID Đặt Vé</th>
+      <th class="px-6 py-3 text-left">Người Dùng</th>
+      <th class="px-6 py-3 text-left">Phim</th>
+      <th class="px-6 py-3 text-left">Thời Gian Chiếu</th>
+      <th class="px-6 py-3 text-left">Ghế</th>
+      <th class="px-6 py-3 text-left">Ngày Đặt</th>
+      <th class="px-6 py-3 text-left">Hình Thức Thanh Toán</th> <!-- Thêm cột này -->
+    </tr>
+  </thead>
+  <tbody>
+    <% bookings.forEach(booking => { %>
+      <tr class="hover:bg-gray-50 border-b">
+        <td class="px-6 py-4 text-sm text-gray-900 font-medium"><%= booking.book_tickets_id %></td>
+        
+        <!-- Hiển thị tên người dùng (dựa trên kết quả từ user_id) -->
+        <td class="px-6 py-4 text-sm text-gray-900">
+          <%= booking.user ? booking.user : 'N/A' %>
+        </td>
+        
+        <!-- Hiển thị tiêu đề phim (dựa trên movie_id) -->
+        <td class="px-6 py-4 text-sm text-gray-900">
+          <%= booking.movie ? booking.movie : 'N/A' %>
+        </td>
+        
+        <!-- Hiển thị thời gian chiếu (dựa trên showtime_id) -->
+        <td class="px-6 py-4 text-sm text-gray-900">
+          <%= booking.showtime ? booking.showtime : 'N/A' %>
+        </td>
+        
+        <!-- Hiển thị ghế đã đặt -->
+        <td class="px-6 py-4 text-sm text-gray-900">
+          <%= booking.seats && booking.seats.length > 0 ? booking.seats.join(', ') : 'N/A' %>
+        </td>
+        
+        <!-- Hiển thị ngày đặt vé -->
+        <td class="px-6 py-4 text-sm text-gray-900">
+          <%= new Date(booking.booking_time).toLocaleDateString() %>
+        </td>
+        
+        <!-- Hiển thị hình thức thanh toán -->
+        <td class="px-6 py-4 text-sm text-gray-900">
+          <%= booking.payment_method ? booking.payment_method : 'N/A' %>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include('layout/footer.ejs') %>

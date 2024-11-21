@@ -4,43 +4,44 @@ const Showtime = require("../models/Showtime");
 const Movie = require("../models/Movie"); // Thêm Movie model để lấy thông tin phim
 const FoodDrink = require("../models/FoodDrink"); // Đảm bảo FoodDrink model tồn tại nếu cần
 
-// Lấy lịch sử đặt vé
 const getBookingHistory = async (req, res) => {
   try {
+    // Lấy tất cả các vé đặt
     const bookings = await BookTickets.find();
 
-    const bookingsWithDetails = await Promise.all(
-      bookings.map(async (booking) => {
-        const user = await User.findOne(
-          { user_id: booking.user_id },
-          "name email"
-        );
-        const showtime = await Showtime.findOne(
-          { showtime_id: booking.showtime_id },
-          "start_time room ticket_price movie_id"
-        );
+    if (bookings.length === 0) {
+      return res.status(404).json({ message: "No bookings found" });
+    }
 
-        // Lấy thông tin phim từ movie_id trong showtime
-        const movie = await Movie.findOne({
-          movie_id: showtime ? showtime.movie_id : null,
-        });
+    // Duyệt qua từng vé và lấy thêm thông tin chi tiết từ User, Movie, Showtime
+    const bookingsWithDetails = await Promise.all(bookings.map(async (booking) => {
+      // Lấy thông tin người dùng từ model User dựa trên user_id
+      const user = await User.findOne({ user_id: booking.user_id });
+      
+      // Lấy thông tin phim từ model Movie dựa trên movie_id
+      const movie = await Movie.findOne({ movie_id: booking.movie_id });
 
-        return {
-          ...booking._doc,
-          user,
-          showtime,
-          movie: movie
-            ? { movie_id: movie.movie_id, title: movie.title }
-            : null, // Trả về thông tin phim
-        };
-      })
-    );
+      // Lấy thông tin lịch chiếu từ model Showtime dựa trên showtime_id
+      const showtime = await Showtime.findOne({ showtime_id: booking.showtime_id });
 
-    res.status(200).json(bookingsWithDetails);
-  } catch (error) {
-    res.status(500).json({ message: "Lỗi khi lấy lịch sử đặt vé", error });
+      // Trả về thông tin booking đã được bổ sung với các chi tiết
+      return {
+        ...booking.toObject(),
+        user: user ? user.username : 'N/A', // Tên người dùng
+        movie: movie ? movie.title : 'N/A', // Tiêu đề phim
+        showtime: showtime ? showtime.time : 'N/A', // Thời gian chiếu
+        payment_method: booking.payment_method || 'N/A' // Hình thức thanh toán
+      };
+    }));
+
+    // Render kết quả lên view EJS
+    res.render('bookingHistory', { bookings: bookingsWithDetails });
+  } catch (err) {
+    console.error("Error fetching booking history:", err);
+    res.status(500).send("Error fetching booking history.");
   }
 };
+
 
 // Tìm kiếm lịch sử đặt vé theo ID hoặc QR Code
 const searchBooking = async (req, res) => {

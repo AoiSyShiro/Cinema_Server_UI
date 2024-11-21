@@ -1,74 +1,91 @@
 const Promotion = require("../models/Promotion");
 
-// Hiển thị danh sách khuyến mãi
+// Lấy tất cả khuyến mãi và hiển thị chúng trên trang EJS
 const getAllPromotions = async (req, res) => {
   try {
-    const promotions = await Promotion.find().populate("showtime_id");
-    res.status(200).json(promotions);
+    const promotions = await Promotion.find();
+    res.render('promotion', { promotions });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Lỗi khi lấy danh sách khuyến mãi", error });
+    console.error("Error fetching promotions:", error);
+    res.status(500).send("Error fetching promotions");
   }
 };
 
-// Thêm mới một khuyến mãi
+// Tạo một khuyến mãi mới
 const createPromotion = async (req, res) => {
   try {
-    const { showtime_id, discount_percentage } = req.body;
-    const newPromotion = new Promotion({ showtime_id, discount_percentage });
+    const { discount_percentage, discount_code } = req.body;
+
+    // Kiểm tra trường bắt buộc
+    if (!discount_percentage) {
+      return res.status(400).json({
+        message: "Discount percentage is required",
+      });
+    }
+
+    const newPromotion = new Promotion({
+      discount_percentage,
+      discount_code, // Trường không bắt buộc
+    });
+
+    // Lưu khuyến mãi
     await newPromotion.save();
-    res
-      .status(201)
-      .json({ message: "Thêm khuyến mãi thành công", promotion: newPromotion });
+    res.redirect("/promotions"); // Chuyển hướng sau khi lưu thành công
   } catch (error) {
-    res.status(500).json({ message: "Lỗi khi thêm khuyến mãi", error });
+    console.error("Error creating promotion:", error);
+    res.status(500).json({
+      message: "Error creating promotion",
+      error: error.message,
+    });
   }
 };
 
-// Cập nhật một khuyến mãi
 const updatePromotion = async (req, res) => {
   try {
-    const { id } = req.params;
-    const updatedData = req.body;
-    const updatedPromotion = await Promotion.findByIdAndUpdate(
-      id,
-      updatedData,
-      { new: true }
-    );
+    const { promotion_id } = req.params; // Lấy promotion_id từ URL parameters
+    const { discount_code, discount_percentage } = req.body;
 
-    if (!updatedPromotion) {
-      return res
-        .status(404)
-        .json({ message: "Không tìm thấy khuyến mãi cần cập nhật" });
+    // Kiểm tra xem promotion_id có tồn tại trong cơ sở dữ liệu không
+    const promotion = await Promotion.findOne({ promotion_id });
+    if (!promotion) {
+      return res.status(404).json({ message: "Khuyến mãi không tìm thấy" });
     }
 
-    res
-      .status(200)
-      .json({
-        message: "Cập nhật khuyến mãi thành công",
-        promotion: updatedPromotion,
-      });
+    // Cập nhật các trường thông tin khuyến mãi
+    promotion.discount_code = discount_code || promotion.discount_code;
+    promotion.discount_percentage = discount_percentage || promotion.discount_percentage;
+
+    // Lưu lại thông tin đã cập nhật
+    await promotion.save();
+
+    res.redirect("/promotions"); // Sau khi cập nhật xong, chuyển hướng về danh sách khuyến mãi
   } catch (error) {
-    res.status(500).json({ message: "Lỗi khi cập nhật khuyến mãi", error });
+    console.error("Error updating promotion:", error);
+    res.status(500).json({
+      message: "Lỗi khi cập nhật khuyến mãi",
+      error: error.message,
+    });
   }
 };
 
-// Xóa một khuyến mãi
+
+
+// Xóa khuyến mãi qua form
 const deletePromotion = async (req, res) => {
   try {
-    const { id } = req.params;
-    const deletedPromotion = await Promotion.findByIdAndDelete(id);
+    const { promotion_id } = req.params; // Lấy promotion_id từ URL parameters
+    const deletedPromotion = await Promotion.findOneAndDelete({ promotion_id });
 
     if (!deletedPromotion) {
-      return res
-        .status(404)
-        .json({ message: "Không tìm thấy khuyến mãi cần xóa" });
+      return res.status(404).json({ message: "Promotion not found" });
     }
 
-    res.status(200).json({ message: "Xóa khuyến mãi thành công" });
+    res.redirect("/promotions"); // Chuyển hướng sau khi xóa thành công
   } catch (error) {
-    res.status(500).json({ message: "Lỗi khi xóa khuyến mãi", error });
+    res.status(500).json({
+      message: "Error deleting promotion",
+      error: error.message,
+    });
   }
 };
 

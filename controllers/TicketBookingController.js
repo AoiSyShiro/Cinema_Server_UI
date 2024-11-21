@@ -102,4 +102,5 @@ const cancelTicket = async (req, res) => {
   }
 };
 
-module.exports = { bookTicket, cancelTicket };
+
+module.exports = { bookTicket, cancelTicket, };

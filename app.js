@@ -18,6 +18,9 @@ const Movie = require("./models/Movie");
 const Category = require("./models/Category");
 const FoodDrink = require("./models/FoodDrink");
 const Showtime = require("./models/Showtime");
+const Promotion = require('./models/Promotion'); 
+
+
 require("dotenv").config();
 
 // Kiểm tra xem biến môi trường đã được nạp đúng chưa
@@ -32,7 +35,6 @@ cloudinary.config({
   api_secret: process.env.API_SECRET,
 });
 
-// Configure multer with Cloudinary
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -40,6 +42,7 @@ const storage = new CloudinaryStorage({
     allowed_formats: ["jpg", "png", "jpeg"],
   },
 });
+
 
 const upload = multer({ storage: storage });
 
@@ -85,11 +88,13 @@ app.use("/showtimes", showtimeRouter);
 app.use("/tickets", ticketBookingRouter);
 app.use("/promotions", promotionRoutes);
 app.use("/reviews", reviewRoutes);
-app.use("/bookings", bookingRoutes);
+app.use("/booking-history", bookingRoutes);
 app.use("/payments", paymentRouter);
 
 const PORT = process.env.PORT || 5000;
 const connectToDatabase = require("./config/db.js");
+
+
 
 const startServer = async () => {
   await connectToDatabase();
@@ -409,5 +414,96 @@ app.get("/showtime-admin/delete/:id", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send("Lỗi khi xóa suất chiếu");
+  }
+});
+
+
+// Lấy tất cả khuyến mãi
+app.get('/promotions/:id', (req, res) => {
+  const promotionId = req.params.id;
+  Promotion.findById(promotionId, (err, promotion) => {
+    if (err) {
+      return res.status(500).send('Error retrieving promotion');
+    }
+    if (!promotion) {
+      return res.status(404).send('Promotion not found');
+    }
+    res.render('promotionDetail', { promotion });
+  });
+});
+
+
+// Tạo một khuyến mãi mới
+app.post("/promotions", async (req, res) => {
+  try {
+    const { discount_percentage, discount_code } = req.body;
+
+    if (!discount_percentage) {
+      return res.status(400).json({
+        message: "Discount percentage is required",
+      });
+    }
+
+    const newPromotion = new Promotion({
+      discount_percentage,
+      discount_code, // Trường không bắt buộc
+    });
+
+    // Lưu khuyến mãi
+    await newPromotion.save();
+    res.redirect("/promotions"); // Chuyển hướng sau khi lưu thành công
+  } catch (error) {
+    console.error("Error creating promotion:", error);
+    res.status(500).json({
+      message: "Error creating promotion",
+      error: error.message,
+    });
+  }
+});
+
+// Cập nhật khuyến mãi
+app.post("/promotions/:promotion_id", async (req, res) => {
+  try {
+    const { promotion_id } = req.params;
+    const { discount_code, discount_percentage } = req.body;
+
+    const promotion = await Promotion.findOne({ promotion_id });
+    if (!promotion) {
+      return res.status(404).json({ message: "Khuyến mãi không tìm thấy" });
+    }
+
+    promotion.discount_code = discount_code || promotion.discount_code;
+    promotion.discount_percentage = discount_percentage || promotion.discount_percentage;
+
+    await promotion.save();
+
+    res.redirect("/promotions");
+  } catch (error) {
+    console.error("Error updating promotion:", error);
+    res.status(500).json({
+      message: "Lỗi khi cập nhật khuyến mãi",
+      error: error.message,
+    });
+  }
+});
+
+// Xóa khuyến mãi
+app.delete("/promotions/:promotion_id", async (req, res) => {
+  try {
+    const { promotion_id } = req.params;
+    const deletedPromotion = await Promotion.findOneAndDelete({ promotion_id });
+
+    if (!deletedPromotion) {
+      return res.status(404).json({ message: "Promotion not found" });
+    }
+
+    // Sau khi xóa thành công, chuyển hướng về trang khuyến mãi
+    res.redirect("/promotions");
+  } catch (error) {
+    console.error("Error deleting promotion:", error);
+    res.status(500).json({
+      message: "Error deleting promotion",
+      error: error.message,
+    });
   }
 });

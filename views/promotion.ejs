@@ -1,0 +1,178 @@
+<%- include('layout/header.ejs') %>
+
+  <div class="overflow-x-auto bg-white shadow-lg">
+    <table class="min-w-full bg-white border border-gray-200 shadow-md">
+      <thead class="bg-gray-800 text-white">
+        <tr class="text-sm uppercase font-semibold">
+          <th class="px-6 py-3 text-left">ID</th>
+          <th class="px-6 py-3 text-left">Mã Giảm Giá</th>
+          <th class="px-6 py-3 text-left">Tỷ Lệ Giảm Giá</th>
+          <th class="px-6 py-3 text-left">Ngày Tạo</th>
+          <th class="px-6 py-3 text-left">
+            <!-- Nút "Thêm Mã Giảm Giá" -->
+            <button
+              class="bg-black text-white py-1.5 px-3 rounded-full shadow-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black transition-all duration-200 ease-in-out text-xs flex items-center"
+              onclick="openAddModal()">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m7-7H5" />
+              </svg>
+              <span>Thêm Mã Giảm Giá</span>
+            </button>
+          </th>
+        </tr>
+      </thead>
+      <tbody class="text-gray-700">
+        <% promotions.forEach(promotion=> { %>
+          <tr class="hover:bg-gray-50 border-b">
+            <td class="px-6 py-4 text-sm text-gray-900 font-medium">
+              <%= promotion.promotion_id %>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-900">
+              <%= promotion.discount_code || "N/A" %>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-900">
+              <%= promotion.discount_percentage %>%
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-900">
+              <%= new Date(promotion.createdAt).toLocaleDateString() %>
+            </td>
+            <td class="px-6 py-4 text-sm font-medium text-gray-600">
+              <div class="flex space-x-4">
+                <!-- Chỉnh sửa - Icon -->
+                <button class="text-indigo-600 hover:text-indigo-900"
+                  onclick="openEditModal('<%= promotion.promotion_id %>', '<%= promotion.discount_code %>', <%= promotion.discount_percentage %>)">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                  </svg>
+                </button>
+
+                <!-- Xóa - Icon -->
+                <button class="text-red-600 hover:text-red-800" onclick="deletePromotion(<%= promotion.promotion_id %>)"
+                  title="Delete">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal thêm và chỉnh sửa mã giảm giá -->
+  <div id="promotionModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white p-6 w-1/3 transition-all transform scale-95 opacity-0" id="promotionModalContent">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800" id="modalTitle">
+        Thêm Mã Giảm Giá
+      </h2>
+      <form id="promotionForm" method="POST" action="">
+        <div class="mb-4">
+          <label for="discount_code" class="block text-sm font-medium text-gray-700">Mã Giảm Giá</label>
+          <input type="text" id="discount_code" name="discount_code"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <div class="mb-4">
+          <label for="discount_percentage" class="block text-sm font-medium text-gray-700">Tỷ Lệ Giảm Giá (%)</label>
+          <input type="number" id="discount_percentage" name="discount_percentage"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            required />
+        </div>
+
+        <div class="flex justify-end space-x-2">
+          <button type="button"
+            class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors duration-200"
+            onclick="closeModal()">
+            Hủy
+          </button>
+          <button type="submit"
+            class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200">
+            Lưu
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Mở modal để chỉnh sửa thông tin khuyến mãi
+    function openEditModal(id, discount_code, discount_percentage) {
+      document.getElementById("promotionModal").classList.remove("hidden");
+      document
+        .getElementById("promotionModalContent")
+        .classList.remove("scale-95", "opacity-0");
+      document
+        .getElementById("promotionModalContent")
+        .classList.add("scale-100", "opacity-100");
+
+      document.getElementById("modalTitle").textContent = "Chỉnh sửa Mã Giảm Giá";
+      document.getElementById("promotionForm").action = "/promotions/" + id;
+
+      document.getElementById("discount_code").value = discount_code;
+      document.getElementById("discount_percentage").value = discount_percentage;
+    }
+
+    // Modal thêm mã giảm giá
+    function openAddModal() {
+      document.getElementById("promotionModal").classList.remove("hidden");
+      document
+        .getElementById("promotionModalContent")
+        .classList.remove("scale-95", "opacity-0");
+      document
+        .getElementById("promotionModalContent")
+        .classList.add("scale-100", "opacity-100");
+
+      document.getElementById("modalTitle").textContent = "Thêm Mã Giảm Giá";
+      document.getElementById("promotionForm").action = "/promotions/"; // Thêm mã giảm giá
+
+      document.getElementById("promotionForm").reset();
+    }
+
+    // Đóng modal
+    function closeModal() {
+      document.getElementById("promotionModal").classList.add("hidden");
+      document
+        .getElementById("promotionModalContent")
+        .classList.remove("scale-100", "opacity-100");
+      document
+        .getElementById("promotionModalContent")
+        .classList.add("scale-95", "opacity-0");
+    }
+
+// Xóa mã giảm giá
+function deletePromotion(promotionId) {
+  // Cảnh báo người dùng trước khi xóa
+  if (confirm("Bạn có chắc muốn xóa mã giảm giá này?")) {
+    // Gửi yêu cầu DELETE đến server
+    fetch(`/promotions/${promotionId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (response.ok) {
+          // Nếu xóa thành công, reload lại trang
+          location.reload(); // Hoặc bạn có thể cập nhật danh sách mà không tải lại trang
+        } else {
+          location.reload()
+          // nó chạy là được
+          //alert("Có lỗi xảy ra khi xóa mã giảm giá.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("Có lỗi xảy ra khi xóa mã giảm giá.");
+      });
+  }
+}
+
+  </script>
+
+  <%- include('layout/footer.ejs') %>

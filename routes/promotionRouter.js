@@ -1,17 +1,17 @@
-const express = require("express");
-const {
-  getAllPromotions,
-  createPromotion,
-  updatePromotion,
-  deletePromotion,
-} = require("../controllers/PromotionController");
-
+const express = require('express');
 const router = express.Router();
+const { getAllPromotions, createPromotion, updatePromotion, deletePromotion } = require('../controllers/PromotionController');
 
-// Định nghĩa các route cho khuyến mãi
-router.get("/", getAllPromotions); // Hiển thị danh sách khuyến mãi
-router.post("/", createPromotion); // Thêm mới khuyến mãi
-router.put("/:id", updatePromotion); // Cập nhật khuyến mãi
-router.delete("/:id", deletePromotion); // Xóa khuyến mãi
+// Get all promotions
+router.get('/', getAllPromotions);
+
+// Create a new promotion
+router.post('/', createPromotion);
+
+// Update an existing promotion
+router.put('/:promotion_id', updatePromotion);
+
+// DELETE route for deleting promotion
+router.delete('/:promotion_id', deletePromotion);  // Sửa lại DELETE để nhận promotion_id từ tham số URL
 
 module.exports = router;
