@@ -1,6 +1,6 @@
 const express = require("express");
 const path = require("path");
-const cloudinary = require("cloudinary").v2; // Khai báo cloudinary chỉ một lần
+const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const userRoutes = require("./routes/userRoutes");
@@ -15,10 +15,10 @@ const reviewRoutes = require("./routes/reviewRouter");
 const bookingRoutes = require("./routes/bookingRouter");
 const paymentRouter = require("./routes/paymentRouter");
 const Movie = require("./models/Movie");
-const Category = require("./models/Category"); // Đảm bảo bạn có mô hình Category
+const Category = require("./models/Category");
 const FoodDrink = require("./models/FoodDrink");
 const Showtime = require("./models/Showtime");
-require("dotenv").config(); // Đảm bảo dotenv.config() được gọi đầu tiên
+require("dotenv").config();
 
 // Kiểm tra xem biến môi trường đã được nạp đúng chưa
 console.log("Cloud Name: ", process.env.CLOUD_NAME);
@@ -313,18 +313,20 @@ app.get("/showtime-admin", async (req, res) => {
   try {
     // Lấy tất cả suất chiếu và phim dưới dạng plain object
     const showtimes = await Showtime.find().lean(); // Sử dụng .lean() để trả về plain object
-    const movies = await Movie.find().lean(); 
+    const movies = await Movie.find().lean();
 
     // Duyệt qua showtimes và bổ sung thông tin phim vào từng showtime
     const showtimesWithMovies = showtimes.map((showtime) => {
       // Tìm phim tương ứng với movie_id của showtime
-      const movie = movies.find((movie) => movie.movie_id === showtime.movie_id);
+      const movie = movies.find(
+        (movie) => movie.movie_id === showtime.movie_id
+      );
 
       // Trả về showtime đã được bổ sung thông tin movie
       return {
-        ...showtime,  // showtime đã là plain object, không cần .toObject()
-        movie: movie ? movie : null, // Nếu có phim, trả về thông tin phim, nếu không, trả về null
-        movie_id: showtime.movie_id  // Truyền movie_id vào để sử dụng trong EJS
+        ...showtime, 
+        movie: movie ? movie : null, 
+        movie_id: showtime.movie_id, 
       };
     });
 
@@ -335,8 +337,6 @@ app.get("/showtime-admin", async (req, res) => {
     res.status(500).send("Server Error");
   }
 });
-
-
 
 // Route xử lý tạo suất chiếu mới
 app.post("/showtime-admin/create", async (req, res) => {
@@ -351,7 +351,7 @@ app.post("/showtime-admin/create", async (req, res) => {
       ticket_price,
     });
 
-    await newShowtime.save(); // Mongoose sẽ tự động cấp showtime_id
+    await newShowtime.save(); 
 
     res.redirect("/showtime-admin"); // Sau khi lưu thành công, chuyển hướng về danh sách suất chiếu
   } catch (error) {
@@ -363,7 +363,7 @@ app.post("/showtime-admin/create", async (req, res) => {
 // Cập nhật suất chiếu theo showtime_id
 app.post("/showtime-admin/update/:id", async (req, res) => {
   try {
-    const showtimeId = Number(req.params.id); // Chuyển id từ params sang kiểu số
+    const showtimeId = Number(req.params.id); 
 
     // Kiểm tra nếu showtimeId không hợp lệ
     if (isNaN(showtimeId)) {
@@ -376,7 +376,7 @@ app.post("/showtime-admin/update/:id", async (req, res) => {
     const updatedShowtime = await Showtime.findOneAndUpdate(
       { showtime_id: showtimeId }, // Dùng showtime_id thay vì _id
       { movie_id, start_time, room, ticket_price },
-      { new: true } // Trả về đối tượng đã được cập nhật
+      { new: true } 
     );
 
     // Kiểm tra nếu không tìm thấy suất chiếu
@@ -392,11 +392,10 @@ app.post("/showtime-admin/update/:id", async (req, res) => {
   }
 });
 
-
 // Xóa suất chiếu
 app.get("/showtime-admin/delete/:id", async (req, res) => {
   try {
-    const id = Number(req.params.id); // Chuyển id sang kiểu number
+    const id = Number(req.params.id); 
 
     const deletedShowtime = await Showtime.findOneAndDelete({
       showtime_id: id,
