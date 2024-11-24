@@ -4,6 +4,7 @@ const {
   createShowtime,
   updateShowtime,
   deleteShowtime,
+  getShowtimesByMovieId,
 } = require("../controllers/ShowtimeController");
 
 const router = express.Router();
@@ -19,5 +20,7 @@ router.put("/:id", updateShowtime);
 
 // Route: Xóa một suất chiếu theo ID
 router.delete("/:id", deleteShowtime);
+
+router.get("/:id", getShowtimesByMovieId);
 
 module.exports = router;

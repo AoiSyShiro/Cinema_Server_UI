@@ -1,8 +1,9 @@
 const BookTickets = require("../models/BookTickets");
 const User = require("../models/User");
-const Showtime = require("../models/Showtime");
+const ShowTime = require("../models/Showtime");
 const Movie = require("../models/Movie"); // Thêm Movie model để lấy thông tin phim
 const FoodDrink = require("../models/FoodDrink"); // Đảm bảo FoodDrink model tồn tại nếu cần
+const { bookTicket } = require("./TicketBookingController");
 
 const getBookingHistory = async (req, res) => {
   try {
@@ -22,14 +23,14 @@ const getBookingHistory = async (req, res) => {
       const movie = await Movie.findOne({ movie_id: booking.movie_id });
 
       // Lấy thông tin lịch chiếu từ model Showtime dựa trên showtime_id
-      const showtime = await Showtime.findOne({ showtime_id: booking.showtime_id });
+      const showtime = await ShowTime.findOne({ showtime_id: booking.showtime_id });
 
       // Trả về thông tin booking đã được bổ sung với các chi tiết
       return {
         ...booking.toObject(),
         user: user ? user.username : 'N/A', // Tên người dùng
         movie: movie ? movie.title : 'N/A', // Tiêu đề phim
-        showtime: showtime ? showtime.time : 'N/A', // Thời gian chiếu
+        booking_time: booking.booking_time || 'N/A', // Sử dụng booking_time từ BookTickets.js
         payment_method: booking.payment_method || 'N/A' // Hình thức thanh toán
       };
     }));
@@ -41,6 +42,7 @@ const getBookingHistory = async (req, res) => {
     res.status(500).send("Error fetching booking history.");
   }
 };
+
 
 
 // Tìm kiếm lịch sử đặt vé theo ID hoặc QR Code
@@ -107,13 +109,13 @@ const getUserTicketHistory = async (req, res) => {
         const user = await User.findOne({ user_id: ticket.user_id });
 
         // Lấy thông tin suất chiếu từ bảng Showtime
-        const showtime = await Showtime.findOne({
-          showtime_id: ticket.showtime_id,
+        const showtime = await ShowTime.findOne({
+          showtime: ticket.showtime_id,
         });
 
         // Lấy thông tin phim từ bảng Movie
         const movie = await Movie.findOne({
-          movie_id: showtime ? showtime.movie_id : null,
+          movie: showtime ? showtime.movie_id : null,
         });
 
         // Lấy thông tin các món ăn/đồ uống đã chọn
@@ -135,7 +137,7 @@ const getUserTicketHistory = async (req, res) => {
           showtime: {
             start_time: showtime ? showtime.start_time : "N/A",
             room: showtime ? showtime.room : "N/A",
-            ticket_price: showtime ? showtime.ticket_price : "N/A",
+            price: showtime ? showtime.price : "N/A",
           },
           movie: {
             title: movie ? movie.title : "N/A", // Tên phim
@@ -144,6 +146,7 @@ const getUserTicketHistory = async (req, res) => {
             image_url: movie ? movie.image_url : "N/A", // Hình ảnh phim
           },
           food_drinks: foodDrinks, // Thông tin món ăn/đồ uống
+          price: ticket.price, // Thêm thông tin giá vé từ ticket
         };
       })
     );
@@ -154,5 +157,6 @@ const getUserTicketHistory = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi lấy lịch sử đặt vé", error });
   }
 };
+
 
 module.exports = { getBookingHistory, getUserTicketHistory, searchBooking };

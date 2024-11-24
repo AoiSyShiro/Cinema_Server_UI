@@ -1,4 +1,5 @@
 const Showtime = require("../models/Showtime");
+const Movie = require("../models/Movie");
 
 // Lấy danh sách tất cả suất chiếu
 const getAllShowtimes = async (req, res) => {
@@ -60,4 +61,39 @@ const deleteShowtime = async (req, res) => {
   }
 };
 
-module.exports = { getAllShowtimes, createShowtime, updateShowtime, deleteShowtime };
+const getShowtimesByMovieId = async (req, res) => {
+  const movieId = Number(req.params.id);  // Chuyển params id thành Number
+  
+  console.log(`Nhận request để tìm suất chiếu cho phim với ID: ${movieId}`);
+
+  // Kiểm tra nếu movieId không phải là số hợp lệ
+  if (isNaN(movieId)) {
+    console.log(`Lỗi: movieId không hợp lệ: ${req.params.id}`);
+    return res.status(400).send("Oops, có chút vấn đề với mã phim. Hãy thử lại nhé!");  // Thông báo thân thiện
+  }
+
+  try {
+    console.log(`Đang tìm suất chiếu cho phim ID: ${movieId}`);
+    
+    // Truy vấn suất chiếu dựa trên movie_id
+    const showtimes = await Showtime.find({ movie_id: movieId });
+
+    // Kiểm tra nếu có suất chiếu
+    if (showtimes.length > 0) {
+      console.log(`Tìm thấy ${showtimes.length} suất chiếu cho phim ID: ${movieId}`);
+      // Trả về suất chiếu nếu có
+      return res.json(showtimes);  
+    } else {
+      console.log(`Không tìm thấy suất chiếu cho phim ID: ${movieId}`);
+      // Nếu không có suất chiếu cho phim này
+      return res.status(404).send("Rất tiếc, hiện tại không có suất chiếu cho bộ phim này. Bạn có thể thử phim khác nhé!");
+    }
+  } catch (error) {
+    console.error("Lỗi khi truy vấn suất chiếu:", error);
+    console.log(`Lỗi xảy ra khi truy vấn suất chiếu cho phim ID: ${movieId}`);
+    return res.status(500).send("Chúng tôi đang gặp chút sự cố kỹ thuật. Vui lòng thử lại sau!");
+  }
+};
+
+
+module.exports = { getAllShowtimes, createShowtime, updateShowtime, deleteShowtime, getShowtimesByMovieId };
