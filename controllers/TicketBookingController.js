@@ -8,7 +8,7 @@ const FoodDrink = require("../models/FoodDrink");
 // Đặt vé xem phim
 const bookTicket = async (req, res) => {
   try {
-    const { user_id, showtime_id, seats, food_drinks, payment_method } = req.body;
+    const { user_id, showtime_id, seats, food_drinks, payment_method, price } = req.body;
 
     // Kiểm tra thông tin người dùng
     const user = await User.findOne({ user_id });
@@ -21,9 +21,6 @@ const bookTicket = async (req, res) => {
     if (!showtime) {
       return res.status(404).json({ message: "Không tìm thấy suất chiếu" });
     }
-
-    // Lấy movie_id từ showtime
-    const movie_id = showtime.movie_id;
 
     // Kiểm tra xem ghế đã được đặt chưa
     const alreadyReserved = seats.some(seat => showtime.reserved_seats.includes(seat));
@@ -45,19 +42,23 @@ const bookTicket = async (req, res) => {
       }
     }
 
+    // Tính giá vé
+    let totalPrice = price; // Trường hợp này giả sử giá đã được truyền lên từ client
+
     // Tạo vé mới với thông tin các món ăn/đồ uống đã chọn và số lượng
     const newTicket = new BookTickets({
       user_id,
       showtime_id,
-      movie_id,  // Lưu movie_id từ showtime
+      movie_id: showtime.movie_id,  // Lấy movie_id từ showtime
       payment_method,
       qr_code: generateQRCode(),  // Kiểm tra hàm này
-      flag: 1,
+      flag: 1,  // Đặt mặc định là đã thanh toán thành công
       seats,  // Lưu thông tin ghế đã chọn
       food_drinks: food_drinks.map(item => ({
-        food_drink_id: item.food_drink_id, 
+        food_drink_id: item.food_drink_id,
         quantity: item.quantity
-      }))  // Lưu food_drink_id và quantity
+      })),
+      price: totalPrice, // Lưu giá vé
     });
 
     const savedTicket = await newTicket.save();
@@ -67,6 +68,7 @@ const bookTicket = async (req, res) => {
       ticket: savedTicket,
       seats,
       food_drinks: selectedFoodDrinks,  // Trả về thông tin các món ăn/đồ uống và số lượng
+      price: totalPrice,  // Trả về giá vé đã tính
     });
   } catch (error) {
     console.error("Lỗi khi đặt vé:", error); // Log chi tiết lỗi
