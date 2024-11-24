@@ -2,7 +2,7 @@ const BookTickets = require("../models/BookTickets");
 const User = require("../models/User");
 const ShowTime = require("../models/Showtime");
 const Movie = require("../models/Movie"); // Thêm Movie model để lấy thông tin phim
-const FoodDrink = require("../models/FoodDrink"); // Đảm bảo FoodDrink model tồn tại nếu cần
+const FoodDrinkModel = require("../models/FoodDrink"); // Đảm bảo FoodDrink model tồn tại nếu cần
 const { bookTicket } = require("./TicketBookingController");
 
 const getBookingHistory = async (req, res) => {
@@ -25,13 +25,30 @@ const getBookingHistory = async (req, res) => {
       // Lấy thông tin lịch chiếu từ model Showtime dựa trên showtime_id
       const showtime = await ShowTime.findOne({ showtime_id: booking.showtime_id });
 
+      // Lấy thông tin đồ ăn/thức uống từ model FoodDrink dựa trên food_drink_id
+      const foodDetails = await Promise.all(booking.food_drinks.map(async (foodItem) => {
+        const food = await FoodDrinkModel.findOne({ food_drink_id: foodItem.food_drink_id });
+        return {
+          name: food ? food.name : 'Không Có Đặt Food',
+          price: food ? food.price : 0,
+          quantity: foodItem.quantity || 0,
+          total: food ? (food.price * (foodItem.quantity || 0)) : 0
+        };
+      }));
+
+      // Tính tổng giá trị đồ ăn/thức uống
+      const foodTotal = foodDetails.reduce((acc, item) => acc + item.total, 0);
+
       // Trả về thông tin booking đã được bổ sung với các chi tiết
       return {
         ...booking.toObject(),
         user: user ? user.username : 'N/A', // Tên người dùng
         movie: movie ? movie.title : 'N/A', // Tiêu đề phim
         booking_time: booking.booking_time || 'N/A', // Sử dụng booking_time từ BookTickets.js
-        payment_method: booking.payment_method || 'N/A' // Hình thức thanh toán
+        payment_method: booking.payment_method || 'N/A', // Hình thức thanh toán
+        price: booking.price || 0, // Giá tiền
+        food_drinks: foodDetails, // Danh sách món ăn/thức uống với tên và số lượng
+        food_total: foodTotal // Tổng giá trị đồ ăn/thức uống
       };
     }));
 
@@ -42,8 +59,6 @@ const getBookingHistory = async (req, res) => {
     res.status(500).send("Error fetching booking history.");
   }
 };
-
-
 
 // Tìm kiếm lịch sử đặt vé theo ID hoặc QR Code
 const searchBooking = async (req, res) => {
