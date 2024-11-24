@@ -125,18 +125,18 @@ const getUserTicketHistory = async (req, res) => {
 
         // Lấy thông tin suất chiếu từ bảng Showtime
         const showtime = await ShowTime.findOne({
-          showtime: ticket.showtime_id,
+          showtime_id: ticket.showtime_id,  // Cập nhật với showtime_id
         });
 
         // Lấy thông tin phim từ bảng Movie
         const movie = await Movie.findOne({
-          movie: showtime ? showtime.movie_id : null,
+          movie_id: showtime ? showtime.movie_id : null, // Cập nhật với movie_id
         });
 
         // Lấy thông tin các món ăn/đồ uống đã chọn
         let foodDrinks = [];
         if (ticket.food_drinks && ticket.food_drinks.length > 0) {
-          foodDrinks = await FoodDrink.find({
+          foodDrinks = await FoodDrinkModel.find({
             food_drink_id: {
               $in: ticket.food_drinks.map((fd) => fd.food_drink_id),
             },
@@ -152,7 +152,7 @@ const getUserTicketHistory = async (req, res) => {
           showtime: {
             start_time: showtime ? showtime.start_time : "N/A",
             room: showtime ? showtime.room : "N/A",
-            price: showtime ? showtime.price : "N/A",
+            price: showtime ? showtime.ticket_price : "N/A", // Sử dụng ticket_price từ Showtime
           },
           movie: {
             title: movie ? movie.title : "N/A", // Tên phim
@@ -172,6 +172,7 @@ const getUserTicketHistory = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi lấy lịch sử đặt vé", error });
   }
 };
+
 
 
 module.exports = { getBookingHistory, getUserTicketHistory, searchBooking };
