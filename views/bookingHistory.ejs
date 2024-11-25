@@ -28,7 +28,7 @@
           <% booking.food_drinks.forEach(food => { %>
             <div><%= food.name %> (x<%= food.quantity %>) - <%= food.total.toLocaleString() %> VND</div>
           <% }) %>
-          <% if (booking.food_drinks.length === 0) { %> N/A <% } %>
+          <% if (booking.food_drinks.length === 0) { %> Không Có Thêm Đồ Ăn <% } %>
         </td>
         <td class="px-6 py-4 text-sm text-gray-900"><%= booking.payment_method ? booking.payment_method : 'N/A' %></td>
       </tr>
