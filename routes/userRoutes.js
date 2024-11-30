@@ -23,8 +23,8 @@ router.delete("/exit", logout);
 // Thay đổi mật khẩu
 router.post("/change-password", changePassword);
 
-// Cập nhật thông tin người dùng
-router.put("/update-info", updateUserInfo);
+// Định nghĩa route sử dụng user_id từ URL
+router.put('/update/:user_id', updateUserInfo);
 
 // Xóa người dùng
 router.delete("/delete", deleteUser);

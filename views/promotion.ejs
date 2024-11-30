@@ -65,42 +65,54 @@
     </table>
   </div>
 
-  <!-- Modal thêm và chỉnh sửa mã giảm giá -->
-  <div id="promotionModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
-    <div class="bg-white p-6 w-1/3 transition-all transform scale-95 opacity-0" id="promotionModalContent">
-      <h2 class="text-xl font-semibold mb-4 text-gray-800" id="modalTitle">
-        Thêm Mã Giảm Giá
-      </h2>
-      <form id="promotionForm" method="POST" action="">
-        <div class="mb-4">
-          <label for="discount_code" class="block text-sm font-medium text-gray-700">Mã Giảm Giá</label>
-          <input type="text" id="discount_code" name="discount_code"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-        </div>
+<!-- Modal thêm và chỉnh sửa mã giảm giá -->
+<div id="promotionModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white p-6 w-1/3 transition-all transform scale-95 opacity-0" id="promotionModalContent">
+    <h2 class="text-xl font-semibold mb-4 text-gray-800" id="modalTitle">
+      Thêm Mã Giảm Giá
+    </h2>
+    <form id="promotionForm" method="POST" action="" onsubmit="return validateDiscountCode()">
+      <div class="mb-4">
+        <label for="discount_code" class="block text-sm font-medium text-gray-700">Mã Giảm Giá</label>
+        <input type="text" id="discount_code" name="discount_code"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+          minlength="6" required />
+        <span id="discount_code_error" class="text-red-500 text-sm hidden">Mã giảm giá phải có ít nhất 6 ký tự.</span>
+      </div>
 
-        <div class="mb-4">
-          <label for="discount_percentage" class="block text-sm font-medium text-gray-700">Tỷ Lệ Giảm Giá (%)</label>
-          <input type="number" id="discount_percentage" name="discount_percentage"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            required />
-        </div>
+      <div class="mb-4">
+        <label for="discount_percentage" class="block text-sm font-medium text-gray-700">Tỷ Lệ Giảm Giá (%)</label>
+        <input type="number" id="discount_percentage" name="discount_percentage"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          required />
+      </div>
 
-        <div class="flex justify-end space-x-2">
-          <button type="button"
-            class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors duration-200"
-            onclick="closeModal()">
-            Hủy
-          </button>
-          <button type="submit"
-            class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200">
-            Lưu
-          </button>
-        </div>
-      </form>
-    </div>
+      <div class="flex justify-end space-x-2">
+        <button type="button"
+          class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors duration-200"
+          onclick="closeModal()">
+          Hủy
+        </button>
+        <button type="submit"
+          class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200">
+          Lưu
+        </button>
+      </div>
+    </form>
   </div>
+</div>
 
-  <script>
+<script>
+  function validateDiscountCode() {
+    const discountCode = document.getElementById('discount_code').value;
+    const errorMessage = document.getElementById('discount_code_error');
+    if (discountCode.length < 6) {
+      errorMessage.classList.remove('hidden');
+      return false;  // Prevent form submission if the code is too short
+    }
+    errorMessage.classList.add('hidden');
+    return true;  // Allow form submission
+  }
     // Mở modal để chỉnh sửa thông tin khuyến mãi
     function openEditModal(id, discount_code, discount_percentage) {
       document.getElementById("promotionModal").classList.remove("hidden");

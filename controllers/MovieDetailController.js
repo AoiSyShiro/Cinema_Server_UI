@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Movie = require("../models/Movie");
 const User = require("../models/User");
+
 const getMovieDetails = async (req, res) => {
   console.log("Received request for movie_id:", req.params.movie_id);
   try {

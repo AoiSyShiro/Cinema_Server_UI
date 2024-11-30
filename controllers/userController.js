@@ -190,60 +190,64 @@ const changePassword = async (req, res) => {
     });
   }
 };
-
-// Hàm cập nhật thông tin người dùng
 const updateUserInfo = async (req, res) => {
-  const { user_id, phone, username, age, gender, address } = req.body;
-
-  if (!user_id) {
-    return res.status(400).json({
-      error: "Dữ liệu đầu vào không hợp lệ",
-      message: "ID người dùng là bắt buộc",
-    });
-  }
-
   try {
+    // Lấy user_id từ tham số URL
+    const { user_id } = req.params;
+
+    // Lấy thông tin cập nhật từ body
+    const { email, full_name, phone_number, address, age, gender, avatar_url } = req.body;
+
+    // Log dữ liệu nhận được từ yêu cầu (để kiểm tra)
+    console.log('Received data from app:', {
+      user_id,
+      email,
+      full_name,
+      phone_number,
+      address,
+      age,
+      gender,
+      avatar_url,
+    });
+
+    // Tìm người dùng theo user_id
     const user = await User.findOne({ user_id });
+
     if (!user) {
-      return res.status(400).json({
-        error: "Dữ liệu đầu vào không hợp lệ",
-        message: "Người dùng không tồn tại",
-      });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    if (phone) user.phone = phone;
-    if (username) user.username = username;
-    if (age !== undefined) user.age = age;
-    if (gender) user.gender = gender;
-    if (address) user.address = address;
+    // Cập nhật thông tin người dùng
+    user.email = email || user.email;
+    user.username = full_name || user.username;
+    user.phone = phone_number || user.phone;
+    user.address = address || user.address;
+    user.age = age || user.age;
+    user.gender = gender || user.gender;
+    user.avatar_url = avatar_url || user.avatar_url;  // Cập nhật ảnh đại diện nếu có
 
-    user.updated_at = new Date(); // Cập nhật thời gian hiện tại
+    // Log thông tin người dùng sau khi cập nhật
+    console.log('Updated user data:', {
+      email: user.email,
+      username: user.username,
+      phone: user.phone,
+      address: user.address,
+      age: user.age,
+      gender: user.gender,
+      avatar_url: user.avatar_url,
+    });
+
+    // Lưu thông tin đã cập nhật
     await user.save();
 
-    console.log("Thông tin người dùng sau khi cập nhật:", user); // Log thông tin người dùng
-
-    return res.status(200).json({
-      message: "Thông tin người dùng đã được cập nhật",
-      user: {
-        id: user.user_id,
-        full_name: user.username,
-        phone_number: user.phone,
-        email: user.email,
-        age: user.age,
-        gender: user.gender,
-        address: user.address,
-        created_at: user.created_at ? user.created_at.toISOString() : null,
-        updated_at: user.updated_at ? user.updated_at.toISOString() : null,
-      },
-    });
+    return res.status(200).json({ message: "User profile updated successfully" });
   } catch (error) {
-    console.error("Lỗi hệ thống:", error);
-    return res.status(500).json({
-      error: "Lỗi máy chủ nội bộ",
-      message: "Đã xảy ra lỗi không mong muốn",
-    });
+    console.error('Error updating user profile:', error);
+    return res.status(500).json({ message: "Error updating user profile" });
   }
 };
+
+
 
 // Hàm xóa người dùng
 const deleteUser = async (req, res) => {

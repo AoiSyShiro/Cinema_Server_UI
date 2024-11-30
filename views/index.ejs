@@ -1,31 +1,33 @@
-<!-- pages/index.ejs -->
 <%- include('layout/header.ejs') %>
 
 <div class="container mx-auto mt-10 px-4">
   <div class="row">
     <div class="col-12">
-      <h1 class="text-3xl font-bold text-center">Chào mừng đến với Rạp Chiếu Phim</h1>
-      <p class="text-center mt-4 text-lg">Hãy chọn một bộ phim để bắt đầu</p>
+      <h1 class="text-3xl font-bold text-center text-blue-800">Chào mừng đến với Rạp Chiếu Phim</h1>
     </div>
   </div>
 
-  <!-- <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
-    <div class="card p-4 bg-white shadow-lg rounded-md">
-      <img src="path_to_image.jpg" alt="Movie 1" class="w-full h-60 object-cover mb-4">
-      <h2 class="font-semibold text-lg">Phim 1</h2>
-      <p class="text-gray-600">Mô tả ngắn về phim 1...</p>
+  <!-- Phần thống kê -->
+  <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    <!-- Thống kê tổng số người dùng -->
+    <div class="bg-blue-100 p-6 rounded-lg shadow-lg">
+      <h2 class="text-xl font-semibold text-center text-blue-700">Tổng số người dùng</h2>
+      <p class="text-3xl font-bold text-center mt-4 text-blue-900"><%= stats.totalUsers %></p>
     </div>
-    <div class="card p-4 bg-white shadow-lg rounded-md">
-      <img src="path_to_image.jpg" alt="Movie 2" class="w-full h-60 object-cover mb-4">
-      <h2 class="font-semibold text-lg">Phim 2</h2>
-      <p class="text-gray-600">Mô tả ngắn về phim 2...</p>
+
+    <!-- Thống kê tổng số vé đã đặt -->
+    <div class="bg-green-100 p-6 rounded-lg shadow-lg">
+      <h2 class="text-xl font-semibold text-center text-green-700">Tổng số vé đã đặt</h2>
+      <p class="text-3xl font-bold text-center mt-4 text-green-900"><%= stats.totalTickets %></p>
     </div>
-    <div class="card p-4 bg-white shadow-lg rounded-md">
-      <img src="path_to_image.jpg" alt="Movie 3" class="w-full h-60 object-cover mb-4">
-      <h2 class="font-semibold text-lg">Phim 3</h2>
-      <p class="text-gray-600">Mô tả ngắn về phim 3...</p>
+
+    <!-- Thống kê tổng số tiền đã đặt -->
+    <div class="bg-yellow-100 p-6 rounded-lg shadow-lg">
+      <h2 class="text-xl font-semibold text-center text-yellow-700">Tổng số tiền đã đặt</h2>
+      <p class="text-3xl font-bold text-center mt-4 text-yellow-900"><%= stats.totalAmount.toLocaleString() %> VND</p>
     </div>
   </div>
-</div> -->
+
+</div>
 
 <%- include('layout/footer.ejs') %>

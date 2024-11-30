@@ -63,46 +63,61 @@
   <div class="bg-white p-6 w-1/3 transition-all transform scale-95 opacity-0" id="movieModalContent">
     <h2 class="text-xl font-semibold mb-4 text-gray-800" id="modalTitle">Thêm Phim</h2>
     <form id="movieForm" method="POST" enctype="multipart/form-data" action="">
+      
+      <!-- Kiểm tra điều kiện cho Tên Phim -->
       <div class="mb-4">
         <label for="title" class="block text-sm font-medium text-gray-700">Tên Phim</label>
         <input type="text" id="title" name="title" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
+        <div id="titleError" class="text-red-500 text-xs mt-2 hidden">Vui lòng nhập tên phim.</div>
       </div>
 
+      <!-- Kiểm tra điều kiện cho Danh Mục -->
       <div class="mb-4">
         <label for="category_id" class="block text-sm font-medium text-gray-700">Danh Mục</label>
-        <select id="category_id" name="category_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <select id="category_id" name="category_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
           <option value="">Chọn thể loại</option>
           <% categories.forEach(category => { %>
             <option value="<%= category.category_id %>"><%= category.name %></option>
           <% }) %>
         </select>
+        <div id="categoryError" class="text-red-500 text-xs mt-2 hidden">Vui lòng chọn một danh mục.</div>
       </div>
 
+      <!-- Kiểm tra điều kiện cho Ngày Phát Hành -->
       <div class="mb-4">
         <label for="release_date" class="block text-sm font-medium text-gray-700">Ngày Phát Hành</label>
-        <input type="date" id="release_date" name="release_date" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+        <input type="date" id="release_date" name="release_date" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
+        <div id="releaseDateError" class="text-red-500 text-xs mt-2 hidden">Vui lòng chọn ngày phát hành.</div>
       </div>
 
+      <!-- Kiểm tra điều kiện cho Thời Lượng -->
       <div class="mb-4">
         <label for="duration" class="block text-sm font-medium text-gray-700">Thời Lượng (phút)</label>
-        <input type="number" id="duration" name="duration" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+        <input type="number" id="duration" name="duration" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
+        <div id="durationError" class="text-red-500 text-xs mt-2 hidden">Vui lòng nhập thời lượng phim (phút).</div>
       </div>
 
+      <!-- Kiểm tra điều kiện cho Mô Tả -->
       <div class="mb-4">
         <label for="description" class="block text-sm font-medium text-gray-700">Mô Tả</label>
         <textarea id="description" name="description" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+        <div id="descriptionError" class="text-red-500 text-xs mt-2 hidden">Vui lòng nhập mô tả phim.</div>
       </div>
 
+      <!-- Kiểm tra điều kiện cho Trailer URL -->
       <div class="mb-4">
         <label for="trailer_url" class="block text-sm font-medium text-gray-700">Trailer URL</label>
         <input type="url" id="trailer_url" name="trailer_url" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
       </div>
 
+      <!-- Kiểm tra điều kiện cho Ảnh -->
       <div class="mb-4">
         <label for="image" class="block text-sm font-medium text-gray-700">Ảnh</label>
-        <input type="file" id="image" name="image" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+        <input type="file" id="image" name="image" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
+        <div id="imageError" class="text-red-500 text-xs mt-2 hidden">Vui lòng chọn ảnh cho phim.</div>
       </div>
 
+      <!-- Kiểm tra điều kiện cho Sắp Chiếu -->
       <div class="mb-4">
         <label for="coming_soon" class="block text-sm font-medium text-gray-700">Sắp Chiếu</label>
         <input type="checkbox" id="coming_soon" name="coming_soon" class="mt-1" />
@@ -110,14 +125,63 @@
 
       <div class="flex justify-end space-x-2">
         <button type="button" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors duration-200" onclick="closeModal()">Hủy</button>
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200">Lưu</button>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200" onclick="return validateForm()">Lưu</button>
       </div>
     </form>
   </div>
 </div>
 
-
 <script>
+  function validateForm() {
+    let isValid = true;
+
+    // Kiểm tra Tên Phim
+    const title = document.getElementById('title').value;
+    if (!title) {
+      document.getElementById('titleError').classList.remove('hidden');
+      isValid = false;
+    } else {
+      document.getElementById('titleError').classList.add('hidden');
+    }
+
+    // Kiểm tra Danh Mục
+    const category = document.getElementById('category_id').value;
+    if (!category) {
+      document.getElementById('categoryError').classList.remove('hidden');
+      isValid = false;
+    } else {
+      document.getElementById('categoryError').classList.add('hidden');
+    }
+
+    // Kiểm tra Ngày Phát Hành
+    const releaseDate = document.getElementById('release_date').value;
+    if (!releaseDate) {
+      document.getElementById('releaseDateError').classList.remove('hidden');
+      isValid = false;
+    } else {
+      document.getElementById('releaseDateError').classList.add('hidden');
+    }
+
+    // Kiểm tra Thời Lượng
+    const duration = document.getElementById('duration').value;
+    if (!duration) {
+      document.getElementById('durationError').classList.remove('hidden');
+      isValid = false;
+    } else {
+      document.getElementById('durationError').classList.add('hidden');
+    }
+
+    // Kiểm tra Ảnh
+    const image = document.getElementById('image').files.length;
+    if (image === 0) {
+      document.getElementById('imageError').classList.remove('hidden');
+      isValid = false;
+    } else {
+      document.getElementById('imageError').classList.add('hidden');
+    }
+
+    return isValid;
+  }
   // Mở modal để chỉnh sửa thông tin phim
   function openEditModal(id, title, description, trailer_url, category_id, duration, release_date, image_url, coming_soon) {
     document.getElementById('movieModal').classList.remove('hidden');

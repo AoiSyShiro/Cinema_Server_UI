@@ -4,6 +4,8 @@ const path = require("path");
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const session = require('express-session');
+const bcrypt = require("bcrypt");  // Thêm bcrypt để mã hóa và so sánh mật khẩu
 
 // Nhập các route của ứng dụng
 const userRoutes = require("./routes/userRoutes");
@@ -17,6 +19,8 @@ const promotionRoutes = require("./routes/promotionRouter");
 const reviewRoutes = require("./routes/reviewRouter");
 const bookingRoutes = require("./routes/bookingRouter");
 const paymentRouter = require("./routes/paymentRouter");
+const dashboardRouter = require('./routes/dashboardRouter');
+
 
 // Nhập các model của ứng dụng
 const Movie = require("./models/Movie");
@@ -24,6 +28,9 @@ const Category = require("./models/Category");
 const FoodDrink = require("./models/FoodDrink");
 const Showtime = require("./models/Showtime");
 const Promotion = require('./models/Promotion');
+const Admin = require('./models/admin');  // Điều chỉnh đường dẫn nếu cần
+
+
 
 // Nạp biến môi trường
 require("dotenv").config();
@@ -77,13 +84,85 @@ const logRequestInfo = (req, res, next) => {
 };
 app.use(logRequestInfo);
 
+// Cấu hình session để lưu trữ thông tin đăng nhập
+app.use(session({
+  secret: 'secret_key',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }  // Đảm bảo secure: false nếu không dùng HTTPS
+}));
+
+
 // Cấu hình view engine là EJS
 app.set("view engine", "ejs");
 
-// Route trang chủ
-app.get("/", (req, res) => {
-  res.render("index", { title: "Trang chủ" });
+// Route trang chủ (kiểm tra đăng nhập)
+// Route trang chủ (kiểm tra đăng nhập)
+app.get('/', (req, res) => {
+  if (!req.session.adminId) {
+    return res.redirect('/login');  // Nếu chưa đăng nhập, chuyển hướng về trang login
+  }
+  // Chuyển hướng về trang dashboard nếu đã đăng nhập
+  res.redirect('/dashboard');
 });
+
+// Connect các router
+app.use('/dashboard', dashboardRouter);
+// Route trang login
+app.get('/login', (req, res) => {
+  res.render('login', { title: 'Đăng nhập Quản trị viên', errorMessage: null });
+});
+
+
+
+
+// Route xử lý đăng nhập
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  // Kiểm tra nếu username hoặc password trống
+  if (!username || !password) {
+    return res.render('login', { 
+      title: 'Đăng nhập Quản trị viên', 
+      errorMessage: 'Vui lòng nhập đầy đủ thông tin.' 
+    });
+  }
+
+  try {
+    // Tìm admin trong cơ sở dữ liệu
+    const admin = await Admin.findOne({ username });
+
+    // Nếu không tìm thấy admin, trả về thông báo lỗi
+    if (!admin) {
+      return res.render('login', { 
+        title: 'Đăng nhập Quản trị viên', 
+        errorMessage: 'Tài khoản không tồn tại.' 
+      });
+    }
+
+    // So sánh mật khẩu thô với mật khẩu trong DB
+    if (password !== admin.password) {
+      return res.render('login', { 
+        title: 'Đăng nhập Quản trị viên', 
+        errorMessage: 'Mật khẩu không chính xác.' 
+      });
+    }
+
+    // Lưu thông tin admin vào session và chuyển hướng tới trang chủ
+    req.session.adminId = admin._id;
+    res.redirect('/');  // Chuyển hướng sau khi đăng nhập thành công
+
+  } catch (err) {
+    // Lỗi trong quá trình truy vấn hoặc so sánh mật khẩu
+    console.error('Lỗi đăng nhập:', err);
+    res.render('login', { 
+      title: 'Đăng nhập Quản trị viên', 
+      errorMessage: 'Đã có lỗi xảy ra. Vui lòng thử lại.' 
+    });
+  }
+});
+
+
 
 // Các route của ứng dụng
 app.use("/auth", userRoutes);
@@ -113,8 +192,7 @@ const startServer = async () => {
   });
 };
 
-startServer(); // Khỏi chạy chạy server
-
+startServer(); // Khởi chạy server
 
 
 
@@ -539,4 +617,22 @@ app.delete("/promotions/:promotion_id", async (req, res) => {
       error: error.message,
     });
   }
+});
+
+
+// Định nghĩa route trả về thời gian server theo múi giờ Việt Nam (GMT+7)
+app.get('/get-server-time', (req, res) => {
+  const options = {
+    timeZone: 'Asia/Ho_Chi_Minh', // Múi giờ Việt Nam
+    hour12: false, // Định dạng 24 giờ
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  };
+
+  const serverTime = new Intl.DateTimeFormat('vi-VN', options).format(new Date());
+  res.json({ time: serverTime });
 });
