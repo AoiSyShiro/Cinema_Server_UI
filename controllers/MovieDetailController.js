@@ -68,12 +68,12 @@ const getRandomMovies = async (req, res) => {
   }
 };
 
-// Lấy danh sách phim sắp chiếu
 const getUpcomingMovies = async (req, res) => {
   try {
     const upcomingMovies = await Movie.find({
-      release_date: { $gte: new Date() }, // Lấy phim có ngày phát hành lớn hơn hoặc bằng ngày hiện tại
-    }).sort({ release_date: 1 }); // Sắp xếp theo ngày phát hành
+      release_date: { $gte: new Date() },  // Lấy phim có ngày phát hành lớn hơn hoặc bằng ngày hiện tại
+      coming_soon: true  // Lọc phim sắp chiếu
+    }).sort({ release_date: 1 });  // Sắp xếp theo ngày phát hành
 
     if (upcomingMovies.length === 0) {
       return res.status(404).json({ message: "Không tìm thấy phim sắp chiếu" });
@@ -82,11 +82,10 @@ const getUpcomingMovies = async (req, res) => {
     res.status(200).json(upcomingMovies);
   } catch (error) {
     console.error("Lỗi khi lấy danh sách phim sắp chiếu:", error);
-    res
-      .status(500)
-      .json({ message: "Lỗi khi lấy danh sách phim sắp chiếu", error });
+    res.status(500).json({ message: "Lỗi khi lấy danh sách phim sắp chiếu", error });
   }
 };
+
 
 // Lấy danh sách phim sắp ra mắt
 const getMoviesComingSoon = async (req, res) => {

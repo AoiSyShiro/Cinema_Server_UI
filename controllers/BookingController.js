@@ -96,7 +96,6 @@ const searchBooking = async (req, res) => {
   }
 };
 
-// Hiển thị lịch sử đặt vé của user_id
 const getUserTicketHistory = async (req, res) => {
   try {
     const { user_id } = req.params; // Lấy user_id từ URL params
@@ -120,7 +119,7 @@ const getUserTicketHistory = async (req, res) => {
     // Nếu có vé, trả về danh sách vé với thông tin cần thiết
     const ticketDetails = await Promise.all(
       tickets.map(async (ticket) => {
-        // Lấy thông tin người dùng từ bảng User (nếu cần)
+        // Lấy thông tin người dùng từ bảng User
         const user = await User.findOne({ user_id: ticket.user_id });
 
         // Lấy thông tin suất chiếu từ bảng Showtime
@@ -135,18 +134,26 @@ const getUserTicketHistory = async (req, res) => {
 
         // Lấy thông tin các món ăn/đồ uống đã chọn
         let foodDrinks = [];
+        let foodTotal = 0;
         if (ticket.food_drinks && ticket.food_drinks.length > 0) {
           foodDrinks = await FoodDrinkModel.find({
             food_drink_id: {
               $in: ticket.food_drinks.map((fd) => fd.food_drink_id),
             },
           });
+
+          // Tính tổng giá trị đồ ăn/thức uống
+          foodTotal = ticket.food_drinks.reduce((total, fd) => {
+            const food = foodDrinks.find(item => item.food_drink_id === fd.food_drink_id);
+            return total + (food ? food.price * fd.quantity : 0);
+          }, 0);
         }
 
         return {
           ...ticket.toObject(),
+          book_tickets_id: ticket.book_tickets_id ? ticket.book_tickets_id : "N/A",
           user: {
-            name: user ? user.name : "N/A",
+            username: user ? user.username : "N/A", // Hiển thị tên người dùng từ model User
             email: user ? user.email : "N/A",
           },
           showtime: {
@@ -160,7 +167,12 @@ const getUserTicketHistory = async (req, res) => {
             trailer_url: movie ? movie.trailer_url : "N/A", // URL trailer phim
             image_url: movie ? movie.image_url : "N/A", // Hình ảnh phim
           },
-          food_drinks: foodDrinks, // Thông tin món ăn/đồ uống
+          food_drinks: foodDrinks.map(item => ({
+            name: item.name,
+            quantity: ticket.food_drinks.find(fd => fd.food_drink_id === item.food_drink_id).quantity,
+            price: item.price,
+          })), // Danh sách món ăn/thức uống với tên và số lượng
+          food_total: foodTotal, // Tổng giá trị đồ ăn/thức uống
           price: ticket.price, // Thêm thông tin giá vé từ ticket
         };
       })
@@ -172,6 +184,8 @@ const getUserTicketHistory = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi lấy lịch sử đặt vé", error });
   }
 };
+
+
 
 
 

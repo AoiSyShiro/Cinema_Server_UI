@@ -9,10 +9,12 @@ const getMovies = async (req, res) => {
 
     // Kết hợp danh mục vào danh sách phim
     const moviesWithCategories = movies.map(movie => {
+      // Tìm thể loại tương ứng với category_id của phim
       const category = categories.find(cat => cat.category_id === movie.category_id);
+
       return {
         ...movie.toObject(),
-        category: category ? category.name : null  // Thêm tên danh mục
+        category: category ? category.name : null  // Thêm tên thể loại vào thông tin phim
       };
     });
 
@@ -22,6 +24,7 @@ const getMovies = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi lấy danh sách phim", error });
   }
 };
+
 
 // Thêm phim
 const addMovieAdmin = async (req, res) => {  // Đổi tên từ addMovie thành addMovieAdmin

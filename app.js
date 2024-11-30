@@ -1,8 +1,11 @@
+// Nhập các thư viện cần thiết
 const express = require("express");
 const path = require("path");
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
+
+// Nhập các route của ứng dụng
 const userRoutes = require("./routes/userRoutes");
 const foodDrinkRoutes = require("./routes/foodDrinkRoutes");
 const movieRoutes = require("./routes/movieRoutes");
@@ -14,27 +17,30 @@ const promotionRoutes = require("./routes/promotionRouter");
 const reviewRoutes = require("./routes/reviewRouter");
 const bookingRoutes = require("./routes/bookingRouter");
 const paymentRouter = require("./routes/paymentRouter");
+
+// Nhập các model của ứng dụng
 const Movie = require("./models/Movie");
 const Category = require("./models/Category");
 const FoodDrink = require("./models/FoodDrink");
 const Showtime = require("./models/Showtime");
-const Promotion = require('./models/Promotion'); 
+const Promotion = require('./models/Promotion');
 
-
+// Nạp biến môi trường
 require("dotenv").config();
 
-// Kiểm tra xem biến môi trường đã được nạp đúng chưa
+// LOG Kiểm tra xem biến môi trường đã được nạp đúng chưa
 console.log("Cloud Name: ", process.env.CLOUD_NAME);
 console.log("API Key: ", process.env.API_KEY);
 console.log("API Secret: ", process.env.API_SECRET);
 
-// Configure Cloudinary
+// Cấu hình Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.API_KEY,
   api_secret: process.env.API_SECRET,
 });
 
+// Cấu hình lưu trữ Cloudinary qua Multer
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
@@ -42,14 +48,14 @@ const storage = new CloudinaryStorage({
     allowed_formats: ["jpg", "png", "jpeg"],
   },
 });
-
-
 const upload = multer({ storage: storage });
 
+// Khởi tạo ứng dụng Express
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); // Middleware để xử lý JSON
+app.use(express.urlencoded({ extended: true })); // Middleware để xử lý URL-encoded
 
+// Middleware log thông tin request
 const logRequestInfo = (req, res, next) => {
   const start = Date.now();
   const { method, path } = req;
@@ -69,16 +75,17 @@ const logRequestInfo = (req, res, next) => {
 
   next();
 };
-
 app.use(logRequestInfo);
 
+// Cấu hình view engine là EJS
 app.set("view engine", "ejs");
 
+// Route trang chủ
 app.get("/", (req, res) => {
   res.render("index", { title: "Trang chủ" });
 });
 
-// Các route khác của ứng dụng
+// Các route của ứng dụng
 app.use("/auth", userRoutes);
 app.use("/food-drinks", foodDrinkRoutes);
 app.use("/movies", movieRoutes);
@@ -91,13 +98,13 @@ app.use("/reviews", reviewRoutes);
 app.use("/booking-history", bookingRoutes);
 app.use("/payments", paymentRouter);
 
+// Cổng mặc định và kết nối cơ sở dữ liệu
 const PORT = process.env.PORT || 5000;
 const connectToDatabase = require("./config/db.js");
 
-
-
+// Hàm khởi động server
 const startServer = async () => {
-  await connectToDatabase();
+  await connectToDatabase(); // Kết nối cơ sở dữ liệu
 
   app.listen(PORT, async () => {
     console.log(`Server đang chạy ở cổng ${PORT}`);
@@ -106,90 +113,116 @@ const startServer = async () => {
   });
 };
 
-startServer();
+startServer(); // Khỏi chạy chạy server
 
+
+
+
+//Tương Tác Server
+
+// Hiện thị Movie Web
 app.get("/movies-admin", async (req, res) => {
   try {
-    // Lấy tất cả phim
+    // Lấy tất cả các phim từ cơ sở dữ liệu
     const movies = await Movie.find();
-    // Lấy tất cả danh mục thể loại
+
+    // Lấy tất cả danh mục thể loại từ cơ sở dữ liệu
     const categories = await Category.find();
 
-    // Kết hợp tên thể loại vào mỗi phim
+    // Kết hợp thông tin tên thể loại vào mỗi phim
     const moviesWithCategories = movies.map((movie) => {
-      // Tìm danh mục tương ứng với category_id của phim
+      // Tìm danh mục tương ứng dựa trên category_id của phim
       const category = categories.find(
         (cat) => cat.category_id === movie.category_id
-      ); // So sánh category_id
+      );
+
+      // Trả về đối tượng phim với thông tin tên thể loại đã kết hợp
       return {
-        ...movie.toObject(),
-        category: category ? category.name : "Không có danh mục",
+        ...movie.toObject(), // Sao chép các thuộc tính của đối tượng phim
+        category: category ? category.name : "Không có danh mục", // Thêm tên danh mục hoặc giá trị mặc định
       };
     });
 
-    // Truyền thông tin phim và danh mục vào view
+    // Kết xuất thông tin phim và danh mục ra giao diện view 'movies'
     res.render("movies", {
-      movies: moviesWithCategories,
-      categories: categories,
+      movies: moviesWithCategories, // Danh sách phim đã kết hợp với tên thể loại
+      categories: categories, // Danh sách tất cả danh mục thể loại
     });
   } catch (err) {
+    // Xử lý lỗi khi lấy dữ liệu
     console.error("Lỗi khi lấy danh sách phim:", err);
-    res.status(500).send("Lỗi khi lấy danh sách phim.");
+    res.status(500).send("Lỗi khi lấy danh sách phim."); // Gửi phản hồi lỗi
   }
 });
 
-// Route để thêm phim
+/// Route để thêm phim mới
 app.post("/movies-admin", upload.single("image"), async (req, res) => {
+  // Lấy thông tin phim từ request body
   const {
-    title,
-    description,
-    trailer_url,
-    category_id,
-    duration,
-    release_date,
-    coming_soon,
+    title,           // Tiêu đề phim
+    description,     // Mô tả phim
+    trailer_url,     // URL trailer
+    category_id,     // ID thể loại
+    duration,        // Thời lượng phim
+    release_date,    // Ngày phát hành
+    coming_soon,     // Trạng thái sắp chiếu
   } = req.body;
+
+  // Lấy đường dẫn hình ảnh nếu có tải lên
   const image_url = req.file ? req.file.path : null;
 
   try {
+    // Tạo đối tượng phim mới
     const movie = new Movie({
-      title,
-      description,
-      trailer_url,
-      category_id,
-      duration,
-      release_date,
-      image_url,
-      coming_soon: coming_soon === "on", // Nếu checkbox "coming_soon" được chọn
+      title,                 // Tiêu đề
+      description,           // Mô tả
+      trailer_url,           // Trailer URL
+      category_id,           // ID thể loại
+      duration,              // Thời lượng
+      release_date,          // Ngày phát hành
+      image_url,             // Đường dẫn ảnh
+      coming_soon: coming_soon === "on", // Nếu checkbox "sắp chiếu" được chọn
     });
 
+    // Lưu phim vào cơ sở dữ liệu
     await movie.save();
+
+    // Sau khi lưu thành công, chuyển hướng về trang quản lý phim
     res.redirect("/movies-admin");
   } catch (err) {
+    // Xử lý lỗi trong quá trình thêm phim
     console.error(err);
-    res.status(500).send("Lỗi khi thêm phim");
+    res.status(500).send("Lỗi khi thêm phim"); // Gửi thông báo lỗi về phía client
   }
 });
 
-// Route xóa phim theo movie_id
+// Route để xóa phim theo movie_id
 app.get("/movies-admin/delete/:movie_id", async (req, res) => {
-  const movieId = req.params.movie_id; // Lấy movie_id từ URL
+  // Lấy movie_id từ tham số URL
+  const movieId = req.params.movie_id;
 
   try {
-    // Tìm và xóa phim theo movie_id
+    // Tìm và xóa phim trong cơ sở dữ liệu dựa trên movie_id
     const movie = await Movie.findOneAndDelete({ movie_id: movieId });
 
     if (!movie) {
+      // Nếu không tìm thấy phim có movie_id tương ứng
+      // Trả về phản hồi với mã trạng thái 404 và thông báo lỗi
       return res.status(404).send("Phim không tồn tại");
     }
 
-    // Sau khi xóa thành công, chuyển hướng về trang quản lý phim
+    // Nếu xóa thành công, chuyển hướng về trang quản lý phim
     res.redirect("/movies-admin");
   } catch (err) {
-    console.error(err);
+    // Ghi lỗi ra console để kiểm tra
+    console.error("Lỗi khi xóa phim:", err);
+
+    // Gửi phản hồi lỗi với mã trạng thái 500 về phía client
     res.status(500).send("Lỗi khi xóa phim");
   }
 });
+
+
 
 // Route cập nhật phim
 app.post("/movies-admin/:id", upload.single("image"), async (req, res) => {
