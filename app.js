@@ -97,7 +97,6 @@ app.use(session({
 app.set("view engine", "ejs");
 
 // Route trang chủ (kiểm tra đăng nhập)
-// Route trang chủ (kiểm tra đăng nhập)
 app.get('/', (req, res) => {
   if (!req.session.adminId) {
     return res.redirect('/login');  // Nếu chưa đăng nhập, chuyển hướng về trang login
@@ -153,7 +152,7 @@ app.post('/login', async (req, res) => {
     res.redirect('/');  // Chuyển hướng sau khi đăng nhập thành công
 
   } catch (err) {
-    // Lỗi trong quá trình truy vấn hoặc so sánh mật khẩu
+  
     console.error('Lỗi đăng nhập:', err);
     res.render('login', { 
       title: 'Đăng nhập Quản trị viên', 
