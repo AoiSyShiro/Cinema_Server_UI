@@ -22,6 +22,11 @@ const paymentRouter = require("./routes/paymentRouter");
 const dashboardRouter = require('./routes/dashboardRouter');
 
 
+//Nhập PassWord
+const forgotPasswordController = require('./controllers/forgotPasswordController');
+const resetPasswordController = require('./controllers/resetPasswordController');
+
+
 // Nhập các model của ứng dụng
 const Movie = require("./models/Movie");
 const Category = require("./models/Category");
@@ -113,7 +118,9 @@ app.get('/login', (req, res) => {
 });
 
 
-
+// Cấu hình route
+app.use('/reset-password', forgotPasswordController);
+app.use('/reset-password', resetPasswordController);
 
 // Route xử lý đăng nhập
 app.post('/login', async (req, res) => {
