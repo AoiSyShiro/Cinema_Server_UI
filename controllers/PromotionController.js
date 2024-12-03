@@ -4,7 +4,7 @@ const Promotion = require("../models/Promotion");
 const getAllPromotions = async (req, res) => {
   try {
     const promotions = await Promotion.find();
-    res.render('promotion', { promotions });
+    res.render("promotion", { promotions });
   } catch (error) {
     console.error("Error fetching promotions:", error);
     res.status(500).send("Error fetching promotions");
@@ -53,7 +53,8 @@ const updatePromotion = async (req, res) => {
 
     // Cập nhật các trường thông tin khuyến mãi
     promotion.discount_code = discount_code || promotion.discount_code;
-    promotion.discount_percentage = discount_percentage || promotion.discount_percentage;
+    promotion.discount_percentage =
+      discount_percentage || promotion.discount_percentage;
 
     // Lưu lại thông tin đã cập nhật
     await promotion.save();
@@ -67,8 +68,6 @@ const updatePromotion = async (req, res) => {
     });
   }
 };
-
-
 
 // Xóa khuyến mãi qua form
 const deletePromotion = async (req, res) => {
@@ -89,9 +88,25 @@ const deletePromotion = async (req, res) => {
   }
 };
 
+// Check Giảm giá trên APP
+const countPromotions = async (req, res) => {
+  const { code } = req.params;
+  try {
+    const promotion = await Promotion.findOne({ discount_code: code }, 'discount_percentage');
+    if (!promotion) {
+      return res.status(404).json({ message: "Mã giảm giá không tồn tại." });
+    }
+    res.json({ discount_percentage: promotion.discount_percentage });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi server.", error: error.message });
+  }
+};
+
+
 module.exports = {
   getAllPromotions,
   createPromotion,
   updatePromotion,
   deletePromotion,
+  countPromotions,
 };

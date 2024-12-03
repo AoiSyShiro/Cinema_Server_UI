@@ -73,7 +73,7 @@ const getUpcomingMovies = async (req, res) => {
   try {
     const upcomingMovies = await Movie.find({
       release_date: { $gte: new Date() },  // Lấy phim có ngày phát hành lớn hơn hoặc bằng ngày hiện tại
-      coming_soon: true  // Lọc phim sắp chiếu
+      // coming_soon: true  // Lọc phim sắp chiếu
     }).sort({ release_date: 1 });  // Sắp xếp theo ngày phát hành
 
     if (upcomingMovies.length === 0) {
