@@ -1,7 +1,7 @@
 const express = require("express");
 const {
   getBookingHistory,
-  searchBooking,
+  searchBookings,
   getUserTicketHistory,
 } = require("../controllers/BookingController");
 
@@ -10,10 +10,11 @@ const bookingRouter = express.Router();
 // Lấy lịch sử đặt vé
 bookingRouter.get("/", getBookingHistory);
 
-// Tìm kiếm theo ID hoặc QR Code
-bookingRouter.get("/search/:query", searchBooking);
 
 // Lấy lịch sử vé của người dùng theo user_id
 bookingRouter.get('/history/:user_id', getUserTicketHistory);
+
+// Route tìm kiếm vé theo book_tickets_id
+bookingRouter.get('/search-bookings', searchBookings);
 
 module.exports = bookingRouter;

@@ -308,42 +308,57 @@ app.get("/movies-admin/delete/:movie_id", async (req, res) => {
 
 
 
-// Route cập nhật phim
+// Định nghĩa một route POST tại URL "/movies-admin/:id"
+// Middleware `upload.single("image")` được sử dụng để xử lý file upload (trường "image")
 app.post("/movies-admin/:id", upload.single("image"), async (req, res) => {
+  // Lấy movieId từ tham số URL
   const movieId = req.params.id;
+
+  // Trích xuất dữ liệu từ body của request
   const {
-    title,
-    description,
-    trailer_url,
-    category_id,
-    duration,
-    release_date,
-    coming_soon,
+    title, // Tiêu đề phim
+    description, // Mô tả phim
+    trailer_url, // URL trailer phim
+    category_id, // ID thể loại phim
+    duration, // Thời lượng phim
+    release_date, // Ngày phát hành
+    coming_soon, // Cờ đánh dấu phim sắp ra mắt
   } = req.body;
+
+  // Lấy đường dẫn file ảnh nếu có file được upload, nếu không thì gán null
   const image_url = req.file ? req.file.path : null;
 
   try {
+    // Tìm bộ phim trong cơ sở dữ liệu theo movieId
     const movie = await Movie.findById(movieId);
+
+    // Nếu không tìm thấy phim, trả về lỗi 404
     if (!movie) {
       return res.status(404).send("Phim không tồn tại");
     }
 
-    movie.title = title;
-    movie.description = description;
-    movie.trailer_url = trailer_url;
-    movie.category_id = category_id;
-    movie.duration = duration;
-    movie.release_date = release_date;
-    movie.coming_soon = coming_soon === "on";
-    movie.image_url = image_url || movie.image_url;
+    // Cập nhật các trường thông tin của bộ phim
+    movie.title = title; // Cập nhật tiêu đề
+    movie.description = description; // Cập nhật mô tả
+    movie.trailer_url = trailer_url; // Cập nhật URL trailer
+    movie.category_id = category_id; // Cập nhật ID thể loại
+    movie.duration = duration; // Cập nhật thời lượng
+    movie.release_date = release_date; // Cập nhật ngày phát hành
+    movie.coming_soon = coming_soon === "on"; // Chuyển đổi "on" thành boolean
+    movie.image_url = image_url || movie.image_url; // Nếu không upload ảnh mới, giữ ảnh cũ
 
+    // Lưu thay đổi vào cơ sở dữ liệu
     await movie.save();
+
+    // Chuyển hướng về trang quản lý phim
     res.redirect("/movies-admin");
   } catch (err) {
+    // Nếu xảy ra lỗi, log lỗi ra console và trả về lỗi 500
     console.error(err);
     res.status(500).send("Lỗi khi cập nhật phim");
   }
 });
+
 
 // Route hiển thị danh sách đồ ăn/đồ uống
 app.get("/food-drinks-admin", async (req, res) => {

@@ -15,84 +15,59 @@ const getBookingHistory = async (req, res) => {
     }
 
     // Duyệt qua từng vé và lấy thêm thông tin chi tiết từ User, Movie, Showtime
-    const bookingsWithDetails = await Promise.all(bookings.map(async (booking) => {
-      // Lấy thông tin người dùng từ model User dựa trên user_id
-      const user = await User.findOne({ user_id: booking.user_id });
-      
-      // Lấy thông tin phim từ model Movie dựa trên movie_id
-      const movie = await Movie.findOne({ movie_id: booking.movie_id });
+    const bookingsWithDetails = await Promise.all(
+      bookings.map(async (booking) => {
+        // Lấy thông tin người dùng từ model User dựa trên user_id
+        const user = await User.findOne({ user_id: booking.user_id });
 
-      // Lấy thông tin lịch chiếu từ model Showtime dựa trên showtime_id
-      const showtime = await ShowTime.findOne({ showtime_id: booking.showtime_id });
+        // Lấy thông tin phim từ model Movie dựa trên movie_id
+        const movie = await Movie.findOne({ movie_id: booking.movie_id });
 
-      // Lấy thông tin đồ ăn/thức uống từ model FoodDrink dựa trên food_drink_id
-      const foodDetails = await Promise.all(booking.food_drinks.map(async (foodItem) => {
-        const food = await FoodDrinkModel.findOne({ food_drink_id: foodItem.food_drink_id });
+        // Lấy thông tin lịch chiếu từ model Showtime dựa trên showtime_id
+        const showtime = await ShowTime.findOne({
+          showtime_id: booking.showtime_id,
+        });
+
+        // Lấy thông tin đồ ăn/thức uống từ model FoodDrink dựa trên food_drink_id
+        const foodDetails = await Promise.all(
+          booking.food_drinks.map(async (foodItem) => {
+            const food = await FoodDrinkModel.findOne({
+              food_drink_id: foodItem.food_drink_id,
+            });
+            return {
+              name: food ? food.name : "Không Có Đặt Food",
+              price: food ? food.price : 0,
+              quantity: foodItem.quantity || 0,
+              total: food ? food.price * (foodItem.quantity || 0) : 0,
+            };
+          })
+        );
+
+        // Tính tổng giá trị đồ ăn/thức uống
+        const foodTotal = foodDetails.reduce(
+          (acc, item) => acc + item.total,
+          0
+        );
+
+        // Trả về thông tin booking đã được bổ sung với các chi tiết
         return {
-          name: food ? food.name : 'Không Có Đặt Food',
-          price: food ? food.price : 0,
-          quantity: foodItem.quantity || 0,
-          total: food ? (food.price * (foodItem.quantity || 0)) : 0
+          ...booking.toObject(),
+          user: user ? user.username : "N/A", // Tên người dùng
+          movie: movie ? movie.title : "N/A", // Tiêu đề phim
+          booking_time: booking.booking_time || "N/A", // Sử dụng booking_time từ BookTickets.js
+          payment_method: booking.payment_method || "N/A", // Hình thức thanh toán
+          price: booking.price || 0, // Giá tiền
+          food_drinks: foodDetails, // Danh sách món ăn/thức uống với tên và số lượng
+          food_total: foodTotal, // Tổng giá trị đồ ăn/thức uống
         };
-      }));
-
-      // Tính tổng giá trị đồ ăn/thức uống
-      const foodTotal = foodDetails.reduce((acc, item) => acc + item.total, 0);
-
-      // Trả về thông tin booking đã được bổ sung với các chi tiết
-      return {
-        ...booking.toObject(),
-        user: user ? user.username : 'N/A', // Tên người dùng
-        movie: movie ? movie.title : 'N/A', // Tiêu đề phim
-        booking_time: booking.booking_time || 'N/A', // Sử dụng booking_time từ BookTickets.js
-        payment_method: booking.payment_method || 'N/A', // Hình thức thanh toán
-        price: booking.price || 0, // Giá tiền
-        food_drinks: foodDetails, // Danh sách món ăn/thức uống với tên và số lượng
-        food_total: foodTotal // Tổng giá trị đồ ăn/thức uống
-      };
-    }));
+      })
+    );
 
     // Render kết quả lên view EJS
-    res.render('bookingHistory', { bookings: bookingsWithDetails });
+    res.render("bookingHistory", { bookings: bookingsWithDetails });
   } catch (err) {
     console.error("Error fetching booking history:", err);
     res.status(500).send("Error fetching booking history.");
-  }
-};
-
-// Tìm kiếm lịch sử đặt vé theo ID hoặc QR Code
-const searchBooking = async (req, res) => {
-  try {
-    const { query } = req.params;
-
-    const booking = await BookTickets.findOne({
-      $or: [{ book_tickets_id: Number(query) }, { qr_code: query }],
-    });
-
-    if (!booking) {
-      return res.status(404).json({ message: "Không tìm thấy vé" });
-    }
-
-    // Manually populate user and showtime details
-    const user = await User.findOne({ user_id: booking.user_id }, "name email");
-    const showtime = await Showtime.findOne(
-      { showtime_id: booking.showtime_id },
-      "start_time room ticket_price movie_id"
-    );
-
-    // Lấy thông tin phim từ movie_id trong showtime
-    const movie = await Movie.findOne({
-      movie_id: showtime ? showtime.movie_id : null,
-    });
-
-    res.status(200).json({
-      ...booking._doc,
-      user,
-      showtime,
-      movie: movie ? { movie_id: movie.movie_id, title: movie.title } : null, // Trả về thông tin phim
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Lỗi khi tìm kiếm vé", error });
   }
 };
 
@@ -124,7 +99,7 @@ const getUserTicketHistory = async (req, res) => {
 
         // Lấy thông tin suất chiếu từ bảng Showtime
         const showtime = await ShowTime.findOne({
-          showtime_id: ticket.showtime_id,  // Cập nhật với showtime_id
+          showtime_id: ticket.showtime_id, // Cập nhật với showtime_id
         });
 
         // Lấy thông tin phim từ bảng Movie
@@ -144,14 +119,18 @@ const getUserTicketHistory = async (req, res) => {
 
           // Tính tổng giá trị đồ ăn/thức uống
           foodTotal = ticket.food_drinks.reduce((total, fd) => {
-            const food = foodDrinks.find(item => item.food_drink_id === fd.food_drink_id);
+            const food = foodDrinks.find(
+              (item) => item.food_drink_id === fd.food_drink_id
+            );
             return total + (food ? food.price * fd.quantity : 0);
           }, 0);
         }
 
         return {
           ...ticket.toObject(),
-          book_tickets_id: ticket.book_tickets_id ? ticket.book_tickets_id : "N/A",
+          book_tickets_id: ticket.book_tickets_id
+            ? ticket.book_tickets_id
+            : "N/A",
           user: {
             username: user ? user.username : "N/A", // Hiển thị tên người dùng từ model User
             email: user ? user.email : "N/A",
@@ -167,9 +146,11 @@ const getUserTicketHistory = async (req, res) => {
             trailer_url: movie ? movie.trailer_url : "N/A", // URL trailer phim
             image_url: movie ? movie.image_url : "N/A", // Hình ảnh phim
           },
-          food_drinks: foodDrinks.map(item => ({
+          food_drinks: foodDrinks.map((item) => ({
             name: item.name,
-            quantity: ticket.food_drinks.find(fd => fd.food_drink_id === item.food_drink_id).quantity,
+            quantity: ticket.food_drinks.find(
+              (fd) => fd.food_drink_id === item.food_drink_id
+            ).quantity,
             price: item.price,
           })), // Danh sách món ăn/thức uống với tên và số lượng
           food_total: foodTotal, // Tổng giá trị đồ ăn/thức uống
@@ -186,7 +167,68 @@ const getUserTicketHistory = async (req, res) => {
 };
 
 
+const searchBookings = async (req, res) => {
+  try {
+    const { book_tickets_id } = req.query; // Lấy book_tickets_id từ query params
+
+    if (!book_tickets_id) {
+      return res.status(400).json({ message: "book_tickets_id is required" });
+    }
+
+    // Tìm BookTicket theo book_tickets_id
+    const booking = await BookTickets.findOne({ book_tickets_id: Number(book_tickets_id) });
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    // Lấy thông tin người dùng từ model User dựa trên user_id
+    const user = await User.findOne({ user_id: booking.user_id });
+
+    // Lấy thông tin phim từ model Movie dựa trên movie_id
+    const movie = await Movie.findOne({ movie_id: booking.movie_id });
+
+    // Lấy thông tin lịch chiếu từ model Showtime dựa trên showtime_id
+    const showtime = await ShowTime.findOne({ showtime_id: booking.showtime_id });
+
+    // Lấy thông tin đồ ăn/thức uống từ model FoodDrink dựa trên food_drink_id
+    const foodDetails = await Promise.all(
+      booking.food_drinks.map(async (foodItem) => {
+        const food = await FoodDrinkModel.findOne({ food_drink_id: foodItem.food_drink_id });
+        return {
+          name: food ? food.name : "Không Có Đặt Food",
+          price: food ? food.price : 0,
+          quantity: foodItem.quantity || 0,
+          total: food ? food.price * (foodItem.quantity || 0) : 0,
+        };
+      })
+    );
+
+    // Tính tổng giá trị đồ ăn/thức uống
+    const foodTotal = foodDetails.reduce((acc, item) => acc + item.total, 0);
+
+    // Thêm thông tin chi tiết vào booking
+    const bookingWithDetails = {
+      ...booking.toObject(),
+      user: user ? user.username : "N/A", // Tên người dùng
+      movie: movie ? movie.title : "N/A", // Tiêu đề phim
+      booking_time: booking.booking_time || "N/A", // Thời gian đặt vé
+      payment_method: booking.payment_method || "N/A", // Hình thức thanh toán
+      price: booking.price || 0, // Giá tiền
+      food_drinks: foodDetails, // Danh sách món ăn/thức uống với tên và số lượng
+      food_total: foodTotal, // Tổng giá trị đồ ăn/thức uống
+    };
+
+    // Render kết quả tìm kiếm vào view EJS
+    res.render("booking-list", { bookings: [bookingWithDetails] });
+
+  } catch (err) {
+    console.error("Error searching booking:", err);
+    res.status(500).send("Error searching booking.");
+  }
+};
 
 
 
-module.exports = { getBookingHistory, getUserTicketHistory, searchBooking };
+
+module.exports = { getBookingHistory, getUserTicketHistory, searchBookings };
