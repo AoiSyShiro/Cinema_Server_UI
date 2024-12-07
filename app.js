@@ -40,6 +40,8 @@ const Promotion = require("./models/Promotion");
 const Admin = require("./models/admin"); // Điều chỉnh đường dẫn nếu cần
 const CinemaRoom = require('./models/CinemaRoom');  // Đảm bảo đường dẫn đúng với vị trí file CinemaRoom.js
 
+
+
 // ========================== Cấu hình Cloudinary và Multer ==========================
 
 // Kiểm tra biến môi trường (dành cho mục đích debug)
