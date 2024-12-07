@@ -1,7 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
-const User = require("../models/User"); // Điều chỉnh đường dẫn nếu cần
+const User = require("../models/User"); 
 require("dotenv").config(); // Tải các biến môi trường từ .env
 
 const router = express.Router();

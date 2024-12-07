@@ -4,8 +4,8 @@ const path = require("path");
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const session = require('express-session');
-const bcrypt = require("bcrypt");  // Thêm bcrypt để mã hóa và so sánh mật khẩu
+const session = require("express-session");
+const bcrypt = require("bcrypt"); // Thêm bcrypt để mã hóa và so sánh mật khẩu
 
 // Nhập các route của ứng dụng
 const userRoutes = require("./routes/userRoutes");
@@ -19,23 +19,21 @@ const promotionRoutes = require("./routes/promotionRouter");
 const reviewRoutes = require("./routes/reviewRouter");
 const bookingRoutes = require("./routes/bookingRouter");
 const paymentRouter = require("./routes/paymentRouter");
-const dashboardRouter = require('./routes/dashboardRouter');
-
+const dashboardRouter = require("./routes/dashboardRouter");
+const cinemaRoomRoutes = require("./routes/cinemaRoomRoutes");
 
 //Nhập PassWord
-const forgotPasswordController = require('./controllers/forgotPasswordController');
-const resetPasswordController = require('./controllers/resetPasswordController');
-
+const forgotPasswordController = require("./controllers/forgotPasswordController");
+const resetPasswordController = require("./controllers/resetPasswordController");
 
 // Nhập các model của ứng dụng
 const Movie = require("./models/Movie");
 const Category = require("./models/Category");
 const FoodDrink = require("./models/FoodDrink");
 const Showtime = require("./models/Showtime");
-const Promotion = require('./models/Promotion');
-const Admin = require('./models/admin');  // Điều chỉnh đường dẫn nếu cần
-
-
+const Promotion = require("./models/Promotion");
+const Admin = require("./models/admin"); // Điều chỉnh đường dẫn nếu cần
+const CinemaRoom = require('./models/CinemaRoom');  // Đảm bảo đường dẫn đúng với vị trí file CinemaRoom.js
 
 // Nạp biến môi trường
 require("dotenv").config();
@@ -67,6 +65,7 @@ const app = express();
 app.use(express.json()); // Middleware để xử lý JSON
 app.use(express.urlencoded({ extended: true })); // Middleware để xử lý URL-encoded
 
+
 // Middleware log thông tin request
 const logRequestInfo = (req, res, next) => {
   const start = Date.now();
@@ -90,47 +89,47 @@ const logRequestInfo = (req, res, next) => {
 app.use(logRequestInfo);
 
 // Cấu hình session để lưu trữ thông tin đăng nhập
-app.use(session({
-  secret: 'secret_key',
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false }  // Đảm bảo secure: false nếu không dùng HTTPS
-}));
-
+app.use(
+  session({
+    secret: "secret_key",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }, // Đảm bảo secure: false nếu không dùng HTTPS
+  })
+);
 
 // Cấu hình view engine là EJS
 app.set("view engine", "ejs");
 
 // Route trang chủ (kiểm tra đăng nhập)
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
   if (!req.session.adminId) {
-    return res.redirect('/login');  // Nếu chưa đăng nhập, chuyển hướng về trang login
+    return res.redirect("/login"); // Nếu chưa đăng nhập, chuyển hướng về trang login
   }
   // Chuyển hướng về trang dashboard nếu đã đăng nhập
-  res.redirect('/dashboard');
+  res.redirect("/dashboard");
 });
 
 // Connect các router
-app.use('/dashboard', dashboardRouter);
+app.use("/dashboard", dashboardRouter);
 // Route trang login
-app.get('/login', (req, res) => {
-  res.render('login', { title: 'Đăng nhập Quản trị viên', errorMessage: null });
+app.get("/login", (req, res) => {
+  res.render("login", { title: "Đăng nhập Quản trị viên", errorMessage: null });
 });
 
-
 // Cấu hình route
-app.use('/reset-password', forgotPasswordController);
-app.use('/reset-password', resetPasswordController);
+app.use("/reset-password", forgotPasswordController);
+app.use("/reset-password", resetPasswordController);
 
 // Route xử lý đăng nhập
-app.post('/login', async (req, res) => {
+app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   // Kiểm tra nếu username hoặc password trống
   if (!username || !password) {
-    return res.render('login', { 
-      title: 'Đăng nhập Quản trị viên', 
-      errorMessage: 'Vui lòng nhập đầy đủ thông tin.' 
+    return res.render("login", {
+      title: "Đăng nhập Quản trị viên",
+      errorMessage: "Vui lòng nhập đầy đủ thông tin.",
     });
   }
 
@@ -140,34 +139,31 @@ app.post('/login', async (req, res) => {
 
     // Nếu không tìm thấy admin, trả về thông báo lỗi
     if (!admin) {
-      return res.render('login', { 
-        title: 'Đăng nhập Quản trị viên', 
-        errorMessage: 'Tài khoản không tồn tại.' 
+      return res.render("login", {
+        title: "Đăng nhập Quản trị viên",
+        errorMessage: "Tài khoản không tồn tại.",
       });
     }
 
     // So sánh mật khẩu thô với mật khẩu trong DB
     if (password !== admin.password) {
-      return res.render('login', { 
-        title: 'Đăng nhập Quản trị viên', 
-        errorMessage: 'Mật khẩu không chính xác.' 
+      return res.render("login", {
+        title: "Đăng nhập Quản trị viên",
+        errorMessage: "Mật khẩu không chính xác.",
       });
     }
 
     // Lưu thông tin admin vào session và chuyển hướng tới trang chủ
     req.session.adminId = admin._id;
-    res.redirect('/');  // Chuyển hướng sau khi đăng nhập thành công
-
+    res.redirect("/"); // Chuyển hướng sau khi đăng nhập thành công
   } catch (err) {
-  
-    console.error('Lỗi đăng nhập:', err);
-    res.render('login', { 
-      title: 'Đăng nhập Quản trị viên', 
-      errorMessage: 'Đã có lỗi xảy ra. Vui lòng thử lại.' 
+    console.error("Lỗi đăng nhập:", err);
+    res.render("login", {
+      title: "Đăng nhập Quản trị viên",
+      errorMessage: "Đã có lỗi xảy ra. Vui lòng thử lại.",
     });
   }
 });
-
 
 
 // Các route của ứng dụng
@@ -182,6 +178,7 @@ app.use("/promotions", promotionRoutes);
 app.use("/reviews", reviewRoutes);
 app.use("/booking-history", bookingRoutes);
 app.use("/payments", paymentRouter);
+app.use("/cinema-rooms", cinemaRoomRoutes);
 
 // Cổng mặc định và kết nối cơ sở dữ liệu
 const PORT = process.env.PORT || 5000;
@@ -199,8 +196,6 @@ const startServer = async () => {
 };
 
 startServer(); // Khởi chạy server
-
-
 
 //Tương Tác Server
 
@@ -243,13 +238,13 @@ app.get("/movies-admin", async (req, res) => {
 app.post("/movies-admin", upload.single("image"), async (req, res) => {
   // Lấy thông tin phim từ request body
   const {
-    title,           // Tiêu đề phim
-    description,     // Mô tả phim
-    trailer_url,     // URL trailer
-    category_id,     // ID thể loại
-    duration,        // Thời lượng phim
-    release_date,    // Ngày phát hành
-    coming_soon,     // Trạng thái sắp chiếu
+    title, // Tiêu đề phim
+    description, // Mô tả phim
+    trailer_url, // URL trailer
+    category_id, // ID thể loại
+    duration, // Thời lượng phim
+    release_date, // Ngày phát hành
+    coming_soon, // Trạng thái sắp chiếu
   } = req.body;
 
   // Lấy đường dẫn hình ảnh nếu có tải lên
@@ -258,13 +253,13 @@ app.post("/movies-admin", upload.single("image"), async (req, res) => {
   try {
     // Tạo đối tượng phim mới
     const movie = new Movie({
-      title,                 // Tiêu đề
-      description,           // Mô tả
-      trailer_url,           // Trailer URL
-      category_id,           // ID thể loại
-      duration,              // Thời lượng
-      release_date,          // Ngày phát hành
-      image_url,             // Đường dẫn ảnh
+      title, // Tiêu đề
+      description, // Mô tả
+      trailer_url, // Trailer URL
+      category_id, // ID thể loại
+      duration, // Thời lượng
+      release_date, // Ngày phát hành
+      image_url, // Đường dẫn ảnh
       coming_soon: coming_soon === "on", // Nếu checkbox "sắp chiếu" được chọn
     });
 
@@ -305,8 +300,6 @@ app.get("/movies-admin/delete/:movie_id", async (req, res) => {
     res.status(500).send("Lỗi khi xóa phim");
   }
 });
-
-
 
 // Định nghĩa một route POST tại URL "/movies-admin/:id"
 // Middleware `upload.single("image")` được sử dụng để xử lý file upload (trường "image")
@@ -358,7 +351,6 @@ app.post("/movies-admin/:id", upload.single("image"), async (req, res) => {
     res.status(500).send("Lỗi khi cập nhật phim");
   }
 });
-
 
 // Route hiển thị danh sách đồ ăn/đồ uống
 app.get("/food-drinks-admin", async (req, res) => {
@@ -449,8 +441,9 @@ app.post("/food-drinks-admin/:id", upload.single("image"), async (req, res) => {
 app.get("/showtime-admin", async (req, res) => {
   try {
     // Lấy tất cả suất chiếu và phim dưới dạng plain object
-    const showtimes = await Showtime.find().lean(); // Sử dụng .lean() để trả về plain object
+    const showtimes = await Showtime.find().lean(); // Không cần populate nữa vì room_id là kiểu number
     const movies = await Movie.find().lean();
+    const rooms = await CinemaRoom.find().lean(); // Lấy tất cả phòng chiếu từ CinemaRoom
 
     // Duyệt qua showtimes và bổ sung thông tin phim vào từng showtime
     const showtimesWithMovies = showtimes.map((showtime) => {
@@ -461,34 +454,35 @@ app.get("/showtime-admin", async (req, res) => {
 
       // Trả về showtime đã được bổ sung thông tin movie
       return {
-        ...showtime, 
-        movie: movie ? movie : null, 
-        movie_id: showtime.movie_id, 
+        ...showtime,
+        movie: movie ? movie : { title: "Phim không xác định" },
+        movie_id: showtime.movie_id,
       };
     });
 
-    // Render view và truyền dữ liệu showtimesWithMovies và movies
-    res.render("showtime", { showtimes: showtimesWithMovies, movies });
+    // Render view và truyền dữ liệu showtimesWithMovies, movies, rooms
+    res.render("showtime", { showtimes: showtimesWithMovies, movies, rooms });
   } catch (error) {
     console.log(error);
-    res.status(500).send("Server Error");
+    res.status(500).send("Lỗi server");
   }
 });
+
 
 // Route xử lý tạo suất chiếu mới
 app.post("/showtime-admin/create", async (req, res) => {
   try {
-    const { movie_id, start_time, room, ticket_price } = req.body;
+    const { movie_id, start_time, room_id, ticket_price } = req.body;
 
-    // Tạo mới đối tượng Showtime mà không cần phải chỉ định showtime_id
+    // Tạo mới suất chiếu với thông tin đã chọn
     const newShowtime = new Showtime({
       movie_id,
       start_time,
-      room,
+      room_id,  // room_id là kiểu Number, không cần phải chuyển đổi thành ObjectId
       ticket_price,
     });
 
-    await newShowtime.save(); 
+    await newShowtime.save();
 
     res.redirect("/showtime-admin"); // Sau khi lưu thành công, chuyển hướng về danh sách suất chiếu
   } catch (error) {
@@ -497,43 +491,40 @@ app.post("/showtime-admin/create", async (req, res) => {
   }
 });
 
+
 // Cập nhật suất chiếu theo showtime_id
 app.post("/showtime-admin/update/:id", async (req, res) => {
   try {
-    const showtimeId = Number(req.params.id); 
+    const showtimeId = req.params.id;  // Không cần chuyển kiểu, chỉ cần chuỗi
 
-    // Kiểm tra nếu showtimeId không hợp lệ
-    if (isNaN(showtimeId)) {
-      return res.status(400).send("ID suất chiếu không hợp lệ");
-    }
+    const { movie_id, start_time, room_id, ticket_price } = req.body;
 
-    const { movie_id, start_time, room, ticket_price } = req.body;
-
-    // Tìm kiếm và cập nhật theo showtime_id (không phải _id)
+    // Tìm và cập nhật suất chiếu với room_id là Number (không phải ObjectId)
     const updatedShowtime = await Showtime.findOneAndUpdate(
-      { showtime_id: showtimeId }, // Dùng showtime_id thay vì _id
-      { movie_id, start_time, room, ticket_price },
-      { new: true } 
+      { showtime_id: showtimeId },
+      { movie_id, start_time, room_id, ticket_price },  // room_id truyền vào như kiểu number
+      { new: true }
     );
 
-    // Kiểm tra nếu không tìm thấy suất chiếu
     if (!updatedShowtime) {
       return res.status(404).send("Không tìm thấy suất chiếu");
     }
 
-    // Redirect về danh sách suất chiếu
-    res.redirect("/showtime-admin");
+    res.redirect("/showtime-admin"); // Sau khi cập nhật thành công, chuyển hướng về danh sách suất chiếu
   } catch (error) {
     console.error(error);
     res.status(500).send("Lỗi khi cập nhật suất chiếu");
   }
 });
 
+
+
 // Xóa suất chiếu
 app.get("/showtime-admin/delete/:id", async (req, res) => {
   try {
-    const id = Number(req.params.id); 
+    const id = Number(req.params.id);
 
+    // Tìm và xóa suất chiếu theo showtime_id
     const deletedShowtime = await Showtime.findOneAndDelete({
       showtime_id: id,
     });
@@ -542,7 +533,7 @@ app.get("/showtime-admin/delete/:id", async (req, res) => {
       return res.status(404).send("Không tìm thấy suất chiếu để xóa");
     }
 
-    res.redirect("/showtime-admin"); // Quay lại danh sách suất chiếu sau khi xóa
+    res.redirect("/showtime-admin"); // Sau khi xóa thành công, chuyển hướng về danh sách suất chiếu
   } catch (error) {
     console.error(error);
     res.status(500).send("Lỗi khi xóa suất chiếu");
@@ -551,19 +542,18 @@ app.get("/showtime-admin/delete/:id", async (req, res) => {
 
 
 // Lấy tất cả khuyến mãi
-app.get('/promotions/:id', (req, res) => {
+app.get("/promotions/:id", (req, res) => {
   const promotionId = req.params.id;
   Promotion.findById(promotionId, (err, promotion) => {
     if (err) {
-      return res.status(500).send('Error retrieving promotion');
+      return res.status(500).send("Error retrieving promotion");
     }
     if (!promotion) {
-      return res.status(404).send('Promotion not found');
+      return res.status(404).send("Promotion not found");
     }
-    res.render('promotionDetail', { promotion });
+    res.render("promotionDetail", { promotion });
   });
 });
-
 
 // Tạo một khuyến mãi mới
 app.post("/promotions", async (req, res) => {
@@ -605,7 +595,8 @@ app.post("/promotions/:promotion_id", async (req, res) => {
     }
 
     promotion.discount_code = discount_code || promotion.discount_code;
-    promotion.discount_percentage = discount_percentage || promotion.discount_percentage;
+    promotion.discount_percentage =
+      discount_percentage || promotion.discount_percentage;
 
     await promotion.save();
 
@@ -640,20 +631,21 @@ app.delete("/promotions/:promotion_id", async (req, res) => {
   }
 });
 
-
 // Định nghĩa route trả về thời gian server theo múi giờ Việt Nam (GMT+7)
-app.get('/get-server-time', (req, res) => {
+app.get("/get-server-time", (req, res) => {
   const options = {
-    timeZone: 'Asia/Ho_Chi_Minh', // Múi giờ Việt Nam
+    timeZone: "Asia/Ho_Chi_Minh", // Múi giờ Việt Nam
     hour12: false, // Định dạng 24 giờ
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
   };
 
-  const serverTime = new Intl.DateTimeFormat('vi-VN', options).format(new Date());
+  const serverTime = new Intl.DateTimeFormat("vi-VN", options).format(
+    new Date()
+  );
   res.json({ time: serverTime });
 });

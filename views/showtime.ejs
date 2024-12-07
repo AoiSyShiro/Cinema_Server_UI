@@ -24,14 +24,21 @@
       <% showtimes.forEach(showtime => { %>
         <tr class="hover:bg-gray-50 border-b">
           <td class="px-6 py-4 text-sm text-gray-900 font-medium"><%= showtime.showtime_id %></td>
-          <td class="px-6 py-4 text-sm text-gray-900"><%= showtime.movie ? showtime.movie.title : 'Không tìm thấy phim' %></td> <!-- Hiển thị tên phim -->
+          <td class="px-6 py-4 text-sm text-gray-900"><%= showtime.movie ? showtime.movie.title : 'Không tìm thấy phim' %></td>
           <td class="px-6 py-4 text-sm text-gray-900"><%= new Date(showtime.start_time).toLocaleString() %></td>
-          <td class="px-6 py-4 text-sm text-gray-900"><%= showtime.room %></td>
+          <td class="px-6 py-4 text-sm text-gray-900">
+            <!-- Hiển thị tên phòng chiếu -->
+            <% 
+              const room = rooms.find(r => r.room_id === showtime.room_id); 
+              const roomName = room ? room.room_name : 'Chưa xác định';
+            %>
+            <%= roomName %>
+          </td>
           <td class="px-6 py-4 text-sm text-gray-900"><%= showtime.ticket_price %> VND</td>
           <td class="px-6 py-4 text-sm font-medium text-gray-600">
             <div class="flex space-x-4">
               <!-- Chỉnh sửa - Icon -->
-              <button class="text-indigo-600 hover:text-indigo-900" onclick="openEditModal('<%= showtime.showtime_id %>', '<%= showtime.movie ? showtime.movie.title : '' %>', '<%= new Date(showtime.start_time).toISOString() %>', '<%= showtime.room %>', <%= showtime.ticket_price %>)">
+              <button class="text-indigo-600 hover:text-indigo-900" onclick="openEditModal('<%= showtime.showtime_id %>', '<%= showtime.movie ? showtime.movie.title : '' %>', '<%= new Date(showtime.start_time).toISOString() %>', <%= showtime.room_id %>, <%= showtime.ticket_price %>)">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                 </svg>
@@ -56,6 +63,7 @@
   <div class="bg-white p-6 w-1/3 transition-all transform scale-95 opacity-0" id="showtimeModalContent">
     <h2 class="text-xl font-semibold mb-4 text-gray-800" id="modalTitle">Thêm Suất Chiếu</h2>
     <form id="showtimeForm" method="POST" action="/showtime-admin/create" onsubmit="return validateShowtimeForm()">
+      <!-- Form Fields for Movie, Start Time, Room and Ticket Price -->
       <div class="mb-4">
         <label for="movie_id" class="block text-sm font-medium text-gray-700">Phim</label>
         <select id="movie_id" name="movie_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
@@ -73,8 +81,13 @@
       </div>
     
       <div class="mb-4">
-        <label for="room" class="block text-sm font-medium text-gray-700">Phòng Chiếu</label>
-        <input type="text" id="room" name="room" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
+        <label for="room_id" class="block text-sm font-medium text-gray-700">Phòng Chiếu</label>
+        <select id="room_id" name="room_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+          <option value="" disabled selected>Chọn phòng chiếu</option>
+          <% rooms.forEach(room => { %>
+            <option value="<%= room.room_id %>"><%= room.room_name %></option>
+          <% }) %>
+        </select>
         <span id="room_error" class="text-red-500 text-sm hidden">Phòng chiếu không được để trống và phải hợp lệ.</span>
       </div>
     
@@ -92,14 +105,15 @@
 </div>
 
 <script>
+  // Validation logic for the form
   function validateShowtimeForm() {
     const startTime = new Date(document.getElementById('start_time').value);
     const currentTime = new Date();
-    const room = document.getElementById('room').value.trim();
+    const room = document.getElementById('room_id').value.trim();
     
     let valid = true;
 
-    // Kiểm tra ngày giờ chiếu phải lớn hơn thời gian hiện tại
+    // Validate start time
     if (startTime <= currentTime) {
       document.getElementById('start_time_error').classList.remove('hidden');
       valid = false;
@@ -107,7 +121,7 @@
       document.getElementById('start_time_error').classList.add('hidden');
     }
 
-    // Kiểm tra phòng chiếu không được để trống và hợp lệ
+    // Validate room field
     if (room === "") {
       document.getElementById('room_error').classList.remove('hidden');
       valid = false;
@@ -115,31 +129,25 @@
       document.getElementById('room_error').classList.add('hidden');
     }
 
-    return valid; // Nếu hợp lệ, form sẽ được gửi
+    return valid; 
   }
-// Mở modal để chỉnh sửa thông tin suất chiếu
-function openEditModal(showtime_id, movie_id, start_time, room, ticket_price) {
-  // Hiển thị modal
-  document.getElementById('showtimeModal').classList.remove('hidden');
-  document.getElementById('showtimeModalContent').classList.remove('scale-95', 'opacity-0');
-  document.getElementById('showtimeModalContent').classList.add('scale-100', 'opacity-100');
-  document.getElementById('modalTitle').textContent = 'Chỉnh Sửa Suất Chiếu';
-  
-  // Truyền showtime_id vào action của form
-  document.getElementById('showtimeForm').action = '/showtime-admin/update/' + showtime_id;  
-  
-  // Gán giá trị cho các trường trong form
-  document.getElementById('movie_id').value = movie_id;  // Đảm bảo sử dụng movie_id
-  
-  // Format lại start_time theo định dạng "yyyy-MM-ddThh:mm" cho input datetime-local
-  const formattedStartTime = new Date(start_time).toISOString().slice(0, 16); // Chuyển đổi sang ISO string và cắt bớt phần giây/millisecond
-  document.getElementById('start_time').value = formattedStartTime;
-  
-  document.getElementById('room').value = room;
-  document.getElementById('ticket_price').value = ticket_price;
+
+  // Modal handling functions for editing and adding showtimes
+  function openEditModal(showtime_id, movie_id, start_time, room_id, ticket_price) {
+    document.getElementById('showtimeModal').classList.remove('hidden');
+    document.getElementById('showtimeModalContent').classList.remove('scale-95', 'opacity-0');
+    document.getElementById('showtimeModalContent').classList.add('scale-100', 'opacity-100');
+    document.getElementById('modalTitle').textContent = 'Chỉnh Sửa Suất Chiếu';
+    
+    document.getElementById('showtimeForm').action = '/showtime-admin/update/' + showtime_id;  
+    
+    document.getElementById('movie_id').value = movie_id;
+    const formattedStartTime = new Date(start_time).toISOString().slice(0, 16); // Format date
+    document.getElementById('start_time').value = formattedStartTime;
+    document.getElementById('room_id').value = room_id; // Set the room ID for editing
+    document.getElementById('ticket_price').value = ticket_price;
 }
 
-  
   function openAddModal() {
     document.getElementById('showtimeModal').classList.remove('hidden');
     document.getElementById('showtimeModalContent').classList.remove('scale-95', 'opacity-0');
@@ -149,8 +157,6 @@ function openEditModal(showtime_id, movie_id, start_time, room, ticket_price) {
     document.getElementById('showtimeForm').action = '/showtime-admin/create';
   }
   
-
-  // Đóng modal
   function closeModal() {
     document.getElementById('showtimeModal').classList.add('hidden');
     document.getElementById('showtimeModalContent').classList.remove('scale-100', 'opacity-100');
