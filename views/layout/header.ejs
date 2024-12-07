@@ -1,4 +1,3 @@
-<!-- layout/header.ejs -->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -7,36 +6,54 @@
   <title>Phòng Vé Rạp</title>
 
   <!-- TailwindCSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,container-queries"></script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
   
-  
+  <!-- Thêm favicon nếu có -->
+  <link rel="icon" href="/path/to/favicon.ico">
+
+  <!-- Các tệp CSS hoặc JS bổ sung -->
+  <!-- <link rel="stylesheet" href="/path/to/your/styles.css"> -->
 </head>
 <body class="bg-gray-100">
   <!-- Phần header chính -->
   <header class="bg-gray-800 text-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="relative flex items-center justify-between h-16">
-        <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
-          <!-- Mobile menu button -->
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center">
+          <a href="/" class="text-2xl font-bold">Rạp Chiếu Phim</a>
         </div>
-        <div class="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
-          <div class="flex-shrink-0">
-            <a href="/" class="text-xl font-semibold">Cinema Server</a>
-          </div>
-          <div class="hidden sm:block sm:ml-6">
-            <div class="flex space-x-4">
-              <a href="/" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Trang chủ</a>
-              <a href="/movies-admin" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Phim</a>
-              <!-- <a href="/category-admin" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Thể loại phim</a> -->
-              <a href="/promotions" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Khuyến mãi</a>
-              <a href="/showtime-admin" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Suất chiếu</a>
-              <a href="/cinema-rooms" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Phòng chiếu</a>
-              <a href="/food-drinks-admin" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Đồ ăn</a>
-              <a href="/booking-history" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Lịch sử đặt vé</a>
-            </div>
-          </div>
+        <nav class="hidden md:flex space-x-4">
+          <a href="/" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">Trang chủ</a>
+          <a href="/movies-admin" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">Phim</a>
+          <!-- <a href="/category-admin" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">Thể loại phim</a> -->
+          <a href="/promotions" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">Khuyến mãi</a>
+          <a href="/showtime-admin" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">Suất chiếu</a>
+          <a href="/cinema-rooms" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">Phòng chiếu</a>
+          <a href="/food-drinks-admin" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">Đồ ăn</a>
+          <a href="/booking-history" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">Lịch sử đặt vé</a>
+        </nav>
+        <!-- Nút menu cho mobile -->
+        <div class="md:hidden flex items-center">
+          <button class="mobile-menu-button">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
+    <!-- Mobile Menu -->
+    <div class="mobile-menu hidden md:hidden">
+      <a href="/" class="block px-4 py-2 text-sm hover:bg-gray-700">Trang chủ</a>
+      <a href="/movies-admin" class="block px-4 py-2 text-sm hover:bg-gray-700">Phim</a>
+      <!-- <a href="/category-admin" class="block px-4 py-2 text-sm hover:bg-gray-700">Thể loại phim</a> -->
+      <a href="/promotions" class="block px-4 py-2 text-sm hover:bg-gray-700">Khuyến mãi</a>
+      <a href="/showtime-admin" class="block px-4 py-2 text-sm hover:bg-gray-700">Suất chiếu</a>
+      <a href="/cinema-rooms" class="block px-4 py-2 text-sm hover:bg-gray-700">Phòng chiếu</a>
+      <a href="/food-drinks-admin" class="block px-4 py-2 text-sm hover:bg-gray-700">Đồ ăn</a>
+      <a href="/booking-history" class="block px-4 py-2 text-sm hover:bg-gray-700">Lịch sử đặt vé</a>
+    </div>
   </header>
+
+  <!-- Nội dung trang -->
