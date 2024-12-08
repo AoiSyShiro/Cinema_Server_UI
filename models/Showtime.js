@@ -7,6 +7,7 @@ const ShowtimeSchema = new mongoose.Schema({
   start_time: { type: Date, required: true },
   room_id: { type: Number, required: true, ref: "CinemaRoom" }, // Tham chiếu đến CinemaRoom
   ticket_price: { type: Number, required: true },
+  reserved_seats: { type: [String], default: [] },
 });
 
 ShowtimeSchema.plugin(AutoIncrement, { inc_field: 'showtime_id' });

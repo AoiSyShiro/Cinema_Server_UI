@@ -1,16 +1,43 @@
 const Showtime = require("../models/Showtime");
 const Movie = require("../models/Movie");
+const CinemaRoom = require("../models/CinemaRoom"); // Đảm bảo đường dẫn đúng với vị trí file CinemaRoom.js
+
 
 // Lấy danh sách tất cả suất chiếu
 const getAllShowtimes = async (req, res) => {
   try {
-    const showtimes = await Showtime.find().populate("movie_id", "title").populate("room_id", "room_id"); // Chỉ lấy room_id
-    res.status(200).json(showtimes);
+    // Lấy tất cả suất chiếu và phim dưới dạng plain object
+    const showtimes = await Showtime.find().lean();
+    const movies = await Movie.find().lean();
+    const rooms = await CinemaRoom.find().lean(); // Lấy tất cả phòng chiếu từ CinemaRoom
+
+    // Duyệt qua showtimes và bổ sung thông tin phim và phòng chiếu vào từng showtime
+    const showtimesWithDetails = showtimes.map((showtime) => {
+      // Tìm phim tương ứng với movie_id của showtime
+      const movie = movies.find(
+        (movie) => movie.movie_id === showtime.movie_id
+      );
+
+      // Tìm phòng chiếu tương ứng với room_id của showtime
+      const room = rooms.find(
+        (room) => room.room_id === showtime.room_id
+      );
+
+      // Trả về showtime đã được bổ sung thông tin movie và room
+      return {
+        ...showtime,
+        movie: movie ? movie : { title: "Phim không xác định" },
+        room: room ? room : { name: "Phòng chiếu không xác định" },
+      };
+    });
+
+    // Gửi danh sách suất chiếu kèm thông tin phim và phòng chiếu dưới dạng JSON
+    res.json(showtimesWithDetails);
   } catch (error) {
-    res.status(500).json({ message: "Lỗi khi lấy danh sách suất chiếu", error });
+    console.error('Lỗi khi lấy danh sách suất chiếu:', error);
+    res.status(500).send('Lỗi server');
   }
 };
-
 
 // Thêm mới một suất chiếu
 const createShowtime = async (req, res) => {
@@ -82,38 +109,69 @@ const deleteShowtime = async (req, res) => {
 };
 
 const getShowtimesByMovieId = async (req, res) => {
-  const movieId = Number(req.params.id);  // Chuyển params id thành Number
-  
+  const movieId = Number(req.params.id); // Chuyển params id thành Number
+
   console.log(`Nhận request để tìm suất chiếu cho phim với ID: ${movieId}`);
 
-  // Kiểm tra nếu movieId không phải là số hợp lệ
   if (isNaN(movieId)) {
     console.log(`Lỗi: movieId không hợp lệ: ${req.params.id}`);
-    return res.status(400).send("Oops, có chút vấn đề với mã phim. Hãy thử lại nhé!");  // Thông báo thân thiện
+    return res.status(400).send("Oops, có chút vấn đề với mã phim. Hãy thử lại nhé!"); // Thông báo thân thiện
   }
 
   try {
     console.log(`Đang tìm suất chiếu cho phim ID: ${movieId}`);
-    
-    // Truy vấn suất chiếu dựa trên movie_id
-    const showtimes = await Showtime.find({ movie_id: movieId });
 
-    // Kiểm tra nếu có suất chiếu
-    if (showtimes.length > 0) {
-      console.log(`Tìm thấy ${showtimes.length} suất chiếu cho phim ID: ${movieId}`);
-      // Trả về suất chiếu nếu có
-      return res.json(showtimes);  
-    } else {
+    // Tìm tất cả suất chiếu với movie_id
+    const showtimes = await Showtime.find({ movie_id: movieId }).lean();
+
+    // Kiểm tra nếu không có suất chiếu nào
+    if (showtimes.length === 0) {
       console.log(`Không tìm thấy suất chiếu cho phim ID: ${movieId}`);
-      // Nếu không có suất chiếu cho phim này
       return res.status(404).send("Rất tiếc, hiện tại không có suất chiếu cho bộ phim này. Bạn có thể thử phim khác nhé!");
     }
+
+    // Lấy thông tin phim
+    const movie = await Movie.findOne({ movie_id: movieId }).lean();
+
+    if (!movie) {
+      console.log(`Không tìm thấy thông tin phim với ID: ${movieId}`);
+      return res.status(404).send("Không tìm thấy thông tin về bộ phim. Vui lòng kiểm tra lại.");
+    }
+
+    // Lấy thông tin tất cả các phòng chiếu
+    const rooms = await CinemaRoom.find().lean();
+
+    // Bổ sung thông tin chi tiết cho từng suất chiếu
+    const showtimesWithDetails = showtimes.map((showtime) => {
+      const room = rooms.find((room) => room.room_id === showtime.room_id);
+      return {
+        ...showtime,
+        movie: {
+          title: movie.title,
+          description: movie.description,
+          duration: movie.duration,
+          release_date: movie.release_date,
+          image_url: movie.image_url,
+        },
+        room: room
+          ? {
+              room_name: room.room_name,
+              seat_capacity: room.seat_capacity,
+              reserved_seats: room.reserved_seats,
+              is_active: room.is_active,
+            }
+          : { room_name: "Phòng không xác định" },
+      };
+    });
+
+    console.log(`Đã tìm thấy ${showtimesWithDetails.length} suất chiếu cho phim ID: ${movieId}`);
+    return res.json(showtimesWithDetails); // Trả về danh sách chi tiết
   } catch (error) {
     console.error("Lỗi khi truy vấn suất chiếu:", error);
-    console.log(`Lỗi xảy ra khi truy vấn suất chiếu cho phim ID: ${movieId}`);
     return res.status(500).send("Chúng tôi đang gặp chút sự cố kỹ thuật. Vui lòng thử lại sau!");
   }
 };
+
 
 
 module.exports = { getAllShowtimes, createShowtime, updateShowtime, deleteShowtime, getShowtimesByMovieId };

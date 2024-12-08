@@ -21,7 +21,6 @@ const ticketBookingRouter = require("./routes/ticketBookingRouter");
 const promotionRoutes = require("./routes/promotionRouter");
 const reviewRoutes = require("./routes/reviewRouter");
 const bookingRoutes = require("./routes/bookingRouter");
-const paymentRouter = require("./routes/paymentRouter");
 const dashboardRouter = require("./routes/dashboardRouter");
 const cinemaRoomRoutes = require("./routes/cinemaRoomRoutes");
 
@@ -38,9 +37,7 @@ const FoodDrink = require("./models/FoodDrink");
 const Showtime = require("./models/Showtime");
 const Promotion = require("./models/Promotion");
 const Admin = require("./models/admin"); // Điều chỉnh đường dẫn nếu cần
-const CinemaRoom = require('./models/CinemaRoom');  // Đảm bảo đường dẫn đúng với vị trí file CinemaRoom.js
-
-
+const CinemaRoom = require("./models/CinemaRoom"); // Đảm bảo đường dẫn đúng với vị trí file CinemaRoom.js
 
 // ========================== Cấu hình Cloudinary và Multer ==========================
 
@@ -77,23 +74,38 @@ app.use(express.urlencoded({ extended: true })); // Middleware để xử lý UR
 
 app.use((req, res, next) => {
   const start = Date.now();
-  const { method, path } = req;
-  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  const { method, originalUrl } = req;
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
-  console.log("Thông tin yêu cầu:", method, path, ip, new Date().toISOString());
-
-  res.on("finish", () => {
+  res.on('finish', () => {
+    const timeStamp = formatDateTime(new Date()); // Lấy thời gian khi phản hồi hoàn thành
     const duration = Date.now() - start;
+    const statusCode = res.statusCode;
+
     console.log(
-      "Trạng thái phản hồi:",
-      res.statusCode,
-      "Thời gian xử lý (ms):",
-      duration
+      `[${timeStamp}] ${ip} ${method} ${originalUrl} ${statusCode} ${duration}ms`
     );
   });
 
   next();
 });
+
+function formatDateTime(date) {
+  const padZero = (num) => num.toString().padStart(2, '0');
+
+  const day = padZero(date.getDate());
+  const month = padZero(date.getMonth() + 1); // Tháng bắt đầu từ 0
+  const year = date.getFullYear();
+  const hours = padZero(date.getHours());
+  const minutes = padZero(date.getMinutes());
+  const seconds = padZero(date.getSeconds());
+
+  // Mảng các thứ trong tuần bằng tiếng Việt
+  const weekdays = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+  const weekday = weekdays[date.getDay()];
+
+  return `${day}-${month}-${year} ${hours}:${minutes}:${seconds} ${weekday}`;
+}
 
 // ========================== Cấu hình Session ==========================
 
@@ -186,7 +198,6 @@ app.use("/tickets", ticketBookingRouter);
 app.use("/promotions", promotionRoutes);
 app.use("/reviews", reviewRoutes);
 app.use("/booking-history", bookingRoutes);
-app.use("/payments", paymentRouter);
 app.use("/cinema-rooms", cinemaRoomRoutes);
 
 // ========================== Kết nối cơ sở dữ liệu và khởi động server ==========================

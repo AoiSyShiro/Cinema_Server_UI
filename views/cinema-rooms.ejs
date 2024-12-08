@@ -139,26 +139,47 @@
     </div>
 </div>
 
+
 <script>
+    // Hàm mở modal chỉnh sửa khi trang được load nếu có lỗi
+    <% if (typeof openModal !== 'undefined' && openModal && isEdit) { %>
+        document.addEventListener('DOMContentLoaded', function() {
+            openEditModal(
+                <%= formData.room_id %>,
+                '<%= formData.room_name %>',
+                <%= formData.seat_capacity %>,
+                '<%= formData.is_active %>',
+                <%= formData.duration %>,
+                <%= formData.movie_id %>,
+                '<%= formData.start_time %>',
+                '<%= formData.end_time %>'
+            );
+        });
+    <% } else if (typeof openModal !== 'undefined' && openModal) { %>
+        // Nếu openModal là true nhưng isEdit là false, mở modal thêm mới
+        document.addEventListener('DOMContentLoaded', function() {
+            openAddModal();
+        });
+    <% } %>
+
     function openEditModal(id, name, capacity, isActive, duration, movieId, startTime, endTime) {
         document.getElementById('roomModal').classList.remove('hidden');
         document.getElementById('roomModalContent').classList.remove('scale-95', 'opacity-0');
         document.getElementById('roomModalContent').classList.add('scale-100', 'opacity-100');
-    
+
         document.getElementById('modalTitle').textContent = 'Chỉnh sửa Phòng';
         document.getElementById('roomForm').action = '/cinema-rooms/' + id;
-    
+
         document.getElementById('room_name').value = name;
         document.getElementById('seat_capacity').value = capacity;
-        document.getElementById('is_active').checked = isActive;
+        document.getElementById('is_active').checked = isActive === 'on' || isActive === true;
         document.getElementById('duration').value = duration;
         document.getElementById('movie_id').value = movieId;
-    
+
         // Cập nhật thời gian bắt đầu và kết thúc
-        document.getElementById('start_time').value = formatDateToLocalISO(new Date(startTime));
-        document.getElementById('end_time').value = formatDateToLocalISO(new Date(endTime));
+        document.getElementById('start_time').value = startTime;
+        document.getElementById('end_time').value = endTime;
     }
-    
 
   function openAddModal() {
     document.getElementById('roomModal').classList.remove('hidden');
@@ -214,5 +235,12 @@ function formatDateToLocalISO(date) {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 </script>
+
+<!-- Thêm script để hiển thị thông báo lỗi -->
+<% if (errorMessage) { %>
+    <script>
+      alert('<%= errorMessage %>');
+    </script>
+  <% } %>
 
 <%- include('layout/footer.ejs') %>

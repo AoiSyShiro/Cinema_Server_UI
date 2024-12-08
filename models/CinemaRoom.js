@@ -5,7 +5,6 @@ const cinemaRoomSchema = new Schema({
   room_id: { type: Number, unique: true },
   room_name: { type: String, required: true },
   seat_capacity: { type: Number, required: true },
-  reserved_seats: { type: [String], default: [] },
   is_active: { type: Boolean, default: true },
   start_time: { type: Date, required: true },
   end_time: { type: Date, required: true },
