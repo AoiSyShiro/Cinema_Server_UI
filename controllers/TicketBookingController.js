@@ -100,6 +100,7 @@ const bookTicket = async (req, res) => {
   }
 };
 
+
 // Hàm tạo mã QR ngẫu nhiên (ví dụ)
 const generateQRCode = () => {
   return Math.random().toString(36).substring(2, 15);

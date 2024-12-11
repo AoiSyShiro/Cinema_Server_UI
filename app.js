@@ -38,6 +38,7 @@ const Showtime = require("./models/Showtime");
 const Promotion = require("./models/Promotion");
 const Admin = require("./models/admin"); // Điều chỉnh đường dẫn nếu cần
 const CinemaRoom = require("./models/CinemaRoom"); // Đảm bảo đường dẫn đúng với vị trí file CinemaRoom.js
+const BookTickets = require('./models/BookTickets');
 
 // ========================== Cấu hình Cloudinary và Multer ==========================
 
@@ -673,4 +674,80 @@ app.get("/get-server-time", (req, res) => {
     new Date()
   );
   res.json({ time: serverTime });
+});
+
+
+app.get('/get-showtimes/:movieId', async (req, res) => {
+  const movieId = req.params.movieId;
+  const showtimes = await Showtime.find({ movie_id: movieId });
+
+  const showtimesWithReservedSeats = showtimes.map(showtime => {
+    return {
+      showtime_id: showtime.showtime_id,
+      start_time: showtime.start_time,
+      room_id: showtime.room_id,
+      reserved_seats: showtime.reserved_seats, // Dữ liệu ghế đã đặt
+    };
+  });
+
+  res.json(showtimesWithReservedSeats);
+});
+
+
+app.post('/book-ticket', async (req, res) => {
+  try {
+    console.log(req.body);  // Log the request body
+    const { user_id, showtime_id, seats, food_drinks, payment_method, price, movie_id } = req.body;
+
+    // Validate the input fields
+    if (!user_id || !showtime_id || !seats || !movie_id || !payment_method || !price) {
+      return res.status(400).json({ message: "Thiếu thông tin bắt buộc" });
+    }
+
+    // Find the showtime by showtime_id
+    const showtime = await Showtime.findOne({ showtime_id });
+    if (!showtime) {
+      return res.status(404).json({ message: "Không tìm thấy suất chiếu" });
+    }
+
+    // Process the food_drinks field
+    let selectedFoodDrinks = [];
+    if (food_drinks && food_drinks.length > 0) {
+      selectedFoodDrinks = await FoodDrink.find({
+        food_drink_id: { $in: food_drinks.split(',') }  // Assuming food_drinks is a comma-separated string
+      });
+    }
+
+    // Calculate total price (you can add logic for price calculation here)
+    let totalPrice = parseInt(price, 10);  // Convert to integer if price is a string
+
+    // Create a new ticket
+    const newTicket = new BookTickets({
+      user_id,
+      movie_id,
+      showtime_id,
+      seats: seats.split(','),  // Assuming seats are passed as a comma-separated string
+      food_drinks: selectedFoodDrinks.map(item => ({
+        food_drink_id: item.food_drink_id,
+        quantity: 1,  // Assuming a quantity of 1 for simplicity
+      })),
+      payment_method,
+      price: totalPrice,
+    });
+
+    // Save the ticket
+    const savedTicket = await newTicket.save();
+
+    // Update showtime with reserved seats
+    showtime.reserved_seats = [...showtime.reserved_seats, ...seats.split(',')]; // Ensure reserved seats are added properly
+    await showtime.save();
+
+    res.status(201).json({
+      message: "Đặt vé thành công",
+      ticket: savedTicket,
+    });
+  } catch (error) {
+    console.error("Error creating ticket:", error);
+    res.status(500).json({ message: "Lỗi khi tạo vé", error: error.message });
+  }
 });

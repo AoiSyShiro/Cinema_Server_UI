@@ -1,46 +1,35 @@
 <%- include('layout/header.ejs') %>
 
 <div class="container mx-auto p-6">
-  <!-- Tiêu đề
-  <h1 class="text-2xl font-bold mb-6 text-gray-800">Quản Lý Đặt Vé</h1> -->
-
-  <!-- Thanh tìm kiếm -->
-  <div class="flex items-center justify-between mb-6">
-    <form id="searchForm" method="GET" action="/booking-history/search-bookings" class="flex items-center space-x-2">
-      <input 
-        type="text" 
-        name="book_tickets_id" 
-        id="searchBook_tickets_id" 
-        placeholder="Nhập ID vé hoặc quét QR..." 
-        class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-200"
-      />
-      <button 
-        type="submit" 
-        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+    <!-- Thanh tìm kiếm -->
+    <div class="flex items-center justify-between mb-6">
+      <form id="searchForm" method="GET" action="/booking-history/search-bookings" class="flex items-center space-x-2">
+        <input 
+          type="text" 
+          name="book_tickets_id" 
+          id="searchBook_tickets_id" 
+          placeholder="Nhập ID vé hoặc quét QR..." 
+          class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+        />
+        <button 
+          type="submit" 
+          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          Tìm kiếm
+        </button>
+      </form>
+      <!-- <button 
+        id="scanQR" 
+        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
       >
-        Tìm kiếm
-      </button>
-    </form>
-    <!-- <button 
-      id="scanQR" 
-      class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-    >
-      Quét QR Code
-    </button> -->
-  </div>
-
-  <!-- QR Scanner -->
-  <div id="qrScannerContainer" class="hidden mb-6">
-    <video id="qrScanner" class="w-full border border-gray-300 rounded-md"></video>
+        Quét QR Code
+      </button> -->
+    </div>
     <button 
-      id="stopScanner" 
-      class="mt-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-    >
-      Dừng Quét
-    </button>
-  </div>
-
-  <!-- Bảng danh sách đặt vé -->
+    class="mt-6 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+    onclick="openAddTicketModal()">
+    Tạo Vé Mới
+  </button>
   <table class="min-w-full bg-white border border-gray-200 shadow-md">
     <thead class="bg-gray-800 text-white">
       <tr>
@@ -59,47 +48,203 @@
       <% bookings.forEach(booking => { %>
         <tr class="hover:bg-gray-50 border-b">
           <td class="px-6 py-4 text-sm text-gray-900 font-medium"><%= booking.book_tickets_id %></td>
-          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.user || 'N/A' %></td>
-          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.movie || 'N/A' %></td>
-          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.booking_time || 'N/A' %></td>
-          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.seats.join(', ') || 'N/A' %></td>
-          <td class="px-6 py-4 text-sm text-gray-900"><%= new Date(booking.booking_time).toLocaleDateString() %></td>
-          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.price.toLocaleString() %> VND</td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.user ? booking.user : 'N/A' %></td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.movie ? booking.movie : 'N/A' %></td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.booking_time ? new Date(booking.booking_time).toLocaleString() : 'N/A' %></td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.seats ? booking.seats.join(', ') : 'N/A' %></td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.booking_time ? new Date(booking.booking_time).toLocaleDateString() : 'N/A' %></td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.price ? booking.price.toLocaleString() : 'N/A' %> VND</td>
           <td class="px-6 py-4 text-sm text-gray-900">
-            <% booking.food_drinks.forEach(food => { %>
-              <div><%= food.name %> (x<%= food.quantity %>) - <%= food.total.toLocaleString() %> VND</div>
-            <% }) %>
-            <% if (booking.food_drinks.length === 0) { %> Không Có Thêm Đồ Ăn <% } %>
+            <% if (booking.food_drinks && booking.food_drinks.length > 0) { %>
+              <% booking.food_drinks.forEach(food => { %>
+                <div><%= food.name %> (x<%= food.quantity %>) - <%= food.total.toLocaleString() %> VND</div>
+              <% }) %>
+            <% } else { %> 
+              Không Có Thêm Đồ Ăn 
+            <% } %>
           </td>
           <td class="px-6 py-4 text-sm text-gray-900"><%= booking.payment_method || 'N/A' %></td>
         </tr>
       <% }) %>
     </tbody>
   </table>
+
+
+
+  <div id="addTicketModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center">
+    <div class="bg-white p-6 rounded-lg w-1/2 shadow-lg max-h-[80vh] overflow-auto">
+      <h2 class="text-2xl font-bold mb-6 text-gray-800">Tạo Vé Mới</h2>
+      <form id="addTicketForm" method="POST" action="/book-ticket">
+        <div class="mb-4">
+          <label for="user_id" class="block text-sm font-medium text-gray-700">Chọn Người Dùng</label>
+          <select id="user_id" name="user_id" class="mt-1 p-2 border border-gray-300 rounded-md w-full" required>
+            <% users.forEach(user => { %>
+              <option value="<%= user.user_id %>"><%= user.username %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <label for="movie_id" class="block text-sm font-medium text-gray-700">Chọn Phim</label>
+          <select id="movie_id" name="movie_id" class="mt-1 p-2 border border-gray-300 rounded-md w-full" required>
+            <option value="">Chọn Phim</option>
+            <% movies.forEach(movie => { %>
+              <option value="<%= movie.movie_id %>"><%= movie.title %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <label for="showtime_id" class="block text-sm font-medium text-gray-700">Chọn Suất Chiếu</label>
+          <select id="showtime_id" name="showtime_id" class="mt-1 p-2 border border-gray-300 rounded-md w-full" required>
+            <option value="">Chọn Suất Chiếu</option>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <label for="seats" class="block text-sm font-medium text-gray-700">Chọn Ghế</label>
+          <div id="seatSelection" class="grid grid-cols-5 gap-2">
+          </div>
+          <input type="hidden" id="seats" name="seats" />
+        </div>
+
+        <div class="mb-4">
+          <label for="food_drinks" class="block text-sm font-medium text-gray-700">Chọn Đồ Ăn & Thức Uống</label>
+          <select id="food_drinks" name="food_drinks" class="mt-1 p-2 border border-gray-300 rounded-md w-full">
+            <% foodItems.forEach(food => { %>
+              <option value="<%= food.food_drink_id %>"><%= food.name %> - <%= food.price %> VND</option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <label for="payment_method" class="block text-sm font-medium text-gray-700">Hình Thức Thanh Toán</label>
+          <select name="payment_method" id="payment_method" class="mt-1 p-2 border border-gray-300 rounded-md w-full" required>
+            <option value="ZaloPay">ZaloPay</option>
+            <option value="Momo">Momo</option>
+            <option value="Tiền mặt">Tiền mặt</option>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <label for="price" class="block text-sm font-medium text-gray-700">Giá Tiền</label>
+          <input type="number" name="price" id="price" class="mt-1 p-2 border border-gray-300 rounded-md w-full" required />
+        </div>
+
+        <div class="flex justify-end">
+          <button type="button" class="mr-4 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700" onclick="closeAddTicketModal()">Hủy</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Tạo Vé</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <%- include('layout/footer.ejs') %>
 
 <script>
-  document.getElementById('scanQR').addEventListener('click', async () => {
-    const scannerContainer = document.getElementById('qrScannerContainer');
-    const videoElement = document.getElementById('qrScanner');
-    scannerContainer.classList.remove('hidden');
-  
-    const scanner = new QrScanner(videoElement, result => {
-      alert(`QR Code Detected: ${result}`);
-      window.location.href = `/booking-history/search-bookings?book_tickets_id=${result}`;
-      scanner.stop();
-      scannerContainer.classList.add('hidden');
-    });
-  
-    scanner.start();
-  
-    document.getElementById('stopScanner').addEventListener('click', () => {
-      scanner.stop();
-      scannerContainer.classList.add('hidden');
-    });
-  });
-</script>
+async function openAddTicketModal() {
+  document.getElementById('addTicketModal').classList.remove('hidden');
+  document.getElementById('seats').value = '';
 
-<script src="/node_modules/qr-scanner/qr-scanner.min.js"></script>
+  const showtimeId = document.getElementById('showtime_id').value;
+  const movieId = document.getElementById('movie_id').value;
+
+  if (!movieId || !showtimeId) return;
+
+  const response = await fetch(`/get-showtimes/${movieId}`);
+  const showtimes = await response.json();
+  const selectedShowtime = showtimes.find(showtime => showtime.showtime_id == showtimeId);
+
+  if (selectedShowtime) {
+    const reservedSeats = (selectedShowtime.reserved_seats || []).map(seat => seat.trim());
+    const seatContainer = document.getElementById('seatSelection');
+    seatContainer.innerHTML = '';
+
+    const seatLayout = [
+      { row: 'A', seats: ['1', '2', '3', '4', '5'] },
+      { row: 'B', seats: ['1', '2', '3', '4', '5'] },
+      { row: 'C', seats: ['1', '2', '3', '4', '5'] },
+      { row: 'D', seats: ['1', '2', '3', '4', '5'] },
+      { row: 'E', seats: ['1', '2', '3', '4', '5'] },
+      { row: 'F', seats: ['1', '2', '3', '4', '5'] },
+      { row: 'G', seats: ['1', '2', '3', '4', '5'] },
+      { row: 'H', seats: ['1', '2', '3', '4', '5'] },
+      { row: 'I', seats: ['1', '2', '3', '4', '5'] },
+      { row: 'J', seats: ['1', '2', '3', '4', '5'] }
+    ];
+
+    seatLayout.forEach(({ row, seats }) => {
+      const rowContainer = document.createElement('div');
+      rowContainer.classList.add('flex', 'mb-2');
+
+      seats.forEach(seatNumber => {
+        const seatId = `${row}${seatNumber}`;
+        const seatDiv = document.createElement('div');
+        seatDiv.classList.add('w-12', 'h-12', 'flex', 'items-center', 'justify-center', 'border', 'border-gray-300', 'rounded-md', 'hover:bg-gray-200', 'cursor-pointer');
+        seatDiv.setAttribute('data-seat', seatId);
+        seatDiv.textContent = seatId;
+
+        if (reservedSeats.includes(seatId)) {
+          seatDiv.classList.add('bg-red-600', 'cursor-not-allowed');
+          seatDiv.setAttribute('disabled', 'disabled');
+        } else {
+          seatDiv.addEventListener('click', () => toggleSeatSelection(seatDiv));
+          seatDiv.classList.add('bg-white');
+        }
+
+        rowContainer.appendChild(seatDiv);
+      });
+
+      seatContainer.appendChild(rowContainer);
+    });
+  } else {
+    alert('Không tìm thấy suất chiếu này!');
+  }
+}
+
+function toggleSeatSelection(button) {
+  const selectedSeatsInput = document.getElementById('seats');
+  let seats = selectedSeatsInput.value ? selectedSeatsInput.value.split(',').map(s => s.trim()) : [];
+
+  const seat = button.getAttribute('data-seat');
+
+  if (button.classList.contains('bg-green-600')) {
+    button.classList.remove('bg-green-600');
+    button.classList.add('bg-white');
+    seats = seats.filter(selectedSeat => selectedSeat !== seat);
+  } else {
+    button.classList.remove('bg-white');
+    button.classList.add('bg-green-600');
+    seats.push(seat);
+  }
+
+  selectedSeatsInput.value = seats.join(', ');
+}
+
+document.getElementById('movie_id').addEventListener('change', async function() {
+  const movieId = this.value;
+  const showtimeSelect = document.getElementById('showtime_id');
+  showtimeSelect.innerHTML = '<option value="">Chọn Suất Chiếu</option>';
+
+  if (movieId) {
+    const response = await fetch(`/get-showtimes/${movieId}`);
+    const showtimes = await response.json();
+
+    showtimes.forEach(showtime => {
+      const option = document.createElement('option');
+      option.value = showtime.showtime_id;
+      option.textContent = `${new Date(showtime.start_time).toLocaleString()} - Phòng ${showtime.room_id}`;
+      showtimeSelect.appendChild(option);
+    });
+  }
+});
+
+document.getElementById('showtime_id').addEventListener('change', function() {
+  openAddTicketModal();
+});
+
+function closeAddTicketModal() {
+  document.getElementById('addTicketModal').classList.add('hidden');
+}
+</script>

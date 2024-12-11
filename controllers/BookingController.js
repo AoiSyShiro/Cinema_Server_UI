@@ -1,39 +1,37 @@
-const BookTickets = require("../models/BookTickets");
+const BookTickets = require("../models/BookTickets"); 
 const User = require("../models/User");
-const ShowTime = require("../models/Showtime");
-const Movie = require("../models/Movie"); // Thêm Movie model để lấy thông tin phim
-const FoodDrinkModel = require("../models/FoodDrink"); // Đảm bảo FoodDrink model tồn tại nếu cần
-const { bookTicket } = require("./TicketBookingController");
+const Showtime = require("../models/Showtime");
+const Movie = require("../models/Movie");
+const FoodDrinkModel = require("../models/FoodDrink");
 
 const getBookingHistory = async (req, res) => {
   try {
-    // Lấy tất cả các vé đặt
+    // Fetch all bookings
     const bookings = await BookTickets.find();
+    const users = await User.find();  // Fetch all users from the User collection
+    const movies = await Movie.find(); // Fetch all movies
+    const showtimes = await Showtime.find(); // Fetch all showtimes
+    const foodItems = await FoodDrinkModel.find(); // Fetch all food/drink items
 
     if (bookings.length === 0) {
       return res.status(404).json({ message: "No bookings found" });
     }
 
-    // Duyệt qua từng vé và lấy thêm thông tin chi tiết từ User, Movie, Showtime
+    // Process bookings to include user, movie, showtime, and food items
     const bookingsWithDetails = await Promise.all(
       bookings.map(async (booking) => {
-        // Lấy thông tin người dùng từ model User dựa trên user_id
+        // Ensure food_drinks is an array
+        const foodDrinks = Array.isArray(booking.food_drinks) ? booking.food_drinks : [];
+
+        // Fetch the related user, movie, and showtime by their IDs
         const user = await User.findOne({ user_id: booking.user_id });
-
-        // Lấy thông tin phim từ model Movie dựa trên movie_id
         const movie = await Movie.findOne({ movie_id: booking.movie_id });
+        const showtime = await Showtime.findOne({ showtime_id: booking.showtime_id });
 
-        // Lấy thông tin lịch chiếu từ model Showtime dựa trên showtime_id
-        const showtime = await ShowTime.findOne({
-          showtime_id: booking.showtime_id,
-        });
-
-        // Lấy thông tin đồ ăn/thức uống từ model FoodDrink dựa trên food_drink_id
+        // Fetch food details for each food item in the booking
         const foodDetails = await Promise.all(
-          booking.food_drinks.map(async (foodItem) => {
-            const food = await FoodDrinkModel.findOne({
-              food_drink_id: foodItem.food_drink_id,
-            });
+          foodDrinks.map(async (foodItem) => {
+            const food = await FoodDrinkModel.findOne({ food_drink_id: foodItem.food_drink_id });
             return {
               name: food ? food.name : "Không Có Đặt Food",
               price: food ? food.price : 0,
@@ -43,33 +41,39 @@ const getBookingHistory = async (req, res) => {
           })
         );
 
-        // Tính tổng giá trị đồ ăn/thức uống
-        const foodTotal = foodDetails.reduce(
-          (acc, item) => acc + item.total,
-          0
-        );
+        // Calculate the total price of the food
+        const foodTotal = foodDetails.reduce((acc, item) => acc + item.total, 0);
 
-        // Trả về thông tin booking đã được bổ sung với các chi tiết
         return {
           ...booking.toObject(),
-          user: user ? user.username : "N/A", // Tên người dùng
-          movie: movie ? movie.title : "N/A", // Tiêu đề phim
-          booking_time: booking.booking_time || "N/A", // Sử dụng booking_time từ BookTickets.js
-          payment_method: booking.payment_method || "N/A", // Hình thức thanh toán
-          price: booking.price || 0, // Giá tiền
-          food_drinks: foodDetails, // Danh sách món ăn/thức uống với tên và số lượng
-          food_total: foodTotal, // Tổng giá trị đồ ăn/thức uống
+          user: user ? user.username : "N/A",
+          movie: movie ? movie.title : "N/A",
+          showtime: showtime 
+            ? `${showtime.start_time.toLocaleString()} - Room: ${showtime.room_id}`
+            : "N/A",
+          booking_time: booking.booking_time || "N/A",
+          payment_method: booking.payment_method || "N/A",
+          price: booking.price || 0,
+          food_drinks: foodDetails,
+          food_total: foodTotal,
         };
       })
     );
 
-    // Render kết quả lên view EJS
-    res.render("bookingHistory", { bookings: bookingsWithDetails });
+    // Render the booking history view with the populated data
+    res.render("bookingHistory", { 
+      bookings: bookingsWithDetails,
+      users: users,  // Pass the list of users to the view
+      movies: movies, // Pass the list of movies to the view
+      showtimes: showtimes, // Pass the list of showtimes to the view
+      foodItems: foodItems, // Pass the list of food items to the view
+    });
   } catch (err) {
     console.error("Error fetching booking history:", err);
     res.status(500).send("Error fetching booking history.");
   }
 };
+
 
 const getUserTicketHistory = async (req, res) => {
   try {
