@@ -49,25 +49,30 @@
 <%- include('layout/footer.ejs') %>
 
 <script>
-  // Dữ liệu mẫu, bạn có thể thay thế bằng dữ liệu thực tế từ server
-  const data = {
-    labels: ['Người dùng', 'Vé đã đặt', 'Tiền đã đặt'],
-    datasets: [{
-      label: 'Thống kê',
-      data: [<%= stats.totalUsers %>, <%= stats.totalTickets %>, <%= stats.totalAmount %>],
-      backgroundColor: [
-        'rgba(59, 130, 246, 0.6)', // Blue
-        'rgba(34, 197, 94, 0.6)',  // Green
-        'rgba(234, 179, 8, 0.6)'    // Yellow
-      ],
-      borderColor: [
-        'rgba(59, 130, 246, 1)',
-        'rgba(34, 197, 94, 1)',
-        'rgba(234, 179, 8, 1)'
-      ],
-      borderWidth: 1
-    }]
-  };
+// Dữ liệu mẫu, bạn có thể thay thế bằng dữ liệu thực tế từ server
+const data = {
+  labels: ['Người dùng', 'Vé đã đặt', 'Tiền đã đặt'],
+  datasets: [{
+    label: 'Thống kê',
+    data: [
+      <%= stats.totalUsers %>, 
+      <%= stats.totalTickets %>, 
+      Math.round(<%= stats.totalAmount %> / 1000000)
+    ],
+    backgroundColor: [
+      'rgba(59, 130, 246, 0.6)', // Blue
+      'rgba(34, 197, 94, 0.6)',  // Green
+      'rgba(234, 179, 8, 0.6)'   // Yellow
+    ],
+    borderColor: [
+      'rgba(59, 130, 246, 1)',
+      'rgba(34, 197, 94, 1)',
+      'rgba(234, 179, 8, 1)'
+    ],
+    borderWidth: 1
+  }]
+};
+
 
   const config = {
     type: 'bar',
