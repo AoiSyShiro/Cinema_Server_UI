@@ -1,15 +1,20 @@
+
+<!-- Modal thêm và sửa phòng -->
 <%- include('layout/header.ejs') %>
 
+<!-- Bảng hiển thị danh sách các phòng chiếu -->
 <div class="overflow-x-auto bg-white shadow-lg">
     <table class="min-w-full bg-white border border-gray-200 shadow-md">
         <thead class="bg-gray-800 text-white">
             <tr class="text-sm uppercase font-semibold">
+                <!-- Tiêu đề của các cột -->
                 <th class="px-6 py-3 text-left">ID</th>
                 <th class="px-6 py-3 text-left">Tên Phòng</th>
                 <th class="px-6 py-3 text-left">Sức Chứa</th>
                 <th class="px-6 py-3 text-left">Trạng Thái</th>
                 <th class="px-6 py-3 text-left">Thời Gian Kéo Dài (Giờ)</th>
                 <th class="px-6 py-3 text-left">
+                    <!-- Nút thêm phòng -->
                     <button
                         class="bg-black text-white py-1.5 px-3 rounded-full shadow-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black transition-all duration-200 ease-in-out text-xs flex items-center"
                         onclick="openAddModal()">
@@ -28,6 +33,7 @@
         <tbody class="text-gray-700">
             <% rooms.forEach(room => { %>
             <tr class="hover:bg-gray-50 border-b">
+                <!-- Hiển thị thông tin phòng -->
                 <td class="px-6 py-4 text-sm text-gray-900 font-medium"><%= room.room_id %></td>
                 <td class="px-6 py-4 text-sm text-gray-900"><%= room.room_name %></td>
                 <td class="px-6 py-4 text-sm text-gray-900"><%= room.seat_capacity %> ghế</td>
@@ -35,6 +41,7 @@
                 <td class="px-6 py-4 text-sm text-gray-900"><%= room.duration %> giờ</td>
                 <td class="px-6 py-4 text-sm font-medium text-gray-600">
                     <div class="flex space-x-4">
+                        <!-- Nút chỉnh sửa phòng -->
                         <button class="text-indigo-600 hover:text-indigo-900"
                             onclick="openEditModal(<%= room.room_id %>, '<%= room.room_name %>', <%= room.seat_capacity %>, <%= room.is_active %>, <%= room.duration %>, <%= room.movie_id %>)">
                             <svg xmlns="http://www.w3.org/2000/svg"
@@ -45,6 +52,7 @@
                                     d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                             </svg>
                         </button>
+                        <!-- Nút xóa phòng -->
                         <a href="/cinema-rooms/delete/<%= room.room_id %>"
                             class="text-red-600 hover:text-red-800"
                             onclick="return confirm('Bạn có chắc muốn xóa phòng này?')">
@@ -69,9 +77,13 @@
     class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
     <div class="bg-white p-6 w-1/3 transition-all transform scale-95 opacity-0"
         id="roomModalContent">
+        <!-- Tiêu đề modal -->
         <h2 class="text-xl font-semibold mb-4 text-gray-800"
             id="modalTitle">Thêm Phòng</h2>
+        
+        <!-- Form thêm hoặc sửa phòng -->
         <form id="roomForm" method="POST" action>
+            <!-- Tên phòng -->
             <div class="mb-4">
                 <label for="room_name"
                     class="block text-sm font-medium text-gray-700">Tên Phòng</label>
@@ -80,6 +92,7 @@
                     required />
             </div>
 
+            <!-- Sức chứa phòng -->
             <div class="mb-4">
                 <label for="seat_capacity"
                     class="block text-sm font-medium text-gray-700">Sức Chứa</label>
@@ -88,6 +101,7 @@
                     required />
             </div>
 
+            <!-- Trạng thái phòng -->
             <div class="mb-4">
                 <label for="is_active"
                     class="block text-sm font-medium text-gray-700">Trạng Thái</label>
@@ -95,6 +109,7 @@
                     class="mt-1" />
             </div>
 
+            <!-- Thời gian bắt đầu -->
             <div class="mb-4">
                 <label for="start_time"
                     class="block text-sm font-medium text-gray-700">Thời Gian Bắt Đầu</label>
@@ -102,6 +117,7 @@
                     class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
             </div>
 
+            <!-- Thời gian kéo dài -->
             <div class="mb-4">
                 <label for="duration"
                     class="block text-sm font-medium text-gray-700">Thời Gian Kéo Dài (giờ)</label>
@@ -110,6 +126,7 @@
                     required min="1" />
             </div>
 
+            <!-- Thời gian kết thúc (tính toán tự động) -->
             <div class="mb-4">
                 <label for="end_time"
                     class="block text-sm font-medium text-gray-700">Thời Gian Kết Thúc</label>
@@ -117,6 +134,7 @@
                     class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required readonly />
             </div>
 
+            <!-- Chọn phim -->
             <div class="mb-4">
                 <label for="movie_id"
                     class="block text-sm font-medium text-gray-700">Phim</label>
@@ -128,113 +146,153 @@
                 </select>
             </div>
 
+            <!-- Các nút hành động -->
             <div class="flex justify-end space-x-2">
+                <!-- Nút hủy -->
                 <button type="button"
-                    class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors duration-200"
+                    class="bg-gray-400 text-white py-2 px-4 rounded-md hover:bg-gray-500 focus:outline-none"
                     onclick="closeModal()">Hủy</button>
+                <!-- Nút lưu -->
                 <button type="submit"
-                    class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200">Lưu</button>
+                    class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none">Lưu</button>
             </div>
         </form>
     </div>
 </div>
-
-
 <script>
     // Hàm mở modal chỉnh sửa khi trang được load nếu có lỗi
     <% if (typeof openModal !== 'undefined' && openModal && isEdit) { %>
+        // Kiểm tra xem biến 'openModal' có được định nghĩa và có giá trị 'true' hay không,
+        // và kiểm tra xem 'isEdit' có phải là true không
+        // Nếu đúng, thêm sự kiện 'DOMContentLoaded' để mở modal chỉnh sửa với dữ liệu có sẵn
         document.addEventListener('DOMContentLoaded', function() {
             openEditModal(
-                <%= formData.room_id %>,
-                '<%= formData.room_name %>',
-                <%= formData.seat_capacity %>,
-                '<%= formData.is_active %>',
-                <%= formData.duration %>,
-                <%= formData.movie_id %>,
-                '<%= formData.start_time %>',
-                '<%= formData.end_time %>'
+                <%= formData.room_id %>, // ID phòng
+                '<%= formData.room_name %>', // Tên phòng
+                <%= formData.seat_capacity %>, // Sức chứa ghế
+                '<%= formData.is_active %>', // Trạng thái hoạt động
+                <%= formData.duration %>, // Thời lượng
+                <%= formData.movie_id %>, // ID phim
+                '<%= formData.start_time %>', // Thời gian bắt đầu
+                '<%= formData.end_time %>' // Thời gian kết thúc
             );
         });
     <% } else if (typeof openModal !== 'undefined' && openModal) { %>
-        // Nếu openModal là true nhưng isEdit là false, mở modal thêm mới
+        // Nếu 'openModal' là true nhưng 'isEdit' không phải là true
+        // Thêm sự kiện 'DOMContentLoaded' để mở modal thêm phòng mới
         document.addEventListener('DOMContentLoaded', function() {
             openAddModal();
         });
     <% } %>
-
-    function openEditModal(id, name, capacity, isActive, duration, movieId, startTime, endTime) {
-        document.getElementById('roomModal').classList.remove('hidden');
-        document.getElementById('roomModalContent').classList.remove('scale-95', 'opacity-0');
-        document.getElementById('roomModalContent').classList.add('scale-100', 'opacity-100');
-
-        document.getElementById('modalTitle').textContent = 'Chỉnh sửa Phòng';
-        document.getElementById('roomForm').action = '/cinema-rooms/' + id;
-
-        document.getElementById('room_name').value = name;
-        document.getElementById('seat_capacity').value = capacity;
-        document.getElementById('is_active').checked = isActive === 'on' || isActive === true;
-        document.getElementById('duration').value = duration;
-        document.getElementById('movie_id').value = movieId;
-
-        // Cập nhật thời gian bắt đầu và kết thúc
-        document.getElementById('start_time').value = startTime;
-        document.getElementById('end_time').value = endTime;
-    }
-
-  function openAddModal() {
-    document.getElementById('roomModal').classList.remove('hidden');
-    document.getElementById('roomModalContent').classList.remove('scale-95', 'opacity-0');
-    document.getElementById('roomModalContent').classList.add('scale-100', 'opacity-100');
-
-    document.getElementById('modalTitle').textContent = 'Thêm Phòng';
-    document.getElementById('roomForm').action = '/cinema-rooms';
-
-    document.getElementById('roomForm').reset();
-  }
-
-  function closeModal() {
-    document.getElementById('roomModal').classList.add('hidden');
-    document.getElementById('roomModalContent').classList.remove('scale-100', 'opacity-100');
-    document.getElementById('roomModalContent').classList.add('scale-95', 'opacity-0');
-  }
-
-  document.getElementById('movie_id').addEventListener('change', function() {
-    const selectedOption = this.options[this.selectedIndex];
-    const duration = selectedOption.getAttribute('data-duration');
-    document.getElementById('duration').value = duration;
-  });
-
-  document.getElementById('start_time').addEventListener('input', function () {
-    const startTime = new Date(this.value); 
-    const duration = document.getElementById('duration').value; 
-
-    if (startTime && duration) {
-        startTime.setHours(startTime.getHours() + parseInt(duration));
-        document.getElementById('end_time').value = formatDateToLocalISO(startTime);
-    }
-});
-
-document.getElementById('duration').addEventListener('input', function () {
-    const startTime = new Date(document.getElementById('start_time').value); 
-    const duration = this.value; 
-
-    if (startTime && duration) {
-        startTime.setHours(startTime.getHours() + parseInt(duration));
-        document.getElementById('end_time').value = formatDateToLocalISO(startTime);
-    }
-});
-
-// Helper function to format date to YYYY-MM-DDTHH:mm format for datetime-local input
-function formatDateToLocalISO(date) {
-    const pad = (num) => num.toString().padStart(2, '0');
-    const year = date.getFullYear();
-    const month = pad(date.getMonth() + 1);
-    const day = pad(date.getDate());
-    const hours = pad(date.getHours());
-    const minutes = pad(date.getMinutes());
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
-</script>
+    
+        // Hàm mở modal chỉnh sửa phòng
+        function openEditModal(id, name, capacity, isActive, duration, movieId, startTime, endTime) {
+            // Hiển thị modal bằng cách loại bỏ class 'hidden'
+            document.getElementById('roomModal').classList.remove('hidden');
+            // Hiệu ứng mở modal: loại bỏ các class để thiết lập trạng thái hiển thị
+            document.getElementById('roomModalContent').classList.remove('scale-95', 'opacity-0');
+            document.getElementById('roomModalContent').classList.add('scale-100', 'opacity-100');
+    
+            // Thiết lập tiêu đề modal là 'Chỉnh sửa Phòng'
+            document.getElementById('modalTitle').textContent = 'Chỉnh sửa Phòng';
+            // Thiết lập action của form để gửi dữ liệu cập nhật phòng với ID cụ thể
+            document.getElementById('roomForm').action = '/cinema-rooms/' + id;
+    
+            // Gán giá trị cho các trường trong form với dữ liệu hiện có
+            document.getElementById('room_name').value = name;
+            document.getElementById('seat_capacity').value = capacity;
+            // Kiểm tra và thiết lập trạng thái của checkbox 'is_active'
+            document.getElementById('is_active').checked = isActive === 'on' || isActive === true;
+            document.getElementById('duration').value = duration;
+            document.getElementById('movie_id').value = movieId;
+    
+            // Cập nhật thời gian bắt đầu và kết thúc
+            document.getElementById('start_time').value = startTime;
+            document.getElementById('end_time').value = endTime;
+        }
+    
+        // Hàm mở modal thêm phòng mới
+        function openAddModal() {
+            // Hiển thị modal bằng cách loại bỏ class 'hidden'
+            document.getElementById('roomModal').classList.remove('hidden');
+            // Hiệu ứng mở modal
+            document.getElementById('roomModalContent').classList.remove('scale-95', 'opacity-0');
+            document.getElementById('roomModalContent').classList.add('scale-100', 'opacity-100');
+    
+            // Thiết lập tiêu đề modal là 'Thêm Phòng'
+            document.getElementById('modalTitle').textContent = 'Thêm Phòng';
+            // Thiết lập action của form để tạo phòng mới
+            document.getElementById('roomForm').action = '/cinema-rooms';
+    
+            // Reset tất cả các trường trong form
+            document.getElementById('roomForm').reset();
+        }
+    
+        // Hàm đóng modal
+        function closeModal() {
+            // Ẩn modal bằng cách thêm class 'hidden'
+            document.getElementById('roomModal').classList.add('hidden');
+            // Hiệu ứng đóng modal: thiết lập lại trạng thái ban đầu
+            document.getElementById('roomModalContent').classList.remove('scale-100', 'opacity-100');
+            document.getElementById('roomModalContent').classList.add('scale-95', 'opacity-0');
+        }
+    
+        // Sự kiện khi thay đổi phim được chọn
+        document.getElementById('movie_id').addEventListener('change', function() {
+            // Lấy option được chọn
+            const selectedOption = this.options[this.selectedIndex];
+            // Lấy thuộc tính 'data-duration' từ option (thời lượng phim)
+            const duration = selectedOption.getAttribute('data-duration');
+            // Gán giá trị thời lượng vào trường 'duration'
+            document.getElementById('duration').value = duration;
+        });
+    
+        // Sự kiện khi người dùng nhập thời gian bắt đầu
+        document.getElementById('start_time').addEventListener('input', function () {
+            // Chuyển giá trị nhập vào thành đối tượng Date
+            const startTime = new Date(this.value); 
+            // Lấy thời lượng từ trường 'duration'
+            const duration = document.getElementById('duration').value; 
+    
+            // Nếu có thời gian bắt đầu và thời lượng
+            if (startTime && duration) {
+                // Cộng thêm số giờ tương ứng với thời lượng vào thời gian bắt đầu
+                startTime.setHours(startTime.getHours() + parseInt(duration));
+                // Cập nhật trường 'end_time' với thời gian kết thúc đã tính toán
+                document.getElementById('end_time').value = formatDateToLocalISO(startTime);
+            }
+        });
+    
+        // Sự kiện khi người dùng thay đổi thời lượng
+        document.getElementById('duration').addEventListener('input', function () {
+            // Lấy thời gian bắt đầu từ trường 'start_time'
+            const startTime = new Date(document.getElementById('start_time').value); 
+            // Lấy thời lượng mới
+            const duration = this.value; 
+    
+            // Nếu có thời gian bắt đầu và thời lượng
+            if (startTime && duration) {
+                // Cộng thêm số giờ tương ứng với thời lượng vào thời gian bắt đầu
+                startTime.setHours(startTime.getHours() + parseInt(duration));
+                // Cập nhật trường 'end_time' với thời gian kết thúc đã tính toán
+                document.getElementById('end_time').value = formatDateToLocalISO(startTime);
+            }
+        });
+    
+        // Hàm trợ giúp để định dạng ngày giờ thành chuỗi phù hợp với input 'datetime-local'
+        function formatDateToLocalISO(date) {
+            // Hàm thêm số 0 vào trước số nếu nhỏ hơn 10
+            const pad = (num) => num.toString().padStart(2, '0');
+            // Lấy năm, tháng, ngày, giờ và phút từ đối tượng Date
+            const year = date.getFullYear();
+            const month = pad(date.getMonth() + 1);
+            const day = pad(date.getDate());
+            const hours = pad(date.getHours());
+            const minutes = pad(date.getMinutes());
+            // Trả về chuỗi định dạng 'YYYY-MM-DDTHH:mm'
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+    </script>
 
 <!-- Thêm script để hiển thị thông báo lỗi -->
 <% if (errorMessage) { %>

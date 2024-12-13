@@ -8,14 +8,14 @@
   <!-- Nếu không có booking nào -->
   <% if (errorMessage) { %>
     <div class="alert alert-warning text-red-500 mb-6">
-      <%= errorMessage %>
+      <%= errorMessage %> <!-- Hiển thị thông báo lỗi nếu có -->
     </div>
   <% } %>
 
   <!-- Nếu không có kết quả tìm kiếm -->
   <% if (!bookings || bookings.length === 0) { %>
     <div class="alert alert-warning text-red-500 mb-6">
-      Không có kết quả tìm kiếm nào.
+      Không có kết quả tìm kiếm nào. <!-- Hiển thị thông báo nếu không có vé đặt nào -->
     </div>
   <% } else { %>
     <!-- Bảng danh sách đặt vé -->
@@ -36,23 +36,23 @@
       <tbody>
         <% bookings.forEach(booking => { %>
           <tr class="hover:bg-gray-50 border-b">
-            <td class="px-6 py-4 text-sm text-gray-900 font-medium"><%= booking.book_tickets_id %></td>
-            <td class="px-6 py-4 text-sm text-gray-900"><%= booking.user || 'N/A' %></td>
-            <td class="px-6 py-4 text-sm text-gray-900"><%= booking.movie || 'N/A' %></td>
-            <td class="px-6 py-4 text-sm text-gray-900"><%= booking.booking_time || 'N/A' %></td>
-            <td class="px-6 py-4 text-sm text-gray-900"><%= booking.seats.join(', ') || 'N/A' %></td>
-            <td class="px-6 py-4 text-sm text-gray-900"><%= new Date(booking.booking_time).toLocaleDateString() %></td>
-            <td class="px-6 py-4 text-sm text-gray-900"><%= booking.price.toLocaleString() %> VND</td>
+            <td class="px-6 py-4 text-sm text-gray-900 font-medium"><%= booking.book_tickets_id %></td> <!-- Hiển thị ID đặt vé -->
+            <td class="px-6 py-4 text-sm text-gray-900"><%= booking.user || 'N/A' %></td> <!-- Hiển thị tên người dùng hoặc 'N/A' nếu không có -->
+            <td class="px-6 py-4 text-sm text-gray-900"><%= booking.movie || 'N/A' %></td> <!-- Hiển thị tên phim hoặc 'N/A' nếu không có -->
+            <td class="px-6 py-4 text-sm text-gray-900"><%= booking.booking_time || 'N/A' %></td> <!-- Hiển thị thời gian đặt vé hoặc 'N/A' nếu không có -->
+            <td class="px-6 py-4 text-sm text-gray-900"><%= booking.seats.join(', ') || 'N/A' %></td> <!-- Hiển thị các ghế đã chọn -->
+            <td class="px-6 py-4 text-sm text-gray-900"><%= new Date(booking.booking_time).toLocaleDateString() %></td> <!-- Hiển thị ngày đặt vé -->
+            <td class="px-6 py-4 text-sm text-gray-900"><%= booking.price.toLocaleString() %> VND</td> <!-- Hiển thị giá vé -->
             <td class="px-6 py-4 text-sm text-gray-900">
-              <% if (booking.food_drinks && booking.food_drinks.length > 0) { %>
+              <% if (booking.food_drinks && booking.food_drinks.length > 0) { %> <!-- Kiểm tra có đồ ăn thức uống hay không -->
                 <% booking.food_drinks.forEach(food => { %>
-                  <div><%= food.name %> (x<%= food.quantity %>) - <%= food.total.toLocaleString() %> VND</div>
+                  <div><%= food.name %> (x<%= food.quantity %>) - <%= food.total.toLocaleString() %> VND</div> <!-- Hiển thị món ăn/thức uống và giá trị tổng cộng -->
                 <% }) %>
               <% } else { %>
-                Không Có Thêm Đồ Ăn
+                Không Có Thêm Đồ Ăn <!-- Hiển thị nếu không có món ăn/thức uống -->
               <% } %>
             </td>
-            <td class="px-6 py-4 text-sm text-gray-900"><%= booking.payment_method || 'N/A' %></td>
+            <td class="px-6 py-4 text-sm text-gray-900"><%= booking.payment_method || 'N/A' %></td> <!-- Hiển thị hình thức thanh toán -->
           </tr>
         <% }) %>
       </tbody>

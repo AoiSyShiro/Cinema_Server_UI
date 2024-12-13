@@ -51,45 +51,48 @@
 <script>
 // Dữ liệu mẫu, bạn có thể thay thế bằng dữ liệu thực tế từ server
 const data = {
-  labels: ['Người dùng', 'Vé đã đặt', 'Tiền đã đặt'],
+  labels: ['Người dùng', 'Vé đã đặt', 'Tiền đã đặt'], // Các nhãn cho trục X
   datasets: [{
-    label: 'Thống kê',
+    label: 'Thống kê', // Nhãn của bộ dữ liệu
     data: [
-      <%= stats.totalUsers %>, 
-      <%= stats.totalTickets %>, 
-      Math.round(<%= stats.totalAmount %> / 1000000)
+      <%= stats.totalUsers %>,  // Dữ liệu tổng số người dùng, lấy từ server
+      <%= stats.totalTickets %>, // Dữ liệu tổng số vé đã đặt, lấy từ server
+      Math.round(<%= stats.totalAmount %> / 1000000) // Dữ liệu tổng tiền đã đặt, chia cho 1 triệu để hiển thị dưới dạng triệu
     ],
     backgroundColor: [
-      'rgba(59, 130, 246, 0.6)', // Blue
-      'rgba(34, 197, 94, 0.6)',  // Green
-      'rgba(234, 179, 8, 0.6)'   // Yellow
+      'rgba(59, 130, 246, 0.6)', // Màu nền của cột 'Người dùng' (màu xanh dương)
+      'rgba(34, 197, 94, 0.6)',  // Màu nền của cột 'Vé đã đặt' (màu xanh lá)
+      'rgba(234, 179, 8, 0.6)'   // Màu nền của cột 'Tiền đã đặt' (màu vàng)
     ],
     borderColor: [
-      'rgba(59, 130, 246, 1)',
-      'rgba(34, 197, 94, 1)',
-      'rgba(234, 179, 8, 1)'
+      'rgba(59, 130, 246, 1)',  // Màu viền của cột 'Người dùng' (màu xanh dương đậm)
+      'rgba(34, 197, 94, 1)',   // Màu viền của cột 'Vé đã đặt' (màu xanh lá đậm)
+      'rgba(234, 179, 8, 1)'    // Màu viền của cột 'Tiền đã đặt' (màu vàng đậm)
     ],
-    borderWidth: 1
+    borderWidth: 1 // Độ rộng của viền cột
   }]
 };
 
-
-  const config = {
-    type: 'bar',
-    data: data,
-    options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true
-        }
+// Cấu hình cho biểu đồ
+const config = {
+  type: 'bar', // Loại biểu đồ là biểu đồ cột
+  data: data,  // Dữ liệu sử dụng
+  options: {
+    responsive: true, // Đảm bảo biểu đồ có thể thay đổi kích thước theo màn hình
+    scales: {
+      y: {
+        beginAtZero: true // Trục Y bắt đầu từ 0
       }
-    },
-  };
+    }
+  },
+};
 
-  // Vẽ biểu đồ khi trang đã tải xong
-  document.addEventListener('DOMContentLoaded', () => {
-    const ctx = document.getElementById('statsChart').getContext('2d');
-    new Chart(ctx, config);
-  });
+// Vẽ biểu đồ khi trang đã tải xong
+document.addEventListener('DOMContentLoaded', () => {
+  // Lấy phần tử canvas với id 'statsChart' để vẽ biểu đồ
+  const ctx = document.getElementById('statsChart').getContext('2d');
+  // Khởi tạo và vẽ biểu đồ với cấu hình đã định nghĩa
+  new Chart(ctx, config);
+});
+
 </script>

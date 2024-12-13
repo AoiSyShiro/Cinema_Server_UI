@@ -27,7 +27,6 @@
           <td class="px-6 py-4 text-sm text-gray-900"><%= showtime.movie ? showtime.movie.title : 'Không tìm thấy phim' %></td>
           <td class="px-6 py-4 text-sm text-gray-900"><%= new Date(showtime.start_time).toLocaleString() %></td>
           <td class="px-6 py-4 text-sm text-gray-900">
-            <!-- Hiển thị tên phòng chiếu -->
             <% 
               const room = rooms.find(r => r.room_id === showtime.room_id); 
               const roomName = room ? room.room_name : 'Chưa xác định';
@@ -58,110 +57,140 @@
   </table>
 </div>
 
+
 <!-- Modal chỉnh sửa và thêm suất chiếu -->
 <div id="showtimeModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
+  <!-- Phần nội dung modal, ẩn khi chưa hiển thị và căn giữa màn hình -->
   <div class="bg-white p-6 w-1/3 transition-all transform scale-95 opacity-0" id="showtimeModalContent">
+    <!-- Tiêu đề modal -->
     <h2 class="text-xl font-semibold mb-4 text-gray-800" id="modalTitle">Thêm Suất Chiếu</h2>
+    
+    <!-- Form để thêm hoặc chỉnh sửa suất chiếu -->
     <form id="showtimeForm" method="POST" action="/showtime-admin/create" onsubmit="return validateShowtimeForm()">
-      <!-- Form Fields for Movie, Start Time, Room and Ticket Price -->
+      <!-- Trường chọn phim -->
       <div class="mb-4">
         <label for="movie_id" class="block text-sm font-medium text-gray-700">Phim</label>
+        <!-- Danh sách các phim có sẵn để người dùng chọn -->
         <select id="movie_id" name="movie_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
           <option value="" disabled selected>Chọn phim</option>
+          <!-- Vòng lặp này sẽ lặp qua các phim và tạo các option tương ứng -->
           <% movies.forEach(movie => { %>
             <option value="<%= movie.movie_id %>"><%= movie.title %></option>
           <% }) %>
         </select>
       </div>
     
+      <!-- Trường nhập ngày giờ chiếu -->
       <div class="mb-4">
         <label for="start_time" class="block text-sm font-medium text-gray-700">Ngày Giờ Chiếu</label>
+        <!-- Người dùng chọn ngày và giờ chiếu, kiểu nhập datetime-local cho phép nhập cả ngày và giờ -->
         <input type="datetime-local" id="start_time" name="start_time" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
+        <!-- Thông báo lỗi nếu ngày giờ chiếu không hợp lệ -->
         <span id="start_time_error" class="text-red-500 text-sm hidden">Ngày giờ chiếu phải lớn hơn thời gian hiện tại.</span>
       </div>
     
+      <!-- Trường chọn phòng chiếu -->
       <div class="mb-4">
         <label for="room_id" class="block text-sm font-medium text-gray-700">Phòng Chiếu</label>
         <select id="room_id" name="room_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
           <option value="" disabled selected>Chọn phòng chiếu</option>
+          <!-- Vòng lặp này sẽ lặp qua các phòng chiếu và tạo các option tương ứng -->
           <% rooms.forEach(room => { %>
             <option value="<%= room.room_id %>"><%= room.room_name %></option>
           <% }) %>
         </select>
+        <!-- Thông báo lỗi nếu phòng chiếu không hợp lệ -->
         <span id="room_error" class="text-red-500 text-sm hidden">Phòng chiếu không được để trống và phải hợp lệ.</span>
       </div>
     
+      <!-- Trường nhập giá vé -->
       <div class="mb-4">
         <label for="ticket_price" class="block text-sm font-medium text-gray-700">Giá Vé</label>
+        <!-- Người dùng nhập giá vé cho suất chiếu -->
         <input type="number" id="ticket_price" name="ticket_price" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
       </div>
     
+      <!-- Nút Hủy và Lưu -->
       <div class="flex justify-end space-x-2">
+        <!-- Nút hủy đóng modal mà không lưu dữ liệu -->
         <button type="button" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors duration-200" onclick="closeModal()">Hủy</button>
+        <!-- Nút lưu để gửi dữ liệu trong form -->
         <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200">Lưu</button>
       </div>
     </form>
   </div>
 </div>
 
+
 <script>
-  // Validation logic for the form
-  function validateShowtimeForm() {
-    const startTime = new Date(document.getElementById('start_time').value);
-    const currentTime = new Date();
-    const room = document.getElementById('room_id').value.trim();
-    
-    let valid = true;
+// Validation logic for the form
+function validateShowtimeForm() {
+  // Lấy giá trị thời gian bắt đầu từ input và chuyển đổi thành đối tượng Date
+  const startTime = new Date(document.getElementById('start_time').value);
+  const currentTime = new Date(); // Lấy thời gian hiện tại
+  const room = document.getElementById('room_id').value.trim(); // Lấy ID phòng từ input
 
-    // Validate start time
-    if (startTime <= currentTime) {
-      document.getElementById('start_time_error').classList.remove('hidden');
-      valid = false;
-    } else {
-      document.getElementById('start_time_error').classList.add('hidden');
-    }
+  let valid = true; // Biến kiểm tra tính hợp lệ của form, mặc định là hợp lệ
 
-    // Validate room field
-    if (room === "") {
-      document.getElementById('room_error').classList.remove('hidden');
-      valid = false;
-    } else {
-      document.getElementById('room_error').classList.add('hidden');
-    }
-
-    return valid; 
+  // Kiểm tra tính hợp lệ của thời gian chiếu
+  if (startTime <= currentTime) {
+      document.getElementById('start_time_error').classList.remove('hidden'); // Hiển thị thông báo lỗi nếu thời gian bắt đầu không hợp lệ
+      valid = false; // Đặt valid là false nếu không hợp lệ
+  } else {
+      document.getElementById('start_time_error').classList.add('hidden'); // Ẩn thông báo lỗi nếu thời gian hợp lệ
   }
 
-  // Modal handling functions for editing and adding showtimes
-  function openEditModal(showtime_id, movie_id, start_time, room_id, ticket_price) {
-    document.getElementById('showtimeModal').classList.remove('hidden');
-    document.getElementById('showtimeModalContent').classList.remove('scale-95', 'opacity-0');
-    document.getElementById('showtimeModalContent').classList.add('scale-100', 'opacity-100');
-    document.getElementById('modalTitle').textContent = 'Chỉnh Sửa Suất Chiếu';
-    
-    document.getElementById('showtimeForm').action = '/showtime-admin/update/' + showtime_id;  
-    
-    document.getElementById('movie_id').value = movie_id;
-    const formattedStartTime = new Date(start_time).toISOString().slice(0, 16); // Format date
-    document.getElementById('start_time').value = formattedStartTime;
-    document.getElementById('room_id').value = room_id; // Set the room ID for editing
-    document.getElementById('ticket_price').value = ticket_price;
+  // Kiểm tra tính hợp lệ của phòng chiếu
+  if (room === "") {
+      document.getElementById('room_error').classList.remove('hidden'); // Hiển thị thông báo lỗi nếu không chọn phòng
+      valid = false; // Đặt valid là false nếu không chọn phòng
+  } else {
+      document.getElementById('room_error').classList.add('hidden'); // Ẩn thông báo lỗi nếu phòng hợp lệ
+  }
+
+  return valid; // Trả về true nếu form hợp lệ, false nếu không hợp lệ
 }
 
-  function openAddModal() {
-    document.getElementById('showtimeModal').classList.remove('hidden');
-    document.getElementById('showtimeModalContent').classList.remove('scale-95', 'opacity-0');
-    document.getElementById('showtimeModalContent').classList.add('scale-100', 'opacity-100');
-    document.getElementById('modalTitle').textContent = 'Thêm Suất Chiếu';
-    document.getElementById('showtimeForm').reset();
-    document.getElementById('showtimeForm').action = '/showtime-admin/create';
-  }
-  
-  function closeModal() {
-    document.getElementById('showtimeModal').classList.add('hidden');
-    document.getElementById('showtimeModalContent').classList.remove('scale-100', 'opacity-100');
-    document.getElementById('showtimeModalContent').classList.add('scale-95', 'opacity-0');
-  }
+// Modal handling functions for editing and adding showtimes
+function openEditModal(showtime_id, movie_id, start_time, room_id, ticket_price) {
+  // Mở modal chỉnh sửa suất chiếu
+  document.getElementById('showtimeModal').classList.remove('hidden');
+  document.getElementById('showtimeModalContent').classList.remove('scale-95', 'opacity-0');
+  document.getElementById('showtimeModalContent').classList.add('scale-100', 'opacity-100');
+  document.getElementById('modalTitle').textContent = 'Chỉnh Sửa Suất Chiếu'; // Thay đổi tiêu đề modal
+
+  // Thiết lập hành động cho form (URL gửi đến khi submit form)
+  document.getElementById('showtimeForm').action = '/showtime-admin/update/' + showtime_id;
+
+  // Thiết lập giá trị cho các trường trong form từ các tham số truyền vào
+  document.getElementById('movie_id').value = movie_id;
+  const formattedStartTime = new Date(start_time).toISOString().slice(0, 16); // Định dạng lại thời gian bắt đầu thành chuỗi ISO
+  document.getElementById('start_time').value = formattedStartTime; // Thiết lập thời gian bắt đầu
+  document.getElementById('room_id').value = room_id; // Thiết lập ID phòng
+  document.getElementById('ticket_price').value = ticket_price; // Thiết lập giá vé
+}
+
+function openAddModal() {
+  // Mở modal thêm suất chiếu
+  document.getElementById('showtimeModal').classList.remove('hidden');
+  document.getElementById('showtimeModalContent').classList.remove('scale-95', 'opacity-0');
+  document.getElementById('showtimeModalContent').classList.add('scale-100', 'opacity-100');
+  document.getElementById('modalTitle').textContent = 'Thêm Suất Chiếu'; // Thay đổi tiêu đề modal
+
+  // Reset form và thiết lập hành động cho form khi tạo mới
+  document.getElementById('showtimeForm').reset();
+  document.getElementById('showtimeForm').action = '/showtime-admin/create'; // Thiết lập URL cho hành động tạo mới
+}
+
+
+// Hàm đóng modal khi không cần thiết
+function closeModal() {
+  // Ẩn modal
+  document.getElementById('showtimeModal').classList.add('hidden');
+  // Thay đổi các lớp CSS để đóng modal với hiệu ứng mờ dần
+  document.getElementById('showtimeModalContent').classList.remove('scale-100', 'opacity-100');
+  document.getElementById('showtimeModalContent').classList.add('scale-95', 'opacity-0');
+}
 </script>
 
 <%- include('layout/footer.ejs') %>

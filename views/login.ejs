@@ -2,36 +2,43 @@
 <html lang="vi">
 
 <head>
+    <!-- Thiết lập bộ ký tự cho trang web là UTF-8 để hỗ trợ tiếng Việt và các ký tự đặc biệt -->
     <meta charset="UTF-8">
+    <!-- Thiết lập viewport cho trang web để trang hiển thị đúng trên các thiết bị di động -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Tiêu đề của trang -->
     <title>Đăng nhập Quản trị viên</title>
+    <!-- Liên kết đến thư viện Tailwind CSS từ CDN để sử dụng các lớp CSS của Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center h-screen">
-
+    <!-- Div chính chứa form đăng nhập với các kiểu dáng đẹp và trung tâm -->
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-sm">
+        <!-- Tiêu đề form đăng nhập -->
         <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Đăng nhập Quản trị viên</h2>
 
-        <!-- Form đăng nhập -->
+        <!-- Form đăng nhập gửi dữ liệu tới đường dẫn "/login" bằng phương thức POST -->
         <form action="/login" method="POST">
-            <!-- Username -->
+            <!-- Trường tên đăng nhập -->
             <div class="mb-6">
                 <label for="username" class="block text-gray-700 font-medium mb-2">Tên đăng nhập</label>
+                <!-- Input cho tên đăng nhập với các lớp CSS của Tailwind để thiết kế đẹp và yêu cầu nhập -->
                 <input type="text" id="username" name="username" placeholder="Nhập tên đăng nhập" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
             </div>
 
-            <!-- Password -->
+            <!-- Trường mật khẩu -->
             <div class="mb-6">
                 <label for="password" class="block text-gray-700 font-medium mb-2">Mật khẩu</label>
+                <!-- Input cho mật khẩu với các lớp CSS của Tailwind để thiết kế đẹp và yêu cầu nhập -->
                 <input type="password" id="password" name="password" placeholder="Nhập mật khẩu" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" required>
             </div>
 
-            <!-- Thông báo lỗi -->
+            <!-- Hiển thị thông báo lỗi nếu có -->
             <% if (errorMessage) { %> 
                 <p style="color:red;"><%= errorMessage %></p> 
             <% } %>
-            <!-- Nút đăng nhập -->
+            <!-- Nút đăng nhập và hiệu ứng hover -->
             <div class="flex justify-center">
                 <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">Đăng nhập</button>
             </div>
