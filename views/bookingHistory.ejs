@@ -1,15 +1,18 @@
 <%- include('layout/header.ejs') %>
 
 <div class="container mx-auto p-6">
+
+  
     <!-- Thanh tìm kiếm -->
     <div class="flex items-center justify-between mb-6">
       <form id="searchForm" method="GET" action="/booking-history/search-bookings" class="flex items-center space-x-2">
         <input 
-          type="text" 
-          name="book_tickets_id" 
-          id="searchBook_tickets_id" 
-          placeholder="Nhập ID vé hoặc quét QR..." 
+          type="email" 
+          name="email"  
+          id="searchEmail" 
+          placeholder="Nhập email của bạn..." 
           class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+          required 
         />
         <button 
           type="submit" 
@@ -18,13 +21,8 @@
           Tìm kiếm
         </button>
       </form>
-      <!-- <button 
-        id="scanQR" 
-        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-      >
-        Quét QR Code
-      </button> -->
     </div>
+    
     <button 
     class="mt-6 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
     onclick="openAddTicketModal()">

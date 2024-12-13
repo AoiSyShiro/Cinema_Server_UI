@@ -1,10 +1,18 @@
 <%- include('layout/header.ejs') %>
 
 <div class="container mx-auto p-6">
+  
   <!-- Tiêu đề -->
   <h1 class="text-2xl font-bold mb-6 text-gray-800">Quản Lý Đặt Vé</h1>
 
   <!-- Nếu không có booking nào -->
+  <% if (errorMessage) { %>
+    <div class="alert alert-warning text-red-500 mb-6">
+      <%= errorMessage %>
+    </div>
+  <% } %>
+
+  <!-- Nếu không có kết quả tìm kiếm -->
   <% if (!bookings || bookings.length === 0) { %>
     <div class="alert alert-warning text-red-500 mb-6">
       Không có kết quả tìm kiếm nào.
