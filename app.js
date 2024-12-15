@@ -8,6 +8,7 @@ const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const session = require("express-session");
 const bcrypt = require("bcrypt"); // Thư viện để mã hóa và so sánh mật khẩu
 require("dotenv").config(); // Nạp biến môi trường
+const os = require('os');
 
 // ========================== Import các route của ứng dụng ==========================
 
@@ -108,6 +109,9 @@ function formatDateTime(date) {
   return `${day}-${month}-${year} ${hours}:${minutes}:${seconds} ${weekday}`;
 }
 
+
+console.log('Local IP Address:', getLocalIP());
+
 // ========================== Cấu hình Session ==========================
 
 app.use(
@@ -203,20 +207,26 @@ app.use("/cinema-rooms", cinemaRoomRoutes);
 
 // ========================== Kết nối cơ sở dữ liệu và khởi động server ==========================
 
-const PORT = process.env.PORT || 5000;
+
+const PORT = process.env.PORT || 3000;
+
 const connectToDatabase = require("./config/db.js");
 
-// Hàm khởi động server
 const startServer = async () => {
-  await connectToDatabase(); // Kết nối cơ sở dữ liệu
+  try {
+    await connectToDatabase(); // Kết nối cơ sở dữ liệu
 
-  app.listen(PORT, async () => {
-    console.log(`Server đang chạy ở cổng ${PORT}`);
-    const open = await import("open");
-    await open.default(`http://localhost:${PORT}`);
-  });
+    app.listen(PORT, "0.0.0.0", async () => {
+      console.log(`Server đang chạy tại http://192.168.100.188:${PORT}`);
+
+      // Chỉ mở trình duyệt sau khi server khởi động thành công
+      const open = await import("open");
+      await open.default(`http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Lỗi khi khởi động server:", error);
+  }
 };
-
 startServer(); // Khởi chạy server
 
 // ========================== Các Route Quản lý phim ==========================
@@ -796,3 +806,17 @@ app.post('/book-ticket', async (req, res) => {
     res.status(500).json({ message: "Lỗi khi tạo vé", error: error.message }); // Trả về phản hồi lỗi với mã 500
   }
 });
+
+
+// Hàm lấy địa chỉ IP cục bộ
+function getLocalIP() {
+  const interfaces = os.networkInterfaces();
+  for (const iface of Object.values(interfaces)) {
+    for (const config of iface) {
+      if (config.family === 'IPv4' && !config.internal) {
+        return config.address; // Địa chỉ IP cục bộ
+      }
+    }
+  }
+  return '127.0.0.1'; // Trả về localhost nếu không tìm thấy
+}
