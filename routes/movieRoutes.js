@@ -10,14 +10,14 @@ const upload = multer({ storage: multer.memoryStorage() });
 // Lấy danh sách phim
 router.get("/", movieController.getMovies);
 
-// Thêm phim
-router.post("/", upload.single("image"), movieController.addMovieAdmin);
+// // Thêm phim
+// router.post("/", upload.single("image"), movieController.addMovieAdmin);
 
 // // Cập nhật phim
 // router.put("/:id", upload.single("image"), movieController.updateMovieAdmin);
 
-// Xóa phim
-router.delete("/:id", movieController.deleteMovie);
+// // Xóa phim
+// router.delete("/:id", movieController.deleteMovie);
 
 // Lấy thông tin chi tiết của một bộ phim
 router.get("/detail/:movie_id", movieDetailController.getMovieDetails);
@@ -25,8 +25,8 @@ router.get("/detail/:movie_id", movieDetailController.getMovieDetails);
 // Lấy danh sách phim theo thể loại
 router.get("/genre/:genre", movieDetailController.getMoviesByGenre);
 
-// Lấy danh sách ramdom movie để chiếu lên slide
-router.get("/random", movieDetailController.getRandomMovies); // Random movies route
+// // Lấy danh sách ramdom movie để chiếu lên slide
+// router.get("/random", movieDetailController.getRandomMovies); // Random movies route
 
 // Lấy danh sách phim sắp chiếu
 router.get("/upcoming", movieDetailController.getUpcomingMovies);
@@ -34,8 +34,8 @@ router.get("/upcoming", movieDetailController.getUpcomingMovies);
 // Lấy danh sách phim sắp ra mắt
 router.get("/coming-soon", movieDetailController.getMoviesComingSoon);
 
-// Tìm kiếm phim theo tên
-router.get("/search", movieDetailController.searchMoviesByTitle);
+// // Tìm kiếm phim theo tên
+// router.get("/search", movieDetailController.searchMoviesByTitle);
 
 // Thêm phim vào danh sách yêu thích của người dùng
 router.post("/users/:user_id/favorites/:movie_id", movieDetailController.addFavoriteMovie);
