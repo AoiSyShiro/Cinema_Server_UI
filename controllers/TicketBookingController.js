@@ -106,26 +106,27 @@ const generateQRCode = () => {
   return Math.random().toString(36).substring(2, 15);
 };
 
-// Hủy vé theo ID
-const cancelTicket = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const canceledTicket = await BookTickets.findByIdAndUpdate(
-      id,
-      { flag: 0 }, // Đánh dấu vé đã hủy
-      { new: true }
-    );
+// // Hủy vé theo ID
+// const cancelTicket = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const canceledTicket = await BookTickets.findByIdAndUpdate(
+//       id,
+//       { flag: 0 }, // Đánh dấu vé đã hủy
+//       { new: true }
+//     );
 
-    if (!canceledTicket) {
-      return res.status(404).json({ message: "Không tìm thấy vé để hủy" });
-    }
+//     if (!canceledTicket) {
+//       return res.status(404).json({ message: "Không tìm thấy vé để hủy" });
+//     }
 
-    res
-      .status(200)
-      .json({ message: "Hủy vé thành công", ticket: canceledTicket });
-  } catch (error) {
-    res.status(500).json({ message: "Lỗi khi hủy vé", error });
-  }
-};
+//     res
+//       .status(200)
+//       .json({ message: "Hủy vé thành công", ticket: canceledTicket });
+//   } catch (error) {
+//     res.status(500).json({ message: "Lỗi khi hủy vé", error });
+//   }
+// };
 
-module.exports = { bookTicket, cancelTicket };
+module.exports = { bookTicket };
+//cancelTicket

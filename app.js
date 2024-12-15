@@ -19,7 +19,7 @@ const trailerRouter = require("./routes/trailerRouter");
 const showtimeRouter = require("./routes/showtimeRouter");
 const ticketBookingRouter = require("./routes/ticketBookingRouter");
 const promotionRoutes = require("./routes/promotionRouter");
-const reviewRoutes = require("./routes/reviewRouter");
+// const reviewRoutes = require("./routes/reviewRouter");
 const bookingRoutes = require("./routes/bookingRouter");
 const dashboardRouter = require("./routes/dashboardRouter");
 const cinemaRoomRoutes = require("./routes/cinemaRoomRoutes");
@@ -197,7 +197,7 @@ app.use("/current", trailerRouter);
 app.use("/showtimes", showtimeRouter);
 app.use("/tickets", ticketBookingRouter);
 app.use("/promotions", promotionRoutes);
-app.use("/reviews", reviewRoutes);
+// app.use("/reviews", reviewRoutes);
 app.use("/booking-history", bookingRoutes);
 app.use("/cinema-rooms", cinemaRoomRoutes);
 

@@ -10,7 +10,6 @@ const bookingRouter = express.Router();
 // Lấy lịch sử đặt vé
 bookingRouter.get("/", getBookingHistory);
 
-
 // Lấy lịch sử vé của người dùng theo user_id
 bookingRouter.get('/history/:user_id', getUserTicketHistory);
 

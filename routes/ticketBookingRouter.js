@@ -10,7 +10,7 @@ const router = express.Router();
 router.post("/book", bookTicket);
 
 
-// Route: Hủy vé theo ID
-router.put("/cancel/:id", cancelTicket);
+// // Route: Hủy vé theo ID
+// router.put("/cancel/:id", cancelTicket);
 
 module.exports = router;
