@@ -1,106 +1,131 @@
 <%- include('layout/header.ejs') %>
 
-<div class="overflow-x-auto bg-white shadow-lg"> <!-- Khung bao quanh bảng, có tính năng cuộn ngang nếu cần và có bóng đổ cho bảng -->
-  <table class="min-w-full bg-white border border-gray-200 shadow-md"> <!-- Bảng phim với màu nền trắng, viền và bóng đổ -->
-    <thead class="bg-gray-800 text-white"> <!-- Đầu bảng với nền xám và chữ trắng -->
-      <tr class="text-sm uppercase font-semibold"> <!-- Dòng tiêu đề bảng -->
-        <th class="px-6 py-3 text-left">ID</th> <!-- Cột "ID" -->
-        <th class="px-6 py-3 text-left">Tên Phim</th> <!-- Cột "Tên Phim" -->
-        <th class="px-6 py-3 text-left">Danh Mục</th> <!-- Cột "Danh Mục" -->
-        <th class="px-6 py-3 text-left">Ngày Phát Hành</th> <!-- Cột "Ngày Phát Hành" -->
-        <th class="px-6 py-3 text-left">Thời Lượng</th> <!-- Cột "Thời Lượng" -->
-        <th class="px-6 py-3 text-left">Ảnh</th> <!-- Cột "Ảnh" -->
-        <th class="px-6 py-3 text-left"> <!-- Cột chứa nút "Thêm Phim" -->
-          <button class="bg-black text-white py-1.5 px-3 rounded-full shadow-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black transition-all duration-200 ease-in-out text-xs flex items-center" onclick="openAddModal()"> <!-- Nút "Thêm Phim" với hiệu ứng hover và focus -->
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <!-- Icon dấu cộng -->
+<div class="overflow-x-auto bg-white shadow-lg">
+  <table class="min-w-full bg-white border border-gray-200 shadow-md">
+    <thead class="bg-gray-800 text-white">
+      <tr class="text-sm uppercase font-semibold">
+        <th class="px-6 py-3 text-left">ID</th>
+        <th class="px-6 py-3 text-left">Tên Phim</th>
+        <th class="px-6 py-3 text-left">Danh Mục</th>
+        <th class="px-6 py-3 text-left">Ngày Phát Hành</th>
+        <th class="px-6 py-3 text-left">Thời Lượng</th>
+        <th class="px-6 py-3 text-left">Ảnh</th>
+        <th class="px-6 py-3 text-left">
+          <!-- Nút "Thêm Phim" -->
+          <button class="bg-black text-white py-1.5 px-3 rounded-full shadow-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black transition-all duration-200 ease-in-out text-xs flex items-center" onclick="openAddModal()">
+            <!-- Icon dấu cộng -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m7-7H5" />
             </svg>
-            <span>Thêm Phim</span> <!-- Chữ "Thêm Phim" -->
+            <!-- Chữ "Thêm Phim" -->
+            <span>Thêm Phim</span>
           </button>
         </th>
       </tr>
     </thead>
-    <tbody class="text-gray-700"> <!-- Nội dung bảng -->
-      <% movies.forEach(movie => { %> <!-- Lặp qua danh sách phim và hiển thị mỗi phim trong bảng -->
-        <tr class="hover:bg-gray-50 border-b"> <!-- Mỗi dòng phim sẽ có hiệu ứng hover và viền dưới -->
-          <td class="px-6 py-4 text-sm text-gray-900 font-medium"><%= movie.movie_id %></td> <!-- Hiển thị ID của phim -->
-          <td class="px-6 py-4 text-sm text-gray-900"><%= movie.title %></td> <!-- Hiển thị tên phim -->
-          <td class="px-6 py-4 text-sm text-gray-900"><%= movie.category %></td> <!-- Hiển thị danh mục phim -->
-          <td class="px-6 py-4 text-sm text-gray-900"><%= new Date(movie.release_date).toLocaleDateString() %></td> <!-- Hiển thị ngày phát hành -->
-          <td class="px-6 py-4 text-sm text-gray-900"><%= movie.duration %> phút</td> <!-- Hiển thị thời lượng phim -->
+    <tbody class="text-gray-700">
+      <% movies.forEach(movie => { %>
+        <tr class="hover:bg-gray-50 border-b">
+          <td class="px-6 py-4 text-sm text-gray-900 font-medium"><%= movie.movie_id %></td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= movie.title %></td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= movie.category %></td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= new Date(movie.release_date).toLocaleDateString() %></td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= movie.duration %> phút</td>
           <td class="px-6 py-4 text-sm text-gray-900">
-            <img src="<%= movie.image_url %>" alt="<%= movie.title %>" class="w-16 h-16 object-cover rounded-lg" /> <!-- Hiển thị ảnh của phim -->
+            <img src="<%= movie.image_url %>" alt="<%= movie.title %>" class="w-16 h-16 object-cover rounded-lg" />
           </td>
           <td class="px-6 py-4 text-sm font-medium text-gray-600">
-            <div class="flex space-x-4"> <!-- Các nút chỉnh sửa và xóa phim -->
-              <button class="text-indigo-600 hover:text-indigo-900" onclick="openEditModal('<%= movie._id %>', '<%= movie.title %>', '<%= movie.description %>', '<%= movie.trailer_url %>', '<%= movie.category_id %>', <%= movie.duration %>, '<%= movie.release_date %>', '<%= movie.image_url %>', <%= movie.coming_soon %>)"> <!-- Nút chỉnh sửa -->
+            <div class="flex space-x-4">
+              <!-- Chỉnh sửa - Icon -->
+              <button class="text-indigo-600 hover:text-indigo-900" onclick="openEditModal('<%= movie._id %>', '<%= movie.title %>', '<%= movie.description %>', '<%= movie.trailer_url %>', '<%= movie.category_id %>', <%= movie.duration %>, '<%= movie.release_date %>', '<%= movie.image_url %>', <%= movie.coming_soon %>)">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                 </svg>
               </button>
           
-              <a href="/movies-admin/delete/<%= movie.movie_id %>" class="text-red-600 hover:text-red-800" onclick="return confirm('Bạn có chắc muốn xóa phim này?')"> <!-- Nút xóa, có yêu cầu xác nhận trước khi xóa -->
+              <!-- Xóa - Icon -->
+              <a href="/movies-admin/delete/<%= movie.movie_id %>" class="text-red-600 hover:text-red-800" onclick="return confirm('Bạn có chắc muốn xóa phim này?')">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </a>
             </div>
           </td>
-        </tr>
+          
       <% }) %>
     </tbody>
   </table>
+  
 </div>
 
 <!-- Modal chỉnh sửa và thêm phim -->
-<div id="movieModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center"> <!-- Modal chỉnh sửa và thêm phim -->
-  <div class="bg-white p-6 w-1/3 transition-all transform scale-95 opacity-0" id="movieModalContent"> <!-- Nội dung của modal -->
-    <h2 class="text-xl font-semibold mb-4 text-gray-800" id="modalTitle">Thêm Phim</h2> <!-- Tiêu đề của modal -->
-    <form id="movieForm" method="POST" enctype="multipart/form-data" action=""> <!-- Form thêm phim -->
+<div id="movieModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white p-6 w-1/3 transition-all transform scale-95 opacity-0" id="movieModalContent">
+    <h2 class="text-xl font-semibold mb-4 text-gray-800" id="modalTitle">Thêm Phim</h2>
+    <form id="movieForm" method="POST" enctype="multipart/form-data" action="">
       
       <!-- Kiểm tra điều kiện cho Tên Phim -->
       <div class="mb-4">
         <label for="title" class="block text-sm font-medium text-gray-700">Tên Phim</label>
         <input type="text" id="title" name="title" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
-        <div id="titleError" class="text-red-500 text-xs mt-2 hidden">Vui lòng nhập tên phim.</div> <!-- Hiển thị lỗi nếu tên phim không được nhập -->
+        <div id="titleError" class="text-red-500 text-xs mt-2 hidden">Vui lòng nhập tên phim.</div>
       </div>
 
       <!-- Kiểm tra điều kiện cho Danh Mục -->
       <div class="mb-4">
         <label for="category_id" class="block text-sm font-medium text-gray-700">Danh Mục</label>
         <select id="category_id" name="category_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-          <option value="">Chọn thể loại</option> <!-- Lựa chọn danh mục thể loại phim -->
+          <option value="">Chọn thể loại</option>
           <% categories.forEach(category => { %>
-            <option value="<%= category.category_id %>"><%= category.name %></option> <!-- Danh sách các danh mục thể loại phim -->
+            <option value="<%= category.category_id %>"><%= category.name %></option>
           <% }) %>
         </select>
-        <div id="categoryError" class="text-red-500 text-xs mt-2 hidden">Vui lòng chọn một danh mục.</div> <!-- Hiển thị lỗi nếu không chọn danh mục -->
+        <div id="categoryError" class="text-red-500 text-xs mt-2 hidden">Vui lòng chọn một danh mục.</div>
       </div>
 
       <!-- Kiểm tra điều kiện cho Ngày Phát Hành -->
       <div class="mb-4">
         <label for="release_date" class="block text-sm font-medium text-gray-700">Ngày Phát Hành</label>
         <input type="date" id="release_date" name="release_date" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
-        <div id="releaseDateError" class="text-red-500 text-xs mt-2 hidden">Vui lòng chọn ngày phát hành.</div> <!-- Hiển thị lỗi nếu ngày phát hành không được chọn -->
+        <div id="releaseDateError" class="text-red-500 text-xs mt-2 hidden">Vui lòng chọn ngày phát hành.</div>
       </div>
 
       <!-- Kiểm tra điều kiện cho Thời Lượng -->
       <div class="mb-4">
         <label for="duration" class="block text-sm font-medium text-gray-700">Thời Lượng (phút)</label>
         <input type="number" id="duration" name="duration" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
-        <div id="durationError" class="text-red-500 text-xs mt-2 hidden">Vui lòng nhập thời gian.</div> <!-- Hiển thị lỗi nếu thời gian không được nhập -->
+        <div id="durationError" class="text-red-500 text-xs mt-2 hidden">Vui lòng nhập thời lượng phim (phút).</div>
+      </div>
+
+      <!-- Kiểm tra điều kiện cho Mô Tả -->
+      <div class="mb-4">
+        <label for="description" class="block text-sm font-medium text-gray-700">Mô Tả</label>
+        <textarea id="description" name="description" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+        <div id="descriptionError" class="text-red-500 text-xs mt-2 hidden">Vui lòng nhập mô tả phim.</div>
+      </div>
+
+      <!-- Kiểm tra điều kiện cho Trailer URL -->
+      <div class="mb-4">
+        <label for="trailer_url" class="block text-sm font-medium text-gray-700">Trailer URL</label>
+        <input type="url" id="trailer_url" name="trailer_url" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
       </div>
 
       <!-- Kiểm tra điều kiện cho Ảnh -->
       <div class="mb-4">
-        <label for="image_url" class="block text-sm font-medium text-gray-700">Ảnh</label>
-        <input type="file" id="image_url" name="image_url" accept="image/*" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-        <div id="imageError" class="text-red-500 text-xs mt-2 hidden">Vui lòng chọn ảnh.</div> <!-- Hiển thị lỗi nếu không chọn ảnh -->
+        <label for="image" class="block text-sm font-medium text-gray-700">Ảnh</label>
+        <input type="file" id="image" name="image" class="mt-1 block w-full px-3 py-2 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required />
+        <div id="imageError" class="text-red-500 text-xs mt-2 hidden">Vui lòng chọn ảnh cho phim.</div>
       </div>
 
-      <!-- Nút để thêm hoặc chỉnh sửa phim -->
+      <!-- Kiểm tra điều kiện cho Sắp Chiếu -->
       <div class="mb-4">
-        <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-full shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 ease-in-out">Lưu</button>
+        <label for="coming_soon" class="block text-sm font-medium text-gray-700">Sắp Chiếu</label>
+        <input type="checkbox" id="coming_soon" name="coming_soon" class="mt-1" />
+      </div>
+
+      <div class="flex justify-end space-x-2">
+        <button type="button" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors duration-200" onclick="closeModal()">Hủy</button>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200" onclick="return validateForm()">Lưu</button>
       </div>
     </form>
   </div>
@@ -108,95 +133,92 @@
 
 <script>
   function validateForm() {
-    let isValid = true;  // Khởi tạo biến isValid với giá trị mặc định là true
+    let isValid = true;
 
     // Kiểm tra Tên Phim
-    const title = document.getElementById('title').value;  // Lấy giá trị nhập vào trong trường Tên Phim
-    if (!title) {  // Nếu trường Tên Phim trống
-      document.getElementById('titleError').classList.remove('hidden');  // Hiển thị thông báo lỗi
-      isValid = false;  // Đặt isValid = false
+    const title = document.getElementById('title').value;
+    if (!title) {
+      document.getElementById('titleError').classList.remove('hidden');
+      isValid = false;
     } else {
-      document.getElementById('titleError').classList.add('hidden');  // Ẩn thông báo lỗi nếu có giá trị
+      document.getElementById('titleError').classList.add('hidden');
     }
 
     // Kiểm tra Danh Mục
-    const category = document.getElementById('category_id').value;  // Lấy giá trị danh mục
-    if (!category) {  // Nếu danh mục không được chọn
-      document.getElementById('categoryError').classList.remove('hidden');  // Hiển thị thông báo lỗi
-      isValid = false;  // Đặt isValid = false
+    const category = document.getElementById('category_id').value;
+    if (!category) {
+      document.getElementById('categoryError').classList.remove('hidden');
+      isValid = false;
     } else {
-      document.getElementById('categoryError').classList.add('hidden');  // Ẩn thông báo lỗi nếu có giá trị
+      document.getElementById('categoryError').classList.add('hidden');
     }
 
     // Kiểm tra Ngày Phát Hành
-    const releaseDate = document.getElementById('release_date').value;  // Lấy giá trị ngày phát hành
-    if (!releaseDate) {  // Nếu không có ngày phát hành
-      document.getElementById('releaseDateError').classList.remove('hidden');  // Hiển thị thông báo lỗi
-      isValid = false;  // Đặt isValid = false
+    const releaseDate = document.getElementById('release_date').value;
+    if (!releaseDate) {
+      document.getElementById('releaseDateError').classList.remove('hidden');
+      isValid = false;
     } else {
-      document.getElementById('releaseDateError').classList.add('hidden');  // Ẩn thông báo lỗi nếu có giá trị
+      document.getElementById('releaseDateError').classList.add('hidden');
     }
 
     // Kiểm tra Thời Lượng
-    const duration = document.getElementById('duration').value;  // Lấy giá trị thời gian chiếu phim
-    if (!duration) {  // Nếu không có thời lượng
-      document.getElementById('durationError').classList.remove('hidden');  // Hiển thị thông báo lỗi
-      isValid = false;  // Đặt isValid = false
+    const duration = document.getElementById('duration').value;
+    if (!duration) {
+      document.getElementById('durationError').classList.remove('hidden');
+      isValid = false;
     } else {
-      document.getElementById('durationError').classList.add('hidden');  // Ẩn thông báo lỗi nếu có giá trị
+      document.getElementById('durationError').classList.add('hidden');
     }
 
     // Kiểm tra Ảnh
-    const image = document.getElementById('image').files.length;  // Kiểm tra số lượng file ảnh đã chọn
-    if (image === 0) {  // Nếu không có ảnh được chọn
-      document.getElementById('imageError').classList.remove('hidden');  // Hiển thị thông báo lỗi
-      isValid = false;  // Đặt isValid = false
+    const image = document.getElementById('image').files.length;
+    if (image === 0) {
+      document.getElementById('imageError').classList.remove('hidden');
+      isValid = false;
     } else {
-      document.getElementById('imageError').classList.add('hidden');  // Ẩn thông báo lỗi nếu có ảnh
+      document.getElementById('imageError').classList.add('hidden');
     }
 
-    return isValid;  // Trả về kết quả là true nếu tất cả các trường hợp hợp lệ, false nếu có lỗi
+    return isValid;
   }
-
   // Mở modal để chỉnh sửa thông tin phim
   function openEditModal(id, title, description, trailer_url, category_id, duration, release_date, image_url, coming_soon) {
-    document.getElementById('movieModal').classList.remove('hidden');  // Mở modal
-    document.getElementById('movieModalContent').classList.remove('scale-95', 'opacity-0');  // Áp dụng hiệu ứng mở modal
-    document.getElementById('movieModalContent').classList.add('scale-100', 'opacity-100');  // Đặt trạng thái modal là hiển thị đầy đủ
+    document.getElementById('movieModal').classList.remove('hidden');
+    document.getElementById('movieModalContent').classList.remove('scale-95', 'opacity-0');
+    document.getElementById('movieModalContent').classList.add('scale-100', 'opacity-100');
 
-    document.getElementById('modalTitle').textContent = 'Chỉnh sửa Phim';  // Cập nhật tiêu đề modal
-    document.getElementById('movieForm').action = '/movies-admin/' + id;  // Đặt hành động của form là chỉnh sửa phim với id tương ứng
+    document.getElementById('modalTitle').textContent = 'Chỉnh sửa Phim';
+    document.getElementById('movieForm').action = '/movies-admin/' + id;
 
-    // Điền các giá trị vào các trường trong modal
     document.getElementById('title').value = title;
     document.getElementById('description').value = description;
     document.getElementById('trailer_url').value = trailer_url;
     document.getElementById('category_id').value = category_id;
     document.getElementById('duration').value = duration;
-    document.getElementById('release_date').value = new Date(release_date).toISOString().split('T')[0];  // Chuyển đổi định dạng ngày tháng
-    document.getElementById('coming_soon').checked = coming_soon;  // Đánh dấu checkbox nếu là phim sắp chiếu
-    document.getElementById('image').value = image_url;  // Cập nhật giá trị của trường ảnh
+    document.getElementById('release_date').value = new Date(release_date).toISOString().split('T')[0];
+    document.getElementById('coming_soon').checked = coming_soon;
+    document.getElementById('image').value = image_url;
   }
 
-  // Mở modal để thêm phim mới
-  function openAddModal() {
-    document.getElementById('movieModal').classList.remove('hidden');  // Mở modal
-    document.getElementById('movieModalContent').classList.remove('scale-95', 'opacity-0');  // Áp dụng hiệu ứng mở modal
-    document.getElementById('movieModalContent').classList.add('scale-100', 'opacity-100');  // Đặt trạng thái modal là hiển thị đầy đủ
+// Modal thêm phim
+function openAddModal() {
+  document.getElementById('movieModal').classList.remove('hidden');
+  document.getElementById('movieModalContent').classList.remove('scale-95', 'opacity-0');
+  document.getElementById('movieModalContent').classList.add('scale-100', 'opacity-100');
 
-    document.getElementById('modalTitle').textContent = 'Thêm Phim';  // Cập nhật tiêu đề modal cho việc thêm phim
-    document.getElementById('movieForm').action = '/movies-admin';  // Đặt hành động của form là thêm phim
+  document.getElementById('modalTitle').textContent = 'Thêm Phim';
+  document.getElementById('movieForm').action = '/movies-admin'; // Thêm phim
 
-    document.getElementById('movieForm').reset();  // Reset lại các trường trong form
-  }
+  document.getElementById('movieForm').reset();
+}
 
   // Đóng modal
   function closeModal() {
-    document.getElementById('movieModal').classList.add('hidden');  // Ẩn modal
-    document.getElementById('movieModalContent').classList.remove('scale-100', 'opacity-100');  // Loại bỏ hiệu ứng hiển thị
-    document.getElementById('movieModalContent').classList.add('scale-95', 'opacity-0');  // Áp dụng hiệu ứng thu nhỏ và làm mờ modal
+    document.getElementById('movieModal').classList.add('hidden');
+    document.getElementById('movieModalContent').classList.remove('scale-100', 'opacity-100');
+    document.getElementById('movieModalContent').classList.add('scale-95', 'opacity-0');
   }
 </script>
-
 
 <%- include('layout/footer.ejs') %>

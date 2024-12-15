@@ -1,44 +1,33 @@
-<%- include('layout/header.ejs') %> <!-- Bao gồm header của trang web -->
+<%- include('layout/header.ejs') %>
 
 <div class="container mx-auto p-6">
-  
-  <!-- Thanh tìm kiếm và nút tạo vé mới -->
-  <div class="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
-    <!-- Thanh tìm kiếm -->
-    <form id="searchForm" method="GET" action="/booking-history/search-bookings" class="w-full md:w-1/2 flex items-center bg-gray-800 text-white shadow-md overflow-hidden">
-      <input 
-        type="email" 
-        name="email"  
-        id="searchEmail" 
-        placeholder="Nhập email của bạn..." 
-        class="w-full px-4 py-2 bg-gray-800 text-white focus:outline-none"
-        required 
-      />
-      <button 
-        type="submit" 
-        class="flex items-center justify-center w-12 h-12 bg-gray-800 text-white hover:bg-gray-700"
-      >
-        <!-- Icon tìm kiếm -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M9.5 17a7.5 7.5 0 100-15 7.5 7.5 0 000 15z" />
-        </svg>
-      </button>
-    </form>
 
-    <!-- Nút tạo vé mới -->
-    <button 
-      class="w-full md:w-auto px-6 py-3 bg-gray-800 text-white shadow-md hover:bg-gray-700 flex items-center justify-center space-x-2"
-      onclick="openAddTicketModal()"
-    >
-      <!-- Icon thêm mới -->
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-      </svg>
-      <span>Tạo Vé Mới</span>
-    </button>
-  </div>
   
-  <!-- Bảng hiển thị lịch sử đặt vé -->
+    <!-- Thanh tìm kiếm -->
+    <div class="flex items-center justify-between mb-6">
+      <form id="searchForm" method="GET" action="/booking-history/search-bookings" class="flex items-center space-x-2">
+        <input 
+          type="email" 
+          name="email"  
+          id="searchEmail" 
+          placeholder="Nhập email của bạn..." 
+          class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-200"
+          required 
+        />
+        <button 
+          type="submit" 
+          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          Tìm kiếm
+        </button>
+      </form>
+    </div>
+    
+    <button 
+    class="mt-6 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+    onclick="openAddTicketModal()">
+    Tạo Vé Mới
+  </button>
   <table class="min-w-full bg-white border border-gray-200 shadow-md">
     <thead class="bg-gray-800 text-white">
       <tr>
@@ -54,60 +43,55 @@
       </tr>
     </thead>
     <tbody>
-      <% bookings.forEach(booking => { %> <!-- Lặp qua từng booking -->
+      <% bookings.forEach(booking => { %>
         <tr class="hover:bg-gray-50 border-b">
-          <td class="px-6 py-4 text-sm text-gray-900 font-medium"><%= booking.book_tickets_id %></td> <!-- ID đặt vé -->
-          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.user ? booking.user : 'N/A' %></td> <!-- Người dùng -->
-          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.movie ? booking.movie : 'N/A' %></td> <!-- Phim -->
-          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.booking_time ? new Date(booking.booking_time).toLocaleString() : 'N/A' %></td> <!-- Thời gian chiếu -->
-          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.seats ? booking.seats.join(', ') : 'N/A' %></td> <!-- Ghế -->
-          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.booking_time ? new Date(booking.booking_time).toLocaleDateString() : 'N/A' %></td> <!-- Ngày đặt -->
-          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.price ? booking.price.toLocaleString() : 'N/A' %> VND</td> <!-- Giá tiền -->
+          <td class="px-6 py-4 text-sm text-gray-900 font-medium"><%= booking.book_tickets_id %></td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.user ? booking.user : 'N/A' %></td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.movie ? booking.movie : 'N/A' %></td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.booking_time ? new Date(booking.booking_time).toLocaleString() : 'N/A' %></td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.seats ? booking.seats.join(', ') : 'N/A' %></td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.booking_time ? new Date(booking.booking_time).toLocaleDateString() : 'N/A' %></td>
+          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.price ? booking.price.toLocaleString() : 'N/A' %> VND</td>
           <td class="px-6 py-4 text-sm text-gray-900">
-            <% if (booking.food_drinks && booking.food_drinks.length > 0) { %> <!-- Kiểm tra có đồ ăn/thức uống -->
-              <% booking.food_drinks.forEach(food => { %> <!-- Lặp qua đồ ăn -->
-                <div><%= food.name %> (x<%= food.quantity %>) - <%= food.total.toLocaleString() %> VND</div> <!-- Hiển thị món ăn -->
+            <% if (booking.food_drinks && booking.food_drinks.length > 0) { %>
+              <% booking.food_drinks.forEach(food => { %>
+                <div><%= food.name %> (x<%= food.quantity %>) - <%= food.total.toLocaleString() %> VND</div>
               <% }) %>
             <% } else { %> 
               Không Có Thêm Đồ Ăn 
             <% } %>
           </td>
-          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.payment_method || 'N/A' %></td> <!-- Phương thức thanh toán -->
+          <td class="px-6 py-4 text-sm text-gray-900"><%= booking.payment_method || 'N/A' %></td>
         </tr>
-      <% }) %> <!-- Kết thúc vòng lặp bookings -->
+      <% }) %>
     </tbody>
   </table>
 
-  <!-- Modal tạo vé mới -->
+
+
   <div id="addTicketModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center">
     <div class="bg-white p-6 rounded-lg w-1/2 shadow-lg max-h-[80vh] overflow-auto">
       <h2 class="text-2xl font-bold mb-6 text-gray-800">Tạo Vé Mới</h2>
-      
-      <!-- Form tạo vé mới -->
       <form id="addTicketForm" method="POST" action="/book-ticket">
-        
-        <!-- Chọn người dùng -->
         <div class="mb-4">
           <label for="user_id" class="block text-sm font-medium text-gray-700">Chọn Người Dùng</label>
           <select id="user_id" name="user_id" class="mt-1 p-2 border border-gray-300 rounded-md w-full" required>
-            <% users.forEach(user => { %> <!-- Lặp qua danh sách người dùng -->
-              <option value="<%= user.user_id %>"><%= user.username %></option> <!-- Hiển thị người dùng -->
+            <% users.forEach(user => { %>
+              <option value="<%= user.user_id %>"><%= user.username %></option>
             <% }) %>
           </select>
         </div>
 
-        <!-- Chọn phim -->
         <div class="mb-4">
           <label for="movie_id" class="block text-sm font-medium text-gray-700">Chọn Phim</label>
           <select id="movie_id" name="movie_id" class="mt-1 p-2 border border-gray-300 rounded-md w-full" required>
             <option value="">Chọn Phim</option>
-            <% movies.forEach(movie => { %> <!-- Lặp qua danh sách phim -->
-              <option value="<%= movie.movie_id %>"><%= movie.title %></option> <!-- Hiển thị phim -->
+            <% movies.forEach(movie => { %>
+              <option value="<%= movie.movie_id %>"><%= movie.title %></option>
             <% }) %>
           </select>
         </div>
 
-        <!-- Chọn suất chiếu -->
         <div class="mb-4">
           <label for="showtime_id" class="block text-sm font-medium text-gray-700">Chọn Suất Chiếu</label>
           <select id="showtime_id" name="showtime_id" class="mt-1 p-2 border border-gray-300 rounded-md w-full" required>
@@ -115,7 +99,6 @@
           </select>
         </div>
 
-        <!-- Chọn ghế -->
         <div class="mb-4">
           <label for="seats" class="block text-sm font-medium text-gray-700">Chọn Ghế</label>
           <div id="seatSelection" class="grid grid-cols-5 gap-2">
@@ -123,17 +106,15 @@
           <input type="hidden" id="seats" name="seats" />
         </div>
 
-        <!-- Chọn đồ ăn & thức uống -->
         <div class="mb-4">
           <label for="food_drinks" class="block text-sm font-medium text-gray-700">Chọn Đồ Ăn & Thức Uống</label>
           <select id="food_drinks" name="food_drinks" class="mt-1 p-2 border border-gray-300 rounded-md w-full">
-            <% foodItems.forEach(food => { %> <!-- Lặp qua danh sách đồ ăn -->
-              <option value="<%= food.food_drink_id %>"><%= food.name %> - <%= food.price %> VND</option> <!-- Hiển thị món ăn -->
+            <% foodItems.forEach(food => { %>
+              <option value="<%= food.food_drink_id %>"><%= food.name %> - <%= food.price %> VND</option>
             <% }) %>
           </select>
         </div>
 
-        <!-- Chọn phương thức thanh toán -->
         <div class="mb-4">
           <label for="payment_method" class="block text-sm font-medium text-gray-700">Hình Thức Thanh Toán</label>
           <select name="payment_method" id="payment_method" class="mt-1 p-2 border border-gray-300 rounded-md w-full" required>
@@ -143,15 +124,13 @@
           </select>
         </div>
 
-        <!-- Nhập giá tiền -->
         <div class="mb-4">
           <label for="price" class="block text-sm font-medium text-gray-700">Giá Tiền</label>
           <input type="number" name="price" id="price" class="mt-1 p-2 border border-gray-300 rounded-md w-full" required />
         </div>
 
-        <!-- Nút hủy và tạo vé -->
-        <div class="flex justify-between">
-          <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600" onclick="closeAddTicketModal()">Hủy</button>
+        <div class="flex justify-end">
+          <button type="button" class="mr-4 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700" onclick="closeAddTicketModal()">Hủy</button>
           <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Tạo Vé</button>
         </div>
       </form>
@@ -159,166 +138,111 @@
   </div>
 </div>
 
-<%- include('layout/footer.ejs') %> <!-- Bao gồm footer của trang web -->
-
-
+<%- include('layout/footer.ejs') %>
 
 <script>
-  async function openAddTicketModal() {
-    // Hiển thị Modal tạo vé mới bằng cách loại bỏ lớp 'hidden'
-    document.getElementById('addTicketModal').classList.remove('hidden');
-    // Đặt giá trị của input 'seats' về chuỗi rỗng
-    document.getElementById('seats').value = '';
-  
-    // Lấy giá trị của 'showtime_id' và 'movie_id' từ các trường select
-    const showtimeId = document.getElementById('showtime_id').value;
-    const movieId = document.getElementById('movie_id').value;
-  
-    // Nếu không có 'movieId' hoặc 'showtimeId', thì thoát khỏi hàm
-    if (!movieId || !showtimeId) return;
-  
-    // Gửi yêu cầu đến máy chủ để lấy danh sách suất chiếu của phim đã chọn
+async function openAddTicketModal() {
+  document.getElementById('addTicketModal').classList.remove('hidden');
+  document.getElementById('seats').value = '';
+
+  const showtimeId = document.getElementById('showtime_id').value;
+  const movieId = document.getElementById('movie_id').value;
+
+  if (!movieId || !showtimeId) return;
+
+  const response = await fetch(`/get-showtimes/${movieId}`);
+  const showtimes = await response.json();
+  const selectedShowtime = showtimes.find(showtime => showtime.showtime_id == showtimeId);
+
+  if (selectedShowtime) {
+    const reservedSeats = (selectedShowtime.reserved_seats || []).map(seat => seat.trim());
+    const seatContainer = document.getElementById('seatSelection');
+    seatContainer.innerHTML = '';
+
+    const seatLayout = [
+      { row: 'A', seats: ['1', '2', '3', '4', '5'] },
+      { row: 'B', seats: ['1', '2', '3', '4', '5'] },
+      { row: 'C', seats: ['1', '2', '3', '4', '5'] },
+      { row: 'D', seats: ['1', '2', '3', '4', '5'] },
+      { row: 'E', seats: ['1', '2', '3', '4', '5'] },
+      { row: 'F', seats: ['1', '2', '3', '4', '5'] },
+      { row: 'G', seats: ['1', '2', '3', '4', '5'] },
+      { row: 'H', seats: ['1', '2', '3', '4', '5'] },
+      { row: 'I', seats: ['1', '2', '3', '4', '5'] },
+      { row: 'J', seats: ['1', '2', '3', '4', '5'] }
+    ];
+
+    seatLayout.forEach(({ row, seats }) => {
+      const rowContainer = document.createElement('div');
+      rowContainer.classList.add('flex', 'mb-2');
+
+      seats.forEach(seatNumber => {
+        const seatId = `${row}${seatNumber}`;
+        const seatDiv = document.createElement('div');
+        seatDiv.classList.add('w-12', 'h-12', 'flex', 'items-center', 'justify-center', 'border', 'border-gray-300', 'rounded-md', 'hover:bg-gray-200', 'cursor-pointer');
+        seatDiv.setAttribute('data-seat', seatId);
+        seatDiv.textContent = seatId;
+
+        if (reservedSeats.includes(seatId)) {
+          seatDiv.classList.add('bg-red-600', 'cursor-not-allowed');
+          seatDiv.setAttribute('disabled', 'disabled');
+        } else {
+          seatDiv.addEventListener('click', () => toggleSeatSelection(seatDiv));
+          seatDiv.classList.add('bg-white');
+        }
+
+        rowContainer.appendChild(seatDiv);
+      });
+
+      seatContainer.appendChild(rowContainer);
+    });
+  } else {
+    alert('Không tìm thấy suất chiếu này!');
+  }
+}
+
+function toggleSeatSelection(button) {
+  const selectedSeatsInput = document.getElementById('seats');
+  let seats = selectedSeatsInput.value ? selectedSeatsInput.value.split(',').map(s => s.trim()) : [];
+
+  const seat = button.getAttribute('data-seat');
+
+  if (button.classList.contains('bg-green-600')) {
+    button.classList.remove('bg-green-600');
+    button.classList.add('bg-white');
+    seats = seats.filter(selectedSeat => selectedSeat !== seat);
+  } else {
+    button.classList.remove('bg-white');
+    button.classList.add('bg-green-600');
+    seats.push(seat);
+  }
+
+  selectedSeatsInput.value = seats.join(', ');
+}
+
+document.getElementById('movie_id').addEventListener('change', async function() {
+  const movieId = this.value;
+  const showtimeSelect = document.getElementById('showtime_id');
+  showtimeSelect.innerHTML = '<option value="">Chọn Suất Chiếu</option>';
+
+  if (movieId) {
     const response = await fetch(`/get-showtimes/${movieId}`);
     const showtimes = await response.json();
-  
-    // Tìm suất chiếu đã chọn từ danh sách các suất chiếu
-    const selectedShowtime = showtimes.find(showtime => showtime.showtime_id == showtimeId);
-  
-    // Nếu tìm thấy suất chiếu
-    if (selectedShowtime) {
-      // Lấy danh sách ghế đã được đặt trước (nếu có) và loại bỏ khoảng trắng
-      const reservedSeats = (selectedShowtime.reserved_seats || []).map(seat => seat.trim());
-      // Lấy phần tử chứa ghế ngồi trên giao diện
-      const seatContainer = document.getElementById('seatSelection');
-      // Xóa nội dung hiện có của phần tử chứa ghế
-      seatContainer.innerHTML = '';
-  
-      // Định nghĩa sơ đồ ghế ngồi trong phòng chiếu
-      const seatLayout = [
-        { row: 'A', seats: ['1', '2', '3', '4', '5'] },
-        { row: 'B', seats: ['1', '2', '3', '4', '5'] },
-        { row: 'C', seats: ['1', '2', '3', '4', '5'] },
-        { row: 'D', seats: ['1', '2', '3', '4', '5'] },
-        { row: 'E', seats: ['1', '2', '3', '4', '5'] },
-        { row: 'F', seats: ['1', '2', '3', '4', '5'] },
-        { row: 'G', seats: ['1', '2', '3', '4', '5'] },
-        { row: 'H', seats: ['1', '2', '3', '4', '5'] },
-        { row: 'I', seats: ['1', '2', '3', '4', '5'] },
-        { row: 'J', seats: ['1', '2', '3', '4', '5'] }
-      ];
-  
-      // Duyệt qua từng hàng ghế trong sơ đồ ghế
-      seatLayout.forEach(({ row, seats }) => {
-        // Tạo một phần tử 'div' cho mỗi hàng ghế
-        const rowContainer = document.createElement('div');
-        rowContainer.classList.add('flex', 'mb-2');
-  
-        // Duyệt qua từng ghế trong hàng
-        seats.forEach(seatNumber => {
-          // Tạo ID cho ghế, ví dụ: 'A1', 'B2', ...
-          const seatId = `${row}${seatNumber}`;
-          // Tạo phần tử 'div' cho mỗi ghế
-          const seatDiv = document.createElement('div');
-          // Thêm các lớp CSS cho ghế
-          seatDiv.classList.add(
-            'w-12', 'h-12', 'flex', 'items-center', 'justify-center',
-            'border', 'border-gray-300', 'rounded-md', 'hover:bg-gray-200', 'cursor-pointer'
-          );
-          // Gán thuộc tính 'data-seat' để lưu ID ghế
-          seatDiv.setAttribute('data-seat', seatId);
-          // Hiển thị ID ghế trong phần tử
-          seatDiv.textContent = seatId;
-  
-          // Kiểm tra xem ghế đó đã được đặt trước chưa
-          if (reservedSeats.includes(seatId)) {
-            // Nếu ghế đã được đặt, thêm lớp CSS để hiển thị là ghế không khả dụng
-            seatDiv.classList.add('bg-red-600', 'cursor-not-allowed');
-            // Vô hiệu hóa khả năng chọn ghế
-            seatDiv.setAttribute('disabled', 'disabled');
-          } else {
-            // Nếu ghế còn trống, thêm sự kiện click để chọn ghế
-            seatDiv.addEventListener('click', () => toggleSeatSelection(seatDiv));
-            // Thêm lớp CSS cho ghế trống
-            seatDiv.classList.add('bg-white');
-          }
-  
-          // Thêm phần tử ghế vào trong hàng ghế
-          rowContainer.appendChild(seatDiv);
-        });
-  
-        // Thêm hàng ghế vào trong container chứa tất cả ghế
-        seatContainer.appendChild(rowContainer);
-      });
-    } else {
-      // Nếu không tìm thấy suất chiếu, hiển thị thông báo
-      alert('Không tìm thấy suất chiếu này!');
-    }
+
+    showtimes.forEach(showtime => {
+      const option = document.createElement('option');
+      option.value = showtime.showtime_id;
+      option.textContent = `${new Date(showtime.start_time).toLocaleString()} - Phòng ${showtime.room_id}`;
+      showtimeSelect.appendChild(option);
+    });
   }
-  
-  // Hàm xử lý khi người dùng chọn hoặc bỏ chọn một ghế
-  function toggleSeatSelection(button) {
-    // Lấy input ẩn chứa danh sách ghế đã chọn
-    const selectedSeatsInput = document.getElementById('seats');
-    // Chuyển chuỗi ghế đã chọn thành mảng
-    let seats = selectedSeatsInput.value ? selectedSeatsInput.value.split(',').map(s => s.trim()) : [];
-  
-    // Lấy ID ghế từ thuộc tính 'data-seat'
-    const seat = button.getAttribute('data-seat');
-  
-    // Kiểm tra xem ghế đã được chọn trước đó chưa
-    if (button.classList.contains('bg-green-600')) {
-      // Nếu ghế đang được chọn, bỏ chọn ghế
-      button.classList.remove('bg-green-600');
-      button.classList.add('bg-white');
-      // Loại bỏ ghế khỏi danh sách ghế đã chọn
-      seats = seats.filter(selectedSeat => selectedSeat !== seat);
-    } else {
-      // Nếu ghế chưa được chọn, chọn ghế
-      button.classList.remove('bg-white');
-      button.classList.add('bg-green-600');
-      // Thêm ghế vào danh sách ghế đã chọn
-      seats.push(seat);
-    }
-  
-    // Cập nhật giá trị input ẩn với danh sách ghế đã chọn
-    selectedSeatsInput.value = seats.join(', ');
-  }
-  
-  // Khi người dùng thay đổi phim trong select 'movie_id'
-  document.getElementById('movie_id').addEventListener('change', async function() {
-    // Lấy ID phim đã chọn
-    const movieId = this.value;
-    // Lấy phần tử select chứa suất chiếu
-    const showtimeSelect = document.getElementById('showtime_id');
-    // Xóa các tùy chọn hiện có
-    showtimeSelect.innerHTML = '<option value="">Chọn Suất Chiếu</option>';
-  
-    // Nếu có ID phim
-    if (movieId) {
-      // Gửi yêu cầu đến máy chủ để lấy các suất chiếu của phim
-      const response = await fetch(`/get-showtimes/${movieId}`);
-      const showtimes = await response.json();
-  
-      // Duyệt qua danh sách suất chiếu và thêm vào select
-      showtimes.forEach(showtime => {
-        const option = document.createElement('option');
-        option.value = showtime.showtime_id;
-        // Hiển thị thời gian bắt đầu và phòng chiếu
-        option.textContent = `${new Date(showtime.start_time).toLocaleString()} - Phòng ${showtime.room_id}`;
-        showtimeSelect.appendChild(option);
-      });
-    }
-  });
-  
-  // Khi người dùng thay đổi suất chiếu trong select 'showtime_id'
-  document.getElementById('showtime_id').addEventListener('change', function() {
-    // Mở Modal tạo vé mới
-    openAddTicketModal();
-  });
-  
-  // Hàm đóng Modal tạo vé mới
-  function closeAddTicketModal() {
-    // Thêm lớp 'hidden' để ẩn Modal
-    document.getElementById('addTicketModal').classList.add('hidden');
-  }
+});
+
+document.getElementById('showtime_id').addEventListener('change', function() {
+  openAddTicketModal();
+});
+
+function closeAddTicketModal() {
+  document.getElementById('addTicketModal').classList.add('hidden');
+}
 </script>
