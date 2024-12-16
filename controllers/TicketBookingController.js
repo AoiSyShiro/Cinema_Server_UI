@@ -4,6 +4,17 @@ const mongoose = require("mongoose");
 const User = require("../models/User");
 const FoodDrink = require("../models/FoodDrink");
 
+const nodemailer = require("nodemailer"); //XLGM
+
+// Cấu hình Nodemailer
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.MYGMAIL, // Sử dụng biến MYGMAIL từ .env
+    pass: process.env.MYPASS, // Sử dụng biến MYPASS từ .env
+  },
+});
+
 // Đặt vé xem phim
 const bookTicket = async (req, res) => {
   try {
@@ -14,7 +25,7 @@ const bookTicket = async (req, res) => {
       food_drinks,
       payment_method,
       price,
-      room_name, // Lưu room_name dưới dạng text
+      room_name,
     } = req.body;
 
     // Kiểm tra thông tin người dùng
@@ -23,79 +34,110 @@ const bookTicket = async (req, res) => {
       return res.status(404).json({ message: "Người dùng không tồn tại" });
     }
 
-    // Kiểm tra suất chiếu có tồn tại không
+    // Kiểm tra email
+    if (!user.email) {
+      return res.status(400).json({ message: "Email của người dùng không tồn tại hoặc không hợp lệ." });
+    }
+
+    // Kiểm tra suất chiếu
     const showtime = await Showtime.findOne({ showtime_id });
     if (!showtime) {
       return res.status(404).json({ message: "Không tìm thấy suất chiếu" });
     }
 
-    // Đảm bảo reserved_seats là một mảng
     if (!Array.isArray(showtime.reserved_seats)) {
       showtime.reserved_seats = [];
     }
 
-    // Kiểm tra xem ghế đã được đặt chưa
+    // Kiểm tra ghế đã được đặt chưa
     const alreadyReserved = seats.some((seat) =>
       showtime.reserved_seats.includes(seat)
     );
     if (alreadyReserved) {
-      return res
-        .status(400)
-        .json({
-          message: "Một hoặc nhiều ghế đã được đặt, vui lòng chọn ghế khác.",
-        });
+      return res.status(400).json({
+        message: "Một hoặc nhiều ghế đã được đặt, vui lòng chọn ghế khác.",
+      });
     }
 
-    // Kiểm tra và lấy thông tin các món ăn/đồ uống đã chọn
+    // Kiểm tra món ăn/đồ uống
     let selectedFoodDrinks = [];
     if (food_drinks && food_drinks.length > 0) {
       selectedFoodDrinks = await FoodDrink.find({
         food_drink_id: { $in: food_drinks.map((item) => item.food_drink_id) },
       });
-      // Kiểm tra nếu có ID nào không hợp lệ
+
       if (selectedFoodDrinks.length !== food_drinks.length) {
-        return res
-          .status(400)
-          .json({ message: "Một hoặc nhiều món ăn/đồ uống không tồn tại." });
+        return res.status(400).json({
+          message: "Một hoặc nhiều món ăn/đồ uống không tồn tại trong hệ thống.",
+        });
       }
     }
 
-    // Tính giá vé
-    let totalPrice = price; // Trường hợp này giả sử giá đã được truyền lên từ client
-
-    // Tạo vé mới với thông tin các món ăn/đồ uống đã chọn và số lượng
+    // Tạo vé mới
     const newTicket = new BookTickets({
       user_id,
       showtime_id,
-      movie_id: showtime.movie_id, // Lấy movie_id từ showtime
+      movie_id: showtime.movie_id,
       payment_method,
-      qr_code: generateQRCode(), // Giả sử bạn có hàm này
-      flag: 1, // Đặt mặc định là đã thanh toán thành công
-      seats, // Lưu thông tin ghế đã chọn
+      qr_code: generateQRCode(),
+      flag: 1,
+      seats,
       food_drinks: food_drinks.map((item) => ({
         food_drink_id: item.food_drink_id,
         quantity: item.quantity,
       })),
-      price: totalPrice, // Lưu giá vé
-      room_name, // Lưu room_name dưới dạng text
+      price,
+      room_name,
     });
 
-    // Cập nhật danh sách ghế đã đặt trong Showtime
+    // Cập nhật ghế đã đặt
     showtime.reserved_seats = [...showtime.reserved_seats, ...seats];
     await showtime.save();
 
     const savedTicket = await newTicket.save();
 
+    // Chuẩn bị nội dung email
+    const seatList = seats.join(", ");
+    const foodList = selectedFoodDrinks
+      .map((item, index) => `${item.name} (x${food_drinks[index].quantity})`)
+      .join(", ");
+    const emailContent = `
+      <h2>Thông tin vé xem phim</h2>
+      <p><strong>Tên người dùng:</strong> ${user.username}</p>
+      <p><strong>Email:</strong> ${user.email}</p>
+      <p><strong>Tên phòng chiếu:</strong> ${room_name}</p>
+      <p><strong>Ghế:</strong> ${seatList}</p>
+      <p><strong>Món ăn/Đồ uống:</strong> ${foodList || "Không"}</p>
+      <p><strong>Tổng giá:</strong> ${price} VND</p>
+      <p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>
+    `;
+
+    const mailOptions = {
+      from: process.env.MYGMAIL,
+      to: user.email,
+      subject: "Xác nhận đặt vé xem phim",
+      html: emailContent,
+    };
+
+    console.log("Mail Options:", mailOptions);
+
+    try {
+      await transporter.sendMail(mailOptions);
+    } catch (error) {
+      console.error("Lỗi khi gửi email:", error);
+      return res.status(500).json({ message: "Lỗi khi gửi email", error: error.message });
+    }
+
     res.status(201).json({
       message: "Đặt vé thành công",
       ticket: savedTicket,
       seats,
-      food_drinks: selectedFoodDrinks, // Trả về thông tin các món ăn/đồ uống và số lượng
-      price: totalPrice, // Trả về giá vé đã tính
-      room_name, // Trả về room_name
+      food_drinks: selectedFoodDrinks,
+      price,
+      room_name,
     });
   } catch (error) {
-    console.error("Lỗi khi đặt vé:", error); // Log chi tiết lỗi
+    console.error("Lỗi khi đặt vé:", error);
     res.status(500).json({ message: "Lỗi khi đặt vé", error: error.message });
   }
 };
