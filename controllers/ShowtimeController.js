@@ -148,31 +148,42 @@ const getShowtimesByMovieId = async (req, res) => {
     // Lấy thông tin tất cả các phòng chiếu
     const rooms = await CinemaRoom.find().lean();
 
-    // Bổ sung thông tin chi tiết cho từng suất chiếu
-    const showtimesWithDetails = showtimes.map((showtime) => {
-      // Tìm phòng chiếu tương ứng với room_id của suất chiếu
-      const room = rooms.find((room) => room.room_id === showtime.room_id);
-      return {
-        ...showtime, // Giữ nguyên thông tin suất chiếu ban đầu
-        movie: {
-          // Thêm thông tin phim vào suất chiếu
-          title: movie.title,
-          description: movie.description,
-          duration: movie.duration,
-          release_date: movie.release_date,
-          image_url: movie.image_url,
-        },
-        room: room
-          ? {
-              // Nếu tìm thấy phòng chiếu, thêm thông tin phòng
-              room_name: room.room_name,
-              seat_capacity: room.seat_capacity,
-              reserved_seats: room.reserved_seats,
-              is_active: room.is_active,
-            }
-          : { room_name: "Phòng không xác định" }, // Nếu không, đặt tên phòng mặc định
-      };
-    });
+    // Lấy thời gian hiện tại
+    const currentDate = new Date();
+
+    // Bổ sung thông tin chi tiết cho từng suất chiếu và lọc những suất chiếu đã hết
+    const showtimesWithDetails = showtimes
+      .filter((showtime) => new Date(showtime.start_time) >= currentDate) // Lọc suất chiếu chưa qua ngày hiện tại
+      .map((showtime) => {
+        // Tìm phòng chiếu tương ứng với room_id của suất chiếu
+        const room = rooms.find((room) => room.room_id === showtime.room_id);
+        return {
+          ...showtime, // Giữ nguyên thông tin suất chiếu ban đầu
+          movie: {
+            // Thêm thông tin phim vào suất chiếu
+            title: movie.title,
+            description: movie.description,
+            duration: movie.duration,
+            release_date: movie.release_date,
+            image_url: movie.image_url,
+          },
+          room: room
+            ? {
+                // Nếu tìm thấy phòng chiếu, thêm thông tin phòng
+                room_name: room.room_name,
+                seat_capacity: room.seat_capacity,
+                reserved_seats: room.reserved_seats,
+                is_active: room.is_active,
+              }
+            : { room_name: "Phòng không xác định" }, // Nếu không, đặt tên phòng mặc định
+        };
+      });
+
+    // Kiểm tra nếu không có suất chiếu còn lại
+    if (showtimesWithDetails.length === 0) {
+      console.log("Hiện tại đã hết suất chiếu cho phim này.");
+      return res.status(404).send("Hiện tại đã hết suất chiếu cho bộ phim này. Bạn có thể thử phim khác nhé!");
+    }
 
     // Ghi log số lượng suất chiếu tìm được
     console.log(`Đã tìm thấy ${showtimesWithDetails.length} suất chiếu cho phim ID: ${movieId}`);
@@ -183,6 +194,7 @@ const getShowtimesByMovieId = async (req, res) => {
     return res.status(500).send("Chúng tôi đang gặp chút sự cố kỹ thuật. Vui lòng thử lại sau!");
   }
 };
+
 
 
 

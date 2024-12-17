@@ -223,7 +223,7 @@ const startServer = async () => {
     await connectToDatabase(); // Kết nối cơ sở dữ liệu
 
     app.listen(PORT, "0.0.0.0", async () => {
-      console.log(`Server đang chạy tại http://192.168.100.188:${PORT}`);
+      console.log(`Server đang chạy tại cổng:${PORT}`);
 
       // Chỉ mở trình duyệt sau khi server khởi động thành công
       const open = await import("open");

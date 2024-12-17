@@ -63,7 +63,7 @@ const createCinemaRoom = async (req, res) => {
     const rooms = await CinemaRoom.find();
     const movies = await Movie.find();
     res.render('cinema-rooms', {
-      errorMessage: 'Lỗi khi thêm phòng chiếu',
+      errorMessage: 'Phòng chiếu đã tồn tại',
       formData: req.body,
       rooms,
       movies,

@@ -116,32 +116,32 @@ const login = async (req, res) => {
   }
 };
 
-// Hàm thoát tài khoản
-const logout = async (req, res) => {
-  const token = req.headers["authorization"]?.split(" ")[1];
+// // Hàm thoát tài khoản
+// const logout = async (req, res) => {
+//   const token = req.headers["authorization"]?.split(" ")[1];
 
-  if (!token) {
-    return res.status(401).json({
-      error: "Không có quyền truy cập",
-      message: "Cần có token để xác thực",
-    });
-  }
+//   if (!token) {
+//     return res.status(401).json({
+//       error: "Không có quyền truy cập",
+//       message: "Cần có token để xác thực",
+//     });
+//   }
 
-  try {
-    console.log(`Người dùng đã thoát tài khoản với token: ${token}`);
+//   try {
+//     console.log(`Người dùng đã thoát tài khoản với token: ${token}`);
 
-    // logic để xử lý thoát tài khoản
-    return res.status(200).json({
-      message: "Đã thoát tài khoản thành công",
-    });
-  } catch (error) {
-    console.error("Lỗi hệ thống:", error);
-    return res.status(500).json({
-      error: "Lỗi máy chủ nội bộ",
-      message: "Đã xảy ra lỗi không mong muốn",
-    });
-  }
-};
+//     // logic để xử lý thoát tài khoản
+//     return res.status(200).json({
+//       message: "Đã thoát tài khoản thành công",
+//     });
+//   } catch (error) {
+//     console.error("Lỗi hệ thống:", error);
+//     return res.status(500).json({
+//       error: "Lỗi máy chủ nội bộ",
+//       message: "Đã xảy ra lỗi không mong muốn",
+//     });
+//   }
+// };
 
 const changePassword = async (req, res) => {
   const { user_id, current_password, new_password } = req.body;
@@ -190,6 +190,8 @@ const changePassword = async (req, res) => {
     });
   }
 };
+
+//Cập nhật user
 const updateUserInfo = async (req, res) => {
   try {
     // Lấy user_id từ tham số URL
@@ -311,6 +313,7 @@ const getUserInfo = async (req, res) => {
       age: user.age,
       gender: user.gender,
       address: user.address,
+      avatar_url: user.avatar_url,
       created_at: user.created_at ? user.created_at.toISOString() : null,
       updated_at: user.updated_at ? user.updated_at.toISOString() : null,
     });
@@ -328,7 +331,7 @@ const getUserInfo = async (req, res) => {
 module.exports = {
   register,
   login,
-  logout,
+  // logout,
   changePassword,
   updateUserInfo,
   deleteUser,
