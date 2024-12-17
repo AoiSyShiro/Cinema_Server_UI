@@ -19,7 +19,7 @@ const createPromotion = async (req, res) => {
     // Kiểm tra trường bắt buộc
     if (!discount_percentage) {
       return res.status(400).json({
-        message: "Discount percentage is required",
+        message: "Giảm giá % Là bắt buộc",
       });
     }
 

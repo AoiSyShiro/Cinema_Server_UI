@@ -8,7 +8,7 @@ const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const session = require("express-session");
 const bcrypt = require("bcrypt"); // Thư viện để mã hóa và so sánh mật khẩu
 require("dotenv").config(); // Nạp biến môi trường
-const os = require('os');
+const os = require("os");
 
 // ========================== Import các route của ứng dụng ==========================
 
@@ -39,7 +39,7 @@ const Showtime = require("./models/Showtime");
 const Promotion = require("./models/Promotion");
 const Admin = require("./models/admin"); // Điều chỉnh đường dẫn nếu cần
 const CinemaRoom = require("./models/CinemaRoom"); // Đảm bảo đường dẫn đúng với vị trí file CinemaRoom.js
-const BookTickets = require('./models/BookTickets');
+const BookTickets = require("./models/BookTickets");
 
 // ========================== Cấu hình Cloudinary và Multer ==========================
 
@@ -77,9 +77,9 @@ app.use(express.urlencoded({ extended: true })); // Middleware để xử lý UR
 app.use((req, res, next) => {
   const start = Date.now();
   const { method, originalUrl } = req;
-  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
-  res.on('finish', () => {
+  res.on("finish", () => {
     const timeStamp = formatDateTime(new Date()); // Lấy thời gian khi phản hồi hoàn thành
     const duration = Date.now() - start;
     const statusCode = res.statusCode;
@@ -93,7 +93,7 @@ app.use((req, res, next) => {
 });
 
 function formatDateTime(date) {
-  const padZero = (num) => num.toString().padStart(2, '0');
+  const padZero = (num) => num.toString().padStart(2, "0");
 
   const day = padZero(date.getDate());
   const month = padZero(date.getMonth() + 1); // Tháng bắt đầu từ 0
@@ -103,14 +103,21 @@ function formatDateTime(date) {
   const seconds = padZero(date.getSeconds());
 
   // Mảng các thứ trong tuần bằng tiếng Việt
-  const weekdays = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+  const weekdays = [
+    "Chủ Nhật",
+    "Thứ Hai",
+    "Thứ Ba",
+    "Thứ Tư",
+    "Thứ Năm",
+    "Thứ Sáu",
+    "Thứ Bảy",
+  ];
   const weekday = weekdays[date.getDay()];
 
   return `${day}-${month}-${year} ${hours}:${minutes}:${seconds} ${weekday}`;
 }
 
-
-console.log('Local IP Address:', getLocalIP());
+console.log("Local IP Address:", getLocalIP());
 
 // ========================== Cấu hình Session ==========================
 
@@ -206,7 +213,6 @@ app.use("/booking-history", bookingRoutes);
 app.use("/cinema-rooms", cinemaRoomRoutes);
 
 // ========================== Kết nối cơ sở dữ liệu và khởi động server ==========================
-
 
 const PORT = process.env.PORT || 3000;
 
@@ -417,7 +423,6 @@ app.post("/food-drinks-admin", upload.single("image"), async (req, res) => {
   }
 });
 
-
 // Route xóa đồ ăn/đồ uống theo food_drink_id
 app.get("/food-drinks-admin/delete/:food_drink_id", async (req, res) => {
   const foodDrinkId = req.params.food_drink_id; // Lấy food_drink_id từ URL
@@ -473,7 +478,6 @@ app.post("/food-drinks-admin/:id", upload.single("image"), async (req, res) => {
   }
 });
 
-
 // ========================== Các Route Quản lý suất chiếu ==========================
 
 // Hiển thị danh sách suất chiếu
@@ -500,7 +504,7 @@ app.get("/showtime-admin", async (req, res) => {
     });
 
     // Render giao diện "showtime" với các dữ liệu đã chuẩn bị
-    res.render("showtime", { 
+    res.render("showtime", {
       showtimes: showtimesWithMovies, // Danh sách suất chiếu kèm thông tin phim
       movies, // Danh sách tất cả phim
       rooms, // Danh sách tất cả phòng chiếu
@@ -510,7 +514,6 @@ app.get("/showtime-admin", async (req, res) => {
     res.status(500).send("Lỗi server"); // Phản hồi lỗi đến người dùng
   }
 });
-
 
 // Route xử lý tạo suất chiếu mới
 app.post("/showtime-admin/create", async (req, res) => {
@@ -580,7 +583,6 @@ app.get("/showtime-admin/delete/:id", async (req, res) => {
   }
 });
 
-
 // ========================== Các Route Quản lý khuyến mãi ==========================
 
 // Lấy thông tin khuyến mãi theo ID
@@ -611,7 +613,7 @@ app.post("/promotions", async (req, res) => {
 
     const newPromotion = new Promotion({
       discount_percentage,
-      discount_code, // Trường không bắt buộc
+      discount_code,
     });
 
     // Lưu khuyến mãi
@@ -696,7 +698,6 @@ app.post("/promotions/:promotion_id", async (req, res) => {
   }
 });
 
-
 // ========================== Route lấy thời gian server theo múi giờ Việt Nam ==========================
 
 // Route để lấy thời gian hiện tại của server
@@ -718,15 +719,15 @@ app.get("/get-server-time", (req, res) => {
   res.json({ time: serverTime }); // Gửi phản hồi dạng JSON chứa thời gian hiện tại
 });
 
-// ========================== Route để lấy danh sách suất chiếu của một phim cụ thể Server ========================== 
-app.get('/get-showtimes/:movieId', async (req, res) => {
+// ========================== Route để lấy danh sách suất chiếu của một phim cụ thể Server ==========================
+app.get("/get-showtimes/:movieId", async (req, res) => {
   const movieId = req.params.movieId; // Lấy movie_id từ URL
 
   // Tìm tất cả suất chiếu liên quan đến movie_id
   const showtimes = await Showtime.find({ movie_id: movieId });
 
   // Duyệt qua các suất chiếu và bổ sung thông tin ghế đã đặt
-  const showtimesWithReservedSeats = showtimes.map(showtime => {
+  const showtimesWithReservedSeats = showtimes.map((showtime) => {
     return {
       showtime_id: showtime.showtime_id, // ID của suất chiếu
       start_time: showtime.start_time, // Thời gian bắt đầu suất chiếu
@@ -738,17 +739,32 @@ app.get('/get-showtimes/:movieId', async (req, res) => {
   res.json(showtimesWithReservedSeats); // Gửi danh sách suất chiếu cùng thông tin ghế đã đặt
 });
 
-// ========================== Route xử lý đặt vé Server ========================== 
+// ========================== Route xử lý đặt vé Server ==========================
 
 // Route xử lý đặt vé
-app.post('/book-ticket', async (req, res) => {
+app.post("/book-ticket", async (req, res) => {
   try {
     console.log(req.body); // In ra thông tin trong body của yêu cầu để kiểm tra dữ liệu được gửi từ client
-    const { user_id, showtime_id, seats, food_drinks, payment_method, price, movie_id } = req.body;
+    const {
+      user_id,
+      showtime_id,
+      seats,
+      food_drinks,
+      payment_method,
+      price,
+      movie_id,
+    } = req.body;
 
     // Kiểm tra các trường thông tin bắt buộc
     // Nếu bất kỳ trường nào bị thiếu, trả về phản hồi với mã lỗi 400
-    if (!user_id || !showtime_id || !seats || !movie_id || !payment_method || !price) {
+    if (
+      !user_id ||
+      !showtime_id ||
+      !seats ||
+      !movie_id ||
+      !payment_method ||
+      !price
+    ) {
       return res.status(400).json({ message: "Thiếu thông tin bắt buộc" });
     }
 
@@ -764,7 +780,7 @@ app.post('/book-ticket', async (req, res) => {
     let selectedFoodDrinks = [];
     if (food_drinks && food_drinks.length > 0) {
       selectedFoodDrinks = await FoodDrink.find({
-        food_drink_id: { $in: food_drinks.split(',') } // Giả định food_drinks là chuỗi các ID phân cách bằng dấu phẩy
+        food_drink_id: { $in: food_drinks.split(",") }, // Giả định food_drinks là chuỗi các ID phân cách bằng dấu phẩy
       });
     }
 
@@ -778,8 +794,8 @@ app.post('/book-ticket', async (req, res) => {
       user_id, // ID của người dùng đặt vé
       movie_id, // ID phim mà người dùng đặt vé
       showtime_id, // ID của suất chiếu
-      seats: seats.split(','), // Chuyển chuỗi ghế thành mảng (phân tách bằng dấu phẩy)
-      food_drinks: selectedFoodDrinks.map(item => ({
+      seats: seats.split(","), // Chuyển chuỗi ghế thành mảng (phân tách bằng dấu phẩy)
+      food_drinks: selectedFoodDrinks.map((item) => ({
         food_drink_id: item.food_drink_id, // ID của đồ ăn/uống
         quantity: 1, // Giả định số lượng là 1, có thể cập nhật logic nếu cần
       })),
@@ -792,7 +808,7 @@ app.post('/book-ticket', async (req, res) => {
 
     // Cập nhật danh sách ghế đã đặt trong suất chiếu
     // Ghép danh sách ghế mới vào mảng reserved_seats của suất chiếu hiện tại
-    showtime.reserved_seats = [...showtime.reserved_seats, ...seats.split(',')]; // Đảm bảo danh sách ghế không bị ghi đè
+    showtime.reserved_seats = [...showtime.reserved_seats, ...seats.split(",")]; // Đảm bảo danh sách ghế không bị ghi đè
     await showtime.save(); // Lưu lại thay đổi của suất chiếu vào cơ sở dữ liệu
 
     // Trả về phản hồi thành công với mã 201 và thông tin vé đã được lưu
@@ -807,16 +823,15 @@ app.post('/book-ticket', async (req, res) => {
   }
 });
 
-
 // Hàm lấy địa chỉ IP cục bộ
 function getLocalIP() {
   const interfaces = os.networkInterfaces();
   for (const iface of Object.values(interfaces)) {
     for (const config of iface) {
-      if (config.family === 'IPv4' && !config.internal) {
+      if (config.family === "IPv4" && !config.internal) {
         return config.address; // Địa chỉ IP cục bộ
       }
     }
   }
-  return '127.0.0.1'; // Trả về localhost nếu không tìm thấy
+  return "127.0.0.1"; // Trả về localhost nếu không tìm thấy
 }
